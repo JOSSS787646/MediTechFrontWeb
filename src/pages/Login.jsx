@@ -5,15 +5,21 @@ import styles from "../styles/Login.module.css";
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showModal, setShowModal] = useState(false); // Estado para mostrar modal
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (username.trim() && password.trim()) {
+
+    if (username === "Axel Nadir" && password === "1234") {
       navigate("/home-nurse");
     } else {
-      alert("Por favor ingresa usuario y contraseña");
+      setShowModal(true); // Muestra el modal en vez de alert
     }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
   };
 
   return (
@@ -25,10 +31,9 @@ export default function Login() {
       <div className={styles.left}>
         <img src="/logo.png" alt="Logo" className={styles.logo} />
         <h1 className={styles.title}>Bienvenido</h1>
-        {/* Franja de fondo solo para la frase */}
         <p className={styles.subtitle}>
-  <span>Gestión médica más fácil, atención más humana</span>
-</p>
+          <span>Gestión médica más fácil, atención más humana</span>
+        </p>
       </div>
 
       {/* Columna derecha */}
@@ -68,6 +73,19 @@ export default function Login() {
 
       {/* Línea inferior */}
       <div className={styles.bottomLine}></div>
+
+      {/* Modal personalizado */}
+      {showModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h3 className={styles.modalTitle}>MediTech informa</h3>
+            <p className={styles.modalMessage}>Usuario o contraseña incorrectos</p>
+            <button className={styles.modalButton} onClick={closeModal}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
