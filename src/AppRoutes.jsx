@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Splash from "./pages/Splash";
 import Login from "./pages/Login";
-import HomeNurse from "./pages/HomeNurse";
+import HomeAdministrador from "./pages/HomeAdministrator";
 
 export default function AppRoutes() {
   return (
@@ -14,7 +14,7 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} />
 
         {/*  Ruta de home nurse */}
-        <Route path="/home-nurse" element={<HomeNurse />} />
+        <Route path="/home-administrator" element={<HomeAdministrador />} />
 
       </Routes>
     </BrowserRouter>

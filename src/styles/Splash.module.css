@@ -8,8 +8,8 @@
 }
 
 .logo {
-  width: 600px;
-  height: 600px;
+  width: 250px;
+  height: auto;
   object-fit: contain;
   animation: fadeIn 1.5s ease-out;
 }
