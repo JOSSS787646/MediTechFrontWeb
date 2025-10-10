@@ -1,0 +1,79 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Mantener opciones arriba */
+  height: 100vh;
+  background-color: #73c0b0;
+  padding: 1rem;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+  transition: width 0.3s ease;
+  overflow: hidden;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.sidebarAbierto {
+  width: 250px;
+}
+
+.sidebarCerrado {
+  width: 70px;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: white;
+}
+
+.mostrar {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.ocultar {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Opciones del menú */
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  background-color: transparent;
+  color: white;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(2px);
+}
+
+.nav-link.active {
+  background-color: #4B908E;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  color: white;
+}
+
+.nav-link .material-icons {
+  font-size: 24px;
+  margin-right: 0.75rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.nav-link:hover .material-icons {
+  transform: scale(1.2);
+}
+
+/* Pie del sidebar: solo el botón de cerrar sesión va abajo */
+.pie {
+  margin-top: auto;
+}
