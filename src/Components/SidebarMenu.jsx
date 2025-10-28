@@ -1,65 +1,86 @@
+// ✅ SidebarMenu.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MenuButton from "./MenuButton";
 import styles from "../styles/Components/SidebarMenu.module.css";
+import logo from "../assets/logoimg.png";
+import logoGrande from "../assets/logo.png";
 
 export default function SidebarMenu({ setSeccion }) {
-  const [abierto, setAbierto] = useState(false); // inicia cerrado
+  const [abierto, setAbierto] = useState(true);
   const [activo, setActivo] = useState("Inicio");
   const navigate = useNavigate();
 
   const opciones = [
     { text: "Inicio", icon: "home" },
     { text: "Usuarios", icon: "group" },
+    { text: "Enfermera", icon: "vaccines" },
+    { text: "Doctores", icon: "medical_services" },
   ];
 
   const handleClick = (opcion) => {
     setActivo(opcion.text);
-    if (setSeccion) setSeccion(opcion.text); // renderiza contenido en main
+    if (setSeccion) setSeccion(opcion.text);
   };
 
   const handleLogout = () => {
-    navigate("/login"); // redirige a login
+    navigate("/login");
+  };
+
+  const handleSidebarClick = (e) => {
+    const clickedButton = e.target.closest("button");
+    if (!clickedButton) {
+      setAbierto((prev) => !prev);
+    }
   };
 
   return (
     <aside
-      className={`${styles.sidebar} ${abierto ? styles.sidebarAbierto : styles.sidebarCerrado}`}
-      onMouseEnter={() => setAbierto(true)}
-      onMouseLeave={() => setAbierto(false)}
+      className={`${styles.sidebar} ${
+        abierto ? styles.sidebarAbierto : styles.sidebarCerrado
+      }`}
+      onClick={handleSidebarClick}
     >
-      {/* Encabezado */}
-      <div className={`${styles.header} d-flex align-items-center mb-3`}>
-        <h5 className={`${abierto ? styles.mostrar : styles.ocultar} ${styles.logo}`}>
-          MediTech
-        </h5>
+      <div className={styles.header}>
+        <div className={styles.logoContainer}>
+          {abierto ? (
+            <img
+              src={logoGrande}
+              alt="Logo MediTech"
+              className={styles.logoGrande}
+            />
+          ) : (
+            <img src={logo} alt="Logo MediTech" className={styles.logoImg} />
+          )}
+        </div>
       </div>
 
-      {/* Opciones del menú */}
-      <nav className="d-flex flex-column">
+      {/* ===== Menú ===== */}
+      <nav className={styles.nav}>
         {opciones.map((opcion) => (
-          <MenuButton
-            key={opcion.text}
-            text={opcion.text}
-            icon={opcion.icon}
-            color="#4B908E"
-            isActive={activo === opcion.text}
-            onClick={() => handleClick(opcion)}
-            abierto={abierto}
-          />
+          <div key={opcion.text} onClick={(e) => e.stopPropagation()}>
+            <MenuButton
+              text={opcion.text}
+              icon={opcion.icon}
+              color="#1e5e5c"
+              isActive={activo === opcion.text}
+              onClick={() => handleClick(opcion)}
+              abierto={abierto}
+            />
+          </div>
         ))}
       </nav>
 
-      {/* Pie / Cerrar sesión */}
-      <div className={styles.pie}>
-        <MenuButton
-          text="Cerrar sesión"
-          icon="logout"
-          color="#FF4B4B"
-          isActive={false}
-          onClick={handleLogout}  // redirige a /login
-          abierto={abierto}
-        />
+      <div className={styles.pie} onClick={(e) => e.stopPropagation()}>
+        <button
+          className={`${styles.logoutButton} ${
+            abierto ? styles.logoutAbierto : styles.logoutCerrado
+          }`}
+          onClick={handleLogout}
+        >
+          <span className="material-icons">logout</span>
+          {abierto && <span className={styles.logoutText}>Cerrar sesión</span>}
+        </button>
       </div>
     </aside>
   );
