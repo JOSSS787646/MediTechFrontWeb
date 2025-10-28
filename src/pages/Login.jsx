@@ -1,28 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/auth"; // asegúrate de que la ruta sea correcta
+import { login } from "../api/auth"; // ✅ tu API original
 import styles from "../styles/Login.module.css";
+import { useAuth } from "../hook/useAuth"; // ✅ usamos el contexto
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(false); // ✅ estado de carga
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login: loginContext } = useAuth(); // ✅ función login del contexto
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // mostrar spinner
+    setLoading(true);
 
     try {
       const response = await login(username, password);
-      console.log("Usuario autenticado:", response);
 
-      if (response.exito) {
-        localStorage.setItem("usuario", JSON.stringify(response));
+      if (response.exito && response.token) {
+        // ✅ Guardar token en el contexto (internamente se guarda en localStorage)
+        loginContext(response.token);
+
+        // ✅ Redirigir al dashboard (ajusta la ruta según tu rol)
         navigate("/home-Administrator");
       } else {
-        // Espera un poco para que el usuario note la animación
         setTimeout(() => {
           setLoading(false);
           setShowModal(true);
@@ -37,9 +40,7 @@ export default function Login() {
     }
   };
 
-  const closeModal = () => {
-    setShowModal(false);
-  };
+  const closeModal = () => setShowModal(false);
 
   return (
     <div className={`${styles.container} ${loading ? styles.blur : ""}`}>
@@ -93,7 +94,7 @@ export default function Login() {
       {/* Línea inferior */}
       <div className={styles.bottomLine}></div>
 
-      {/* 🌀 Spinner de carga */}
+      {/* Spinner de carga */}
       {loading && (
         <div className={styles.spinnerOverlay}>
           <div className={styles.spinner}></div>

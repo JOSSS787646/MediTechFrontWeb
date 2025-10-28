@@ -1,0 +1,463 @@
+/* nursehome.module.css */
+:root {
+  --sidebar-color: #63b2a5;
+  --sidebar-hover: #4b8e83;
+  --text-dark: #0a2928;
+  --white: #ffffff;
+  --border: #d1d5db;
+  --font: "Segoe UI", sans-serif;
+}
+
+/* ====== ESTRUCTURA GENERAL ====== */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--white);
+  font-family: var(--font);
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.logo {
+  width: 300px;
+  height: auto;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.navButton {
+  background: none;
+  border: none;
+  color: var(--sidebar-hover);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.3s ease;
+}
+
+.navButton:hover {
+  color: var(--text-dark);
+}
+
+.userBox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.divider {
+  width: 100%;
+  max-width: 1100px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  margin: 0.8rem 0 2rem;
+}
+
+/* ====== CONTENIDO PRINCIPAL ====== */
+.mainContent {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* ====== BUSCADOR Y BOTONES ====== */
+.searchRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.searchSection {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 0.3rem;
+}
+
+.searchInput {
+  flex: 1;
+  background-color: var(--sidebar-color);
+  border: none;
+  color: #ffffff;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.searchInput::placeholder {
+  color: #dbe9e6;
+}
+
+.searchButton {
+  background-color: var(--sidebar-color);
+  border: none;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  color: white;
+}
+
+.searchButton:hover {
+  background-color: var(--sidebar-hover);
+}
+
+/* ====== BOTÓN AGENDAR ====== */
+.scheduleButton {
+  background-color: var(--sidebar-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.3s ease;
+}
+
+.scheduleButton:hover {
+  background-color: var(--sidebar-hover);
+}
+
+/* ====== CITAS ====== */
+.appointments {
+  width: 100%;
+  text-align: left;
+}
+
+.appointments p {
+  font-size: 1rem;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.appointmentBox {
+  width: 100%;
+  height: 150px;
+  border: 1px solid var(--text-dark);
+  border-radius: 4px;
+  background: #fff;
+}
+
+/* ====== LISTA DE CITAS ====== */
+.appointmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.appointmentItem {
+  border: 1px solid var(--text-dark);
+  border-radius: 8px;
+  padding: 1rem;
+  background: #fff;
+  line-height: 1.5;
+}
+
+/* ====== PACIENTE ENCONTRADO ====== */
+.patientBox {
+  width: 100%;
+  border: 1px solid var(--text-dark);
+  border-radius: 4px;
+  background: #fff;
+  margin-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.patientHeader {
+  background-color: var(--sidebar-color);
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.patientName {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.profileButton {
+  background-color: var(--text-dark);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profileButton:hover {
+  background-color: var(--sidebar-hover);
+}
+
+.patientDetails {
+  padding: 1rem;
+  line-height: 1.5;
+  color: var(--text-dark);
+  position: relative;
+}
+
+.medButton {
+  background-color: var(--text-dark);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.medButton:hover {
+  background-color: var(--sidebar-hover);
+}
+
+.showMoreContainer {
+  width: 100%;
+  text-align: right;
+  margin-top: 1rem;
+}
+
+.showMoreButton {
+  background-color: var(--sidebar-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.showMoreButton:hover {
+  background-color: var(--sidebar-hover);
+}
+
+.historyList {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.historyItem {
+  border: 1px solid var(--text-dark);
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.6rem;
+  background: #fff;
+}
+
+/* ====== CARD SUPERPUESTA PERFIL ====== */
+.profileOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.profileCard {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: slideUp 0.35s ease-out;
+}
+
+.profileCardHeader {
+  background: linear-gradient(135deg, var(--sidebar-color), var(--sidebar-hover));
+  color: #fff;
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profileCardHeader h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.closeProfileCard {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.closeProfileCard:hover {
+  transform: scale(1.1);
+}
+
+.profileCardBody {
+  padding: 1.5rem;
+  color: var(--text-dark);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.profileInfoRow {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+/* ====== CARD AGENDAR ====== */
+.scheduleCard {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: slideUp 0.35s ease-out;
+}
+
+.scheduleBody {
+  padding: 1.5rem;
+  color: var(--text-dark);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.scheduleBody label {
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.inputField {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-size: 1rem;
+  outline: none;
+}
+
+.inputField:focus {
+  border-color: var(--sidebar-color);
+  box-shadow: 0 0 4px rgba(99, 178, 165, 0.5);
+}
+
+.scheduleFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background-color: #f8fafc;
+}
+
+.cancelButton {
+  background-color: #e5e7eb;
+  color: #111827;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cancelButton:hover {
+  background-color: #d1d5db;
+}
+
+.confirmButton {
+  background-color: var(--sidebar-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.confirmButton:hover {
+  background-color: var(--sidebar-hover);
+}
+
+/* ====== ANIMACIONES ====== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .navLinks {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .searchRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .scheduleButton {
+    width: 100%;
+  }
+
+  .profileCardBody {
+    font-size: 0.95rem;
+  }
+
+  .scheduleCard {
+    width: 95%;
+  }
+}
