@@ -6,7 +6,7 @@ import HomeNurse from "./pages/HomeNurse";
 import DoctorHome from "./pages/Administrator/DoctorHome";
 import DoctorPrescription from "./pages/Administrator/DoctorPrescription";
 import Profile from "./pages/Nurse/Profile";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./Components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 
 export default function AppRoutes() {
