@@ -1,35 +1,57 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/auth"; // asegúrate de que la ruta sea correcta
+import { login as loginApi } from "../api/auth";
 import styles from "../styles/Login.module.css";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(false); // ✅ estado de carga
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // mostrar spinner
+    setLoading(true);
 
     try {
-      const response = await login(username, password);
-      console.log("Usuario autenticado:", response);
+      const response = await loginApi(username, password);
+      console.log("🟢 Usuario autenticado:", response);
 
-      if (response.exito) {
+      // ⚠️ Backend devuelve minúsculas: exito, token, tipoColaborador
+      if (response.exito && response.token) {
+        // Guardar usuario en localStorage
         localStorage.setItem("usuario", JSON.stringify(response));
-        navigate("/home-Administrator");
+
+        // Normalizamos el texto
+        const tipo = response.tipoColaborador?.toString().trim().toLowerCase();
+
+        console.log("🔎 Tipo de colaborador detectado:", tipo);
+
+        // ✅ Redirección flexible según tipo
+        if (tipo.includes("médico") || tipo.includes("medico") || tipo === "1") {
+          navigate("/home-doctor");
+        } else if (tipo.includes("enfermera") || tipo === "2") {
+          navigate("/home-nurse");
+        } else if (
+          tipo.includes("admin") ||
+          tipo.includes("administrador") ||
+          tipo === "3"
+        ) {
+          navigate("/home-administrator");
+        } else {
+          console.warn("⚠️ Tipo de colaborador no reconocido:", tipo);
+          navigate("/login");
+        }
       } else {
-        // Espera un poco para que el usuario note la animación
         setTimeout(() => {
           setLoading(false);
           setShowModal(true);
         }, 800);
       }
     } catch (error) {
-      console.error("Error al iniciar sesión:", error);
+      console.error("❌ Error al iniciar sesión:", error);
       setTimeout(() => {
         setLoading(false);
         setShowModal(true);
@@ -37,9 +59,7 @@ export default function Login() {
     }
   };
 
-  const closeModal = () => {
-    setShowModal(false);
-  };
+  const closeModal = () => setShowModal(false);
 
   return (
     <div className={`${styles.container} ${loading ? styles.blur : ""}`}>
@@ -68,8 +88,10 @@ export default function Login() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Ingresa tu usuario"
+                required
               />
             </div>
+
             <div className={styles.formGroup}>
               <label className={styles.label}>Contraseña</label>
               <input
@@ -78,13 +100,15 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Ingresa tu contraseña"
+                required
               />
               <a href="#" className={styles.forgot}>
                 Olvidé contraseña
               </a>
             </div>
-            <button type="submit" className={styles.button}>
-              Iniciar sesión
+
+            <button type="submit" className={styles.button} disabled={loading}>
+              {loading ? "Validando..." : "Iniciar sesión"}
             </button>
           </form>
         </div>
@@ -93,7 +117,7 @@ export default function Login() {
       {/* Línea inferior */}
       <div className={styles.bottomLine}></div>
 
-      {/* 🌀 Spinner de carga */}
+      {/* Spinner */}
       {loading && (
         <div className={styles.spinnerOverlay}>
           <div className={styles.spinner}></div>
