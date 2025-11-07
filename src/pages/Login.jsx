@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/auth"; // ✅ tu API original
+import { login } from "../Api/auth"; // ✅ tu API original
 import styles from "../styles/Login.module.css";
 import { useAuth } from "../hook/useAuth"; // ✅ usamos el contexto
 
