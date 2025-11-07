@@ -1,21 +1,24 @@
+//homeadministrador
 import React, { useState } from "react";
 import SidebarMenu from "../Components/SidebarMenu";
 import styles from "../styles/pages/HomeAdministrador.module.css";
-import 'material-icons/iconfont/material-icons.css';
+import "material-icons/iconfont/material-icons.css";
 import StartHome from "./Administrator/StartHome";
 import UsersHome from "./Administrator/UsersHome";
+import NurseHome from "./Administrator/NurseHome";
+import DoctorHome from "./Administrator/DoctorHome"; // 👨‍⚕️ nuevo
 
 export default function HomeAdministrador() {
-  const [seccion, setSeccion] = useState("Inicio"); // sección a renderizar
+  const [seccion, setSeccion] = useState("Inicio");
 
-
-
-  /*SELECCIONA LO QUE VA A RENDERIZAR EN BASE  UN CLIC, ESTO SE CONFIGURA EN
-  EN Slider*/
   const renderContenido = () => {
     switch (seccion) {
       case "Usuarios":
         return <UsersHome />;
+      case "Enfermera":
+        return <NurseHome />;
+      case "Doctores":
+        return <DoctorHome />; // nuevo
       case "Inicio":
       default:
         return <StartHome />;
@@ -25,10 +28,7 @@ export default function HomeAdministrador() {
   return (
     <div className={styles.container}>
       <SidebarMenu setSeccion={setSeccion} />
-
-      <main className={styles.mainContent}>
-        {renderContenido()}
-      </main>
+      <main className={styles.mainContent}>{renderContenido()}</main>
     </div>
   );
 }

@@ -1,89 +1,206 @@
-import React, { useState } from "react";
-import styles from "../../styles/components/RegisterUserModal.module.css";
-import TextField from "../TextField";
+import React from "react";
+import DynamicFormModal from "../DynamicFormModal";
+import { createColaborador } from "../../Api/colaborator";
+import Swal from "sweetalert2";
 
 export default function RegisterUserModal({ onClose, onSave }) {
-    const [nombre, setNombre] = useState("");
-    const [apePaterno, setApePaterno] = useState("");
-    const [apeMaterno, setApeMaterno] = useState("");
-    const [edad, setEdad] = useState("");
-    const [fechaNacimiento, setFechaNacimiento] = useState("");
-    const [direccion, setDireccion] = useState("");
-    const [curp, setCurp] = useState("");
-    const [email, setEmail] = useState("");
-    const [matricula, setMatricula] = useState("");
-    const [telefono, setTelefono] = useState("");
-    const [genero, setGenero] = useState("");
-    const [fechaContrato, setFechaContrato] = useState("");
-    const [licencia, setLicencia] = useState("");
-    const [diagnostico, setDiagnostico] = useState("");
-    const [errors, setErrors] = useState({});
+  const today = new Date().toISOString().split("T")[0];
+  const eighteenYearsAgo = new Date();
+  eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+  const maxFechaNacimiento = eighteenYearsAgo.toISOString().split("T")[0];
 
-    const validate = () => {
-        const newErrors = {};
-        if (!nombre.trim()) newErrors.nombre = "El nombre es obligatorio";
-        if (!apePaterno.trim()) newErrors.apePaterno = "El apellido paterno es obligatorio";
-        if (!apeMaterno.trim()) newErrors.apeMaterno = "El apellido materno es obligatorio";
-        if (!edad.trim()) newErrors.edad = "La edad es obligatoria";
-        else if (isNaN(edad) || edad <= 0) newErrors.edad = "Ingresa una edad válida";
-        if (!diagnostico.trim()) newErrors.diagnostico = "El diagnóstico es obligatorio";
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+  // ✅ Validadores reutilizables
+  const soloLetras = (val) =>
+    !val || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(val)
+      ? true
+      : "Solo se permiten letras y espacios";
 
-    const handleSave = () => {
-        if (!validate()) return;
+  const ochoDigitos = (val) =>
+    !val || /^\d{8}$/.test(val)
+      ? true
+      : "Debe contener exactamente 8 dígitos numéricos";
 
-        const usuario = {
-            id: Date.now(),
-            nombre,
-            apePaterno,
-            apeMaterno,
-            edad,
-            fechaNacimiento,
-            direccion,
-            curp,
-            email,
-            matricula,
-            telefono,
-            genero,
-            fechaContrato,
-            licencia,
-            diagnostico
-        };
+  const curpValida = (val) =>
+    /^[A-Z0-9]{18}$/.test(val || "")
+      ? true
+      : "Debe tener 18 caracteres alfanuméricos en mayúsculas";
 
-        // Solo pasamos los datos al componente padre
-        onSave(usuario);
-        onClose();
-    };
+  const emailValido = (val) =>
+    !val ||
+    /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(val)
+      ? true
+      : "Correo electrónico inválido";
 
-    return (
-        <div className={styles.overlay}>
-            <div className={`${styles.modal} ${styles.animateIn}`}>
-                <h2 className={styles.title}>Registrar Usuario</h2>
+  const diezDigitos = (val) =>
+    !val || /^\d{10}$/.test(val)
+      ? true
+      : "Debe tener exactamente 10 dígitos";
 
-                <div className={styles.fieldsGrid}>
-                    <TextField label="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ejemplo: Juan" error={errors.nombre} />
-                    <TextField label="Apellido Paterno" value={apePaterno} onChange={(e) => setApePaterno(e.target.value)} placeholder="Ejemplo: Pérez" error={errors.apePaterno} />
-                    <TextField label="Apellido Materno" value={apeMaterno} onChange={(e) => setApeMaterno(e.target.value)} placeholder="Ejemplo: Gómez" error={errors.apeMaterno} />
-                    <TextField label="Edad" type="number" value={edad} onChange={(e) => setEdad(e.target.value)} placeholder="Ejemplo: 30" error={errors.edad} />
-                    <TextField label="Fecha de Nacimiento" type="date" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} error={errors.fechaNacimiento} />
-                    <TextField label="Dirección" value={direccion} onChange={(e) => setDireccion(e.target.value)} placeholder="Ejemplo: Calle 123" error={errors.direccion} />
-                    <TextField label="CURP" value={curp} onChange={(e) => setCurp(e.target.value)} placeholder="Ejemplo: ABCD123456HDF" error={errors.curp} />
-                    <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Ejemplo: correo@dominio.com" error={errors.email} />
-                    <TextField label="Matrícula" value={matricula} onChange={(e) => setMatricula(e.target.value)} placeholder="Ejemplo: 12345" error={errors.matricula} />
-                    <TextField label="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ejemplo: 5551234567" error={errors.telefono} />
-                    <TextField label="Género" value={genero} onChange={(e) => setGenero(e.target.value)} placeholder="Ejemplo: Masculino/Femenino" error={errors.genero} />
-                    <TextField label="Fecha de Contrato" type="date" value={fechaContrato} onChange={(e) => setFechaContrato(e.target.value)} error={errors.fechaContrato} />
-                    <TextField label="Licencia" value={licencia} onChange={(e) => setLicencia(e.target.value)} placeholder="Ejemplo: A1234567" error={errors.licencia} />
-                    <TextField label="Diagnóstico" value={diagnostico} onChange={(e) => setDiagnostico(e.target.value)} placeholder="Ejemplo: Hipertensión" error={errors.diagnostico} />
-                </div>
+  // ✅ Campos del formulario
+  const colaboradorFields = [
+    {
+      key: "nombre",
+      label: "Nombre",
+      required: true,
+      placeholder: "Ejemplo: Juan",
+      transform: (val) =>
+        val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "",
+      validate: soloLetras,
+    },
+    {
+      key: "apellidoPaterno",
+      label: "Apellido Paterno",
+      required: true,
+      transform: (val) =>
+        val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "",
+      validate: soloLetras,
+    },
+    {
+      key: "apellidoMaterno",
+      label: "Apellido Materno",
+      required: true,
+      transform: (val) =>
+        val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "",
+      validate: soloLetras,
+    },
+    { key: "edad", label: "Edad", type: "number", required: true },
+    {
+      key: "fechaNacimiento",
+      label: "Fecha de Nacimiento",
+      type: "date",
+      required: true,
+      max: maxFechaNacimiento,
+    },
+    { key: "direccion", label: "Dirección" },
+    {
+      key: "curp",
+      label: "CURP",
+      required: true,
+      transform: (val) => (val ? val.toUpperCase().slice(0, 18) : ""),
+      validate: curpValida,
+    },
+    {
+      key: "email",
+      label: "Correo Electrónico",
+      type: "email",
+      placeholder: "correo@ejemplo.com",
+      validate: emailValido,
+    },
+    {
+      key: "cedulaProfesional", // visible como Cédula, backend recibirá matriculaProfesional
+      label: "Cédula Profesional",
+      placeholder: "Ejemplo: 12345678",
+      transform: (val) => (val ? val.replace(/\D/g, "").slice(0, 8) : ""),
+      validate: ochoDigitos,
+    },
+    {
+      key: "telefono",
+      label: "Teléfono",
+      type: "tel",
+      transform: (val) => (val ? val.replace(/\D/g, "").slice(0, 10) : ""),
+      validate: diezDigitos,
+    },
+    {
+      key: "genero",
+      label: "Género",
+      type: "select",
+      options: ["Hombre", "Mujer", "Otro"],
+      required: true,
+    },
+    {
+      key: "fechaContrato",
+      label: "Fecha de Contrato",
+      type: "date",
+      min: today,
+    },
+    {
+      key: "licencia",
+      label: "Licencia",
+      placeholder: "Ejemplo: 87654321",
+      transform: (val) => (val ? val.replace(/\D/g, "").slice(0, 8) : ""),
+      validate: ochoDigitos,
+    },
+  ];
 
-                <div className={styles.actions}>
-                    <button className={styles.saveButton} onClick={handleSave}>Guardar</button>
-                    <button className={styles.cancelButton} onClick={onClose}>Cancelar</button>
-                </div>
-            </div>
-        </div>
-    );
+  // ✅ Guardar colaborador
+  const handleSave = async (data) => {
+    try {
+      const processedData = {};
+      colaboradorFields.forEach((field) => {
+        const value = data[field.key];
+        processedData[field.key] = field.transform ? field.transform(value) : value;
+      });
+
+      // Validaciones
+      for (const field of colaboradorFields) {
+        const value = processedData[field.key];
+        if (field.required && !value) {
+          throw new Error(`El campo "${field.label}" es obligatorio`);
+        }
+        if (field.validate) {
+          const valid = field.validate(value);
+          if (valid !== true) throw new Error(`Error en ${field.label}: ${valid}`);
+        }
+      }
+
+      const colaboradorData = {
+        id: 0,
+        iD_Cede: 1, // ✅ nombre exacto del backend
+        ...processedData,
+        edad: parseInt(processedData.edad || 0),
+        fechaCreacion: new Date().toISOString(),
+        fechaActualizacion: new Date().toISOString(),
+        esActivo: true,
+      };
+
+      // 🔁 Mapear "Cédula Profesional" → "matriculaProfesional"
+      if (colaboradorData.cedulaProfesional) {
+        colaboradorData.matriculaProfesional = colaboradorData.cedulaProfesional;
+        delete colaboradorData.cedulaProfesional;
+      }
+
+      // 🔹 Evitar enviar campos vacíos
+      Object.keys(colaboradorData).forEach((k) => {
+        if (colaboradorData[k] === "" || colaboradorData[k] == null)
+          delete colaboradorData[k];
+      });
+
+      console.log("📤 Datos enviados al backend:", colaboradorData);
+      const response = await createColaborador(colaboradorData);
+      console.log("✅ Respuesta backend:", response);
+
+      Swal.fire({
+        icon: "success",
+        title: "¡Éxito!",
+        text: "Colaborador registrado correctamente ✅",
+        background: "#ffffff",
+        color: "#000000",
+        confirmButtonColor: "#4B908E",
+        timer: 2000,
+        timerProgressBar: true,
+      });
+
+      onSave?.(response);
+      onClose();
+    } catch (error) {
+      console.error("❌ Error al registrar colaborador:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "No se pudo registrar el colaborador",
+        background: "#ffffff",
+        color: "#005124FF",
+        confirmButtonColor: "#4B908E",
+      });
+    }
+  };
+
+  return (
+    <DynamicFormModal
+      title="Registrar Colaborador"
+      fields={colaboradorFields}
+      onClose={onClose}
+      onSave={handleSave}
+    />
+  );
 }

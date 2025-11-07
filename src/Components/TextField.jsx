@@ -1,6 +1,6 @@
 // frontend/src/components/TextField.jsx
 import React from "react";
-import styles from "../styles/components/RegisterUserModal.module.css"; // o el que uses
+import styles from "../styles/Components/RegisterUserModal.module.css"; 
 
 export default function TextField({
   label,
@@ -10,17 +10,40 @@ export default function TextField({
   placeholder = "",
   error = "",
   className = "",
+  disabled = false,
+  checked, // para checkboxes
 }) {
   return (
-    <div className={`${styles.field} ${className}`}>
-      <label>{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className={error ? styles.inputError : ""}
-      />
+    <div className={`${styles.fieldWrapper} ${className}`}>
+      {label && (
+        <label className={styles.label}>
+          {label}
+        </label>
+      )}
+
+      {type === "checkbox" ? (
+        <input
+          type="checkbox"
+          checked={checked || false}
+          onChange={onChange}
+          disabled={disabled}
+          className={styles.checkboxInput}
+          style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+        />
+      ) : (
+        <input
+          type={type}
+          value={value || ""}
+          onChange={onChange}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={`${styles.input} ${error ? styles.inputError : ""}`}
+          style={{
+            cursor: disabled ? "not-allowed" : "text",
+          }}
+        />
+      )}
+
       {error && <span className={styles.error}>{error}</span>}
     </div>
   );
