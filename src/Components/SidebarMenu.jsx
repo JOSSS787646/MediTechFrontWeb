@@ -1,5 +1,4 @@
-// ✅ SidebarMenu.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MenuButton from "./MenuButton";
 import styles from "../styles/Components/SidebarMenu.module.css";
@@ -9,7 +8,18 @@ import logoGrande from "../assets/logo.png";
 export default function SidebarMenu({ setSeccion }) {
   const [abierto, setAbierto] = useState(true);
   const [activo, setActivo] = useState("Inicio");
+  const [modoOscuro, setModoOscuro] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const modoGuardado = localStorage.getItem("modoOscuro") === "true";
+    setModoOscuro(modoGuardado);
+  }, []);
+
+  useEffect(() => {
+    document.body.className = modoOscuro ? "modo-oscuro" : "";
+    localStorage.setItem("modoOscuro", modoOscuro);
+  }, [modoOscuro]);
 
   const opciones = [
     { text: "Inicio", icon: "home" },
@@ -29,33 +39,31 @@ export default function SidebarMenu({ setSeccion }) {
 
   const handleSidebarClick = (e) => {
     const clickedButton = e.target.closest("button");
-    if (!clickedButton) {
-      setAbierto((prev) => !prev);
-    }
+    if (!clickedButton) setAbierto((prev) => !prev);
+  };
+
+  const toggleModo = (e) => {
+    e.stopPropagation();
+    setModoOscuro((prev) => !prev);
   };
 
   return (
     <aside
       className={`${styles.sidebar} ${
         abierto ? styles.sidebarAbierto : styles.sidebarCerrado
-      }`}
+      } ${modoOscuro ? styles.modoOscuro : ""}`}
       onClick={handleSidebarClick}
     >
       <div className={styles.header}>
         <div className={styles.logoContainer}>
           {abierto ? (
-            <img
-              src={logoGrande}
-              alt="Logo MediTech"
-              className={styles.logoGrande}
-            />
+            <img src={logoGrande} alt="Logo MediTech" className={styles.logoGrande} />
           ) : (
             <img src={logo} alt="Logo MediTech" className={styles.logoImg} />
           )}
         </div>
       </div>
 
-      {/* ===== Menú ===== */}
       <nav className={styles.nav}>
         {opciones.map((opcion) => (
           <div key={opcion.text} onClick={(e) => e.stopPropagation()}>
@@ -72,6 +80,22 @@ export default function SidebarMenu({ setSeccion }) {
       </nav>
 
       <div className={styles.pie} onClick={(e) => e.stopPropagation()}>
+        <button
+          className={`${styles.modoButton} ${
+            abierto ? styles.modoAbierto : styles.modoCerrado
+          }`}
+          onClick={toggleModo}
+        >
+          <span className="material-icons">
+            {modoOscuro ? "dark_mode" : "light_mode"}
+          </span>
+          {abierto && (
+            <span className={styles.modoText}>
+              {modoOscuro ? "Modo oscuro" : "Modo claro"}
+            </span>
+          )}
+        </button>
+
         <button
           className={`${styles.logoutButton} ${
             abierto ? styles.logoutAbierto : styles.logoutCerrado

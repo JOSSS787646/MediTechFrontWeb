@@ -117,6 +117,7 @@
   padding-top: 15px;
   border-top: 1px solid #f0f0f0;
   gap: 10px;
+  flex-direction: row-reverse; /* ✅ Intercambia la posición de los botones */
 }
 
 .saveButton,
@@ -130,13 +131,15 @@
   font-size: 0.95rem;
 }
 
+/* ✅ Botón guardar más claro, con hover más marcado */
 .saveButton {
-  background-color: #4b908e;
-  color: #fff;
+  background-color: #558a88; /* tono más claro */
+  color: #ffffff;
 }
 
 .saveButton:hover {
-  background-color: #3b7d7a;
+  background-color: #1e5e5c; /* más oscuro al pasar el cursor */
+  box-shadow: 0 0 8px rgba(30, 94, 92, 0.3);
 }
 
 .cancelButton {
@@ -147,6 +150,7 @@
 .cancelButton:hover {
   background-color: #d6d6d6;
 }
+
 
 @keyframes fadeIn {
   from {

@@ -1,3 +1,4 @@
+// DynamicFormModal.jsx
 import React, { useState } from "react";
 import styles from "../styles/Components/RegisterUserModal.module.css";
 
@@ -106,6 +107,7 @@ export default function DynamicFormModal({ title, fields, onClose, onSave }) {
                   {field.required && <span className={styles.required}>*</span>}
                 </label>
 
+                {/* 🔹 Campo tipo select */}
                 {field.type === "select" ? (
                   <select
                     value={formData[field.key] || ""}
@@ -113,13 +115,24 @@ export default function DynamicFormModal({ title, fields, onClose, onSave }) {
                     className={`${styles.input} ${styles.select}`}
                   >
                     <option value="">Seleccione...</option>
-                    {field.options?.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
+                    {field.options?.map((opt, idx) => {
+                      // Permite opciones tipo string o tipo objeto {label, value}
+                      if (typeof opt === "object" && opt !== null) {
+                        return (
+                          <option key={idx} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        );
+                      }
+                      return (
+                        <option key={idx} value={opt}>
+                          {opt}
+                        </option>
+                      );
+                    })}
                   </select>
                 ) : (
+                  /* 🔹 Campo tipo input */
                   <input
                     type={field.type || "text"}
                     value={formData[field.key] || ""}
@@ -139,7 +152,7 @@ export default function DynamicFormModal({ title, fields, onClose, onSave }) {
                   />
                 )}
 
-                {/* 🔸 Mostrar texto aclaratorio debajo del campo Edad */}
+                {/* 🔸 Mensaje aclaratorio debajo del campo Edad */}
                 {field.key === "edad" && (
                   <small className={styles.hintText}>
                     ℹ️ Se calcula automáticamente al seleccionar la fecha de nacimiento

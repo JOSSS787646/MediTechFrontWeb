@@ -1,15 +1,50 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DynamicFormModal from "../DynamicFormModal";
 import { createColaborador } from "../../Api/colaborator";
+import { getCedes } from "../../Api/cede";
+import { getTiposColaboradores } from "../../Api/tipoColaborador";
+import { getEspecialidades } from "../../Api/especialidad";
 import Swal from "sweetalert2";
 
 export default function RegisterUserModal({ onClose, onSave }) {
+  const [cedes, setCedes] = useState([]);
+  const [tipos, setTipos] = useState([]);
+  const [especialidades, setEspecialidades] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const today = new Date().toISOString().split("T")[0];
   const eighteenYearsAgo = new Date();
   eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
   const maxFechaNacimiento = eighteenYearsAgo.toISOString().split("T")[0];
 
-  // ✅ Validadores reutilizables
+  // === Cargar catálogos ===
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [cedesData, tiposData, especialidadesData] = await Promise.all([
+          getCedes(),
+          getTiposColaboradores(),
+          getEspecialidades(),
+        ]);
+
+        console.log("📋 Cedes:", cedesData);
+        console.log("📋 Tipos Colaborador:", tiposData);
+        console.log("📋 Especialidades:", especialidadesData);
+
+        setCedes(cedesData || []);
+        setTipos(tiposData || []);
+        setEspecialidades(especialidadesData || []);
+      } catch (error) {
+        console.error("❌ Error al cargar catálogos:", error);
+        Swal.fire("Error", "No se pudieron cargar los catálogos", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // === Validadores ===
   const soloLetras = (val) =>
     !val || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(val)
       ? true
@@ -36,32 +71,44 @@ export default function RegisterUserModal({ onClose, onSave }) {
       ? true
       : "Debe tener exactamente 10 dígitos";
 
-  // ✅ Campos del formulario
+  // === Campos del formulario ===
   const colaboradorFields = [
+    {
+      key: "nombreUsuario",
+      label: "Nombre de Usuario",
+      required: true,
+      placeholder: "Usuario para inicio de sesión",
+    },
+    {
+      key: "contrasenia",
+      label: "Contraseña",
+      required: true,
+      type: "password",
+      placeholder: "Contraseña segura",
+    },
     {
       key: "nombre",
       label: "Nombre",
       required: true,
-      placeholder: "Ejemplo: Juan",
-      transform: (val) =>
-        val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "",
       validate: soloLetras,
+      transform: (v) =>
+        v ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : "",
     },
     {
       key: "apellidoPaterno",
       label: "Apellido Paterno",
       required: true,
-      transform: (val) =>
-        val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "",
       validate: soloLetras,
+      transform: (v) =>
+        v ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : "",
     },
     {
       key: "apellidoMaterno",
       label: "Apellido Materno",
       required: true,
-      transform: (val) =>
-        val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "",
       validate: soloLetras,
+      transform: (v) =>
+        v ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : "",
     },
     { key: "edad", label: "Edad", type: "number", required: true },
     {
@@ -76,28 +123,26 @@ export default function RegisterUserModal({ onClose, onSave }) {
       key: "curp",
       label: "CURP",
       required: true,
-      transform: (val) => (val ? val.toUpperCase().slice(0, 18) : ""),
       validate: curpValida,
+      transform: (v) => (v ? v.toUpperCase().slice(0, 18) : ""),
     },
     {
       key: "email",
       label: "Correo Electrónico",
       type: "email",
-      placeholder: "correo@ejemplo.com",
       validate: emailValido,
     },
     {
-      key: "cedulaProfesional", // visible como Cédula, backend recibirá matriculaProfesional
+      key: "cedulaProfesional",
       label: "Cédula Profesional",
-      placeholder: "Ejemplo: 12345678",
-      transform: (val) => (val ? val.replace(/\D/g, "").slice(0, 8) : ""),
+      transform: (v) => (v ? v.replace(/\D/g, "").slice(0, 8) : ""),
       validate: ochoDigitos,
     },
     {
       key: "telefono",
       label: "Teléfono",
       type: "tel",
-      transform: (val) => (val ? val.replace(/\D/g, "").slice(0, 10) : ""),
+      transform: (v) => (v ? v.replace(/\D/g, "").slice(0, 10) : ""),
       validate: diezDigitos,
     },
     {
@@ -116,84 +161,99 @@ export default function RegisterUserModal({ onClose, onSave }) {
     {
       key: "licencia",
       label: "Licencia",
-      placeholder: "Ejemplo: 87654321",
-      transform: (val) => (val ? val.replace(/\D/g, "").slice(0, 8) : ""),
+      transform: (v) => (v ? v.replace(/\D/g, "").slice(0, 8) : ""),
       validate: ochoDigitos,
+    },
+
+    // === Selects dinámicos actualizados ===
+    {
+      key: "iD_Cede",
+      label: "Cede",
+      type: "select",
+      required: true,
+      options: cedes.map((c) => ({
+        label: c.ciudad ?? "Sin ciudad",
+        value: c.id,
+      })),
+    },
+    {
+      key: "iD_TipoColaborador",
+      label: "Tipo de Colaborador",
+      type: "select",
+      required: true,
+      // 👇 usa la propiedad "tipo" del backend
+      options: tipos.map((t) => ({
+        label: t.tipo ?? `Tipo ${t.id}`,
+        value: t.id,
+      })),
+    },
+    {
+      key: "iD_Especialidad",
+      label: "Especialidad",
+      type: "select",
+      required: true,
+      options: especialidades.map((e) => ({
+        label: e.nombre ?? `Especialidad ${e.id}`,
+        value: e.id,
+      })),
     },
   ];
 
-  // ✅ Guardar colaborador
+  // === Guardar colaborador ===
   const handleSave = async (data) => {
     try {
-      const processedData = {};
-      colaboradorFields.forEach((field) => {
-        const value = data[field.key];
-        processedData[field.key] = field.transform ? field.transform(value) : value;
+      const processed = {};
+      colaboradorFields.forEach((f) => {
+        const value = data[f.key];
+        processed[f.key] = f.transform ? f.transform(value) : value;
       });
 
-      // Validaciones
-      for (const field of colaboradorFields) {
-        const value = processedData[field.key];
-        if (field.required && !value) {
-          throw new Error(`El campo "${field.label}" es obligatorio`);
-        }
-        if (field.validate) {
-          const valid = field.validate(value);
-          if (valid !== true) throw new Error(`Error en ${field.label}: ${valid}`);
+      for (const f of colaboradorFields) {
+        if (f.required && !processed[f.key])
+          throw new Error(`El campo "${f.label}" es obligatorio`);
+        if (f.validate) {
+          const res = f.validate(processed[f.key]);
+          if (res !== true) throw new Error(`${f.label}: ${res}`);
         }
       }
 
-      const colaboradorData = {
-        id: 0,
-        iD_Cede: 1, // ✅ nombre exacto del backend
-        ...processedData,
-        edad: parseInt(processedData.edad || 0),
+      const payload = {
+        ...processed,
+        edad: parseInt(processed.edad || 0),
+        esActivo: true,
         fechaCreacion: new Date().toISOString(),
         fechaActualizacion: new Date().toISOString(),
-        esActivo: true,
       };
 
-      // 🔁 Mapear "Cédula Profesional" → "matriculaProfesional"
-      if (colaboradorData.cedulaProfesional) {
-        colaboradorData.matriculaProfesional = colaboradorData.cedulaProfesional;
-        delete colaboradorData.cedulaProfesional;
+      if (payload.cedulaProfesional) {
+        payload.matriculaProfesional = payload.cedulaProfesional;
+        delete payload.cedulaProfesional;
       }
 
-      // 🔹 Evitar enviar campos vacíos
-      Object.keys(colaboradorData).forEach((k) => {
-        if (colaboradorData[k] === "" || colaboradorData[k] == null)
-          delete colaboradorData[k];
-      });
-
-      console.log("📤 Datos enviados al backend:", colaboradorData);
-      const response = await createColaborador(colaboradorData);
-      console.log("✅ Respuesta backend:", response);
+      console.log("📤 Enviando al backend:", payload);
+      const response = await createColaborador(payload);
 
       Swal.fire({
         icon: "success",
-        title: "¡Éxito!",
-        text: "Colaborador registrado correctamente ✅",
-        background: "#ffffff",
-        color: "#000000",
-        confirmButtonColor: "#4B908E",
-        timer: 2000,
-        timerProgressBar: true,
+        title: "¡Colaborador registrado!",
+        text: "El registro se completó correctamente ✅",
+        confirmButtonColor: "#1e5e5c",
       });
 
       onSave?.(response);
       onClose();
     } catch (error) {
-      console.error("❌ Error al registrar colaborador:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "No se pudo registrar el colaborador",
-        background: "#ffffff",
-        color: "#005124FF",
-        confirmButtonColor: "#4B908E",
-      });
+      console.error("❌ Error al registrar:", error);
+      Swal.fire("Error", error.message || "No se pudo registrar el colaborador", "error");
     }
   };
+
+  if (loading)
+    return (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <p>Cargando catálogos...</p>
+      </div>
+    );
 
   return (
     <DynamicFormModal

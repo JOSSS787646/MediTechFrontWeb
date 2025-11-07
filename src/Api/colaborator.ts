@@ -1,3 +1,4 @@
+//colaborator.ts
 import api from "./index";
 
 // Obtener todos los colaboradores

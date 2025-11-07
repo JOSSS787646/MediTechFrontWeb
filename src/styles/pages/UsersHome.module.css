@@ -13,9 +13,7 @@
   flex-direction: column;
   overflow: hidden;
   box-sizing: border-box;
-
-  /* 👇 Igual que el layout administrador */
-  font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #4b5563;
 }
 
@@ -86,7 +84,7 @@
   flex: 1;
   font-size: 1rem;
   color: #374151;
-  font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .searchInput::placeholder {
@@ -266,28 +264,6 @@
   font-weight: 600;
 }
 
-/* === Responsivo === */
-@media (max-width: 768px) {
-  .crudTable {
-    font-size: 0.9rem;
-    min-width: 600px;
-  }
-
-  .searchBox {
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .crudTable {
-    font-size: 0.8rem;
-    min-width: 500px;
-  }
-
-  .pageTitle {
-    font-size: 1.2rem;
-  }
-}
 /* === Switch (toggle activo/inactivo mejorado) === */
 .switch {
   position: relative;
@@ -303,7 +279,6 @@
   height: 0;
 }
 
-/* Fondo del switch */
 .slider {
   position: absolute;
   cursor: pointer;
@@ -311,13 +286,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #e74c3c; /* 🔴 Rojo por defecto (inactivo) */
+  background-color: #e74c3c;
   transition: all 0.4s ease;
   border-radius: 34px;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Círculo interior */
 .slider:before {
   position: absolute;
   content: "";
@@ -330,31 +304,28 @@
   border-radius: 50%;
 }
 
-/* ✅ Activo: verde */
 input:checked + .slider {
-  background-color: #28a745; /* 🟢 Verde activo */
+  background-color: #28a745;
 }
 
-/* Deslizamiento del círculo */
 input:checked + .slider:before {
   transform: translateX(24px);
 }
 
-/* 🔄 Animación de hover */
 .switch:hover .slider {
   box-shadow: 0 0 6px rgba(30, 94, 92, 0.4);
   transform: scale(1.05);
 }
 
-/* 🟢 Sombra verde cuando activo */
 input:checked + .slider:hover {
   box-shadow: 0 0 8px rgba(40, 167, 69, 0.6);
 }
 
-/* 🔴 Sombra roja cuando inactivo */
 input:not(:checked) + .slider:hover {
   box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
 }
+
+/* === Botón para ver dirección === */
 .eyeButton {
   background-color: #1e5e5c;
   border: none;
@@ -379,7 +350,7 @@ input:not(:checked) + .slider:hover {
   line-height: 1;
 }
 
-/* === Card emergente === */
+/* === Card emergente (ver dirección completa) === */
 .cardOverlay {
   position: fixed;
   inset: 0;
@@ -388,6 +359,7 @@ input:not(:checked) + .slider:hover {
   align-items: center;
   justify-content: center;
   z-index: 1200;
+  animation: fadeInCard 0.25s ease;
 }
 
 .infoCard {
@@ -396,8 +368,14 @@ input:not(:checked) + .slider:hover {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
   width: 90%;
   max-width: 500px;
-  padding: 1.5rem;
+  padding: 1.8rem;
   animation: fadeInCard 0.25s ease;
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.6;
+  box-sizing: border-box;
 }
 
 .infoCard h3 {
@@ -411,6 +389,8 @@ input:not(:checked) + .slider:hover {
 .infoCard p {
   color: #374151;
   margin: 0.5rem 0;
+  font-size: 1rem;
+  word-break: break-word;
 }
 
 .closeCardButton {
@@ -422,6 +402,7 @@ input:not(:checked) + .slider:hover {
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
   transition: transform 0.15s ease, background 0.2s ease;
 }
 
@@ -438,5 +419,61 @@ input:not(:checked) + .slider:hover {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* === Botón de filtro Activos / Inactivos === */
+.toggleButton {
+  background-color: #1e5e5c;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.toggleButton:hover {
+  background-color: #184e4c;
+  transform: scale(1.03);
+}
+
+/* 🟥 Modo inactivos */
+.toggleButton.inactiveMode {
+  background-color: #a63232;
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(166, 50, 50, 0.3);
+}
+
+.toggleButton.inactiveMode:hover {
+  background-color: #922828;
+  transform: scale(1.05);
+}
+
+/* === Responsivo === */
+@media (max-width: 768px) {
+  .crudTable {
+    font-size: 0.9rem;
+    min-width: 600px;
+  }
+
+  .searchBox {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .crudTable {
+    font-size: 0.8rem;
+    min-width: 500px;
+  }
+
+  .pageTitle {
+    font-size: 1.2rem;
   }
 }
