@@ -1,22 +1,220 @@
-/* ================================
-   Imagen en StartHome centrada
-   ================================ */
-.startHomeContainer {
-  display: flex;
-  justify-content: center;  /* Centrado horizontal */
-  align-items: center;      /* Centrado vertical */
-  height: 100vh;            /* Ocupar toda la pantalla */
-  width: 100%;
-  background-color: #f5f5f5; /* Igual al fondo general */
-  box-sizing: border-box;
-  margin: 0;                /* Quita cualquier margen extra */
+:root {
+  --sidebar-color: #63b2a5;
+  --sidebar-hover: #4b8e83;
+  --text-dark: #0a2928;
+  --text-light: #ffffff;
 }
 
-/* Imagen del banner */
-.bannerImage {
-  max-width: 80%;           /* Hasta 80% del ancho */
-  max-height: 80vh;         /* Hasta 80% de la altura visible */
-  object-fit: contain;      /* Mantiene proporción sin recorte */
-  display: block;
-  margin: 0 auto;           /* Centrado horizontal extra */
+/* ================= BASE ================= */
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+  padding: 1rem 2rem;
+  box-sizing: border-box;
+  animation: fadeIn 0.6s ease-in-out;
+  overflow: hidden;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* ================= TOP BAR ================= */
+.topBar {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.registerButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--sidebar-color);
+  color: var(--text-light);
+  border: none;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.registerButton:hover {
+  background-color: var(--sidebar-hover);
+  transform: scale(1.04);
+}
+
+.registerButton .material-icons {
+  font-size: 20px;
+}
+
+.userBox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+/* ================= DIVIDER ================= */
+.divider {
+  width: 100%;
+  max-width: 1100px;
+  border-bottom: 1px solid #d1d5db;
+  margin: 0.8rem 0 2rem;
+}
+
+/* ================= HEADER ================= */
+.headerSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 950px;
+  width: 100%;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.timeBox {
+  text-align: left;
+  color: var(--sidebar-color);
+}
+
+.timeBox h2 {
+  font-size: 2.2rem;
+  margin-bottom: 0.2rem;
+  font-weight: 700;
+}
+
+.timeBox p {
+  font-size: 1rem;
+  color: #475569;
+  text-transform: capitalize;
+}
+
+.welcomeBox {
+  text-align: right;
+  color: var(--text-dark);
+}
+
+.welcomeBox h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.welcomeBox p {
+  color: #6b7280;
+  font-size: 1.05rem;
+}
+
+/* ================= CARDS ================= */
+.cardsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1rem;
+  max-width: 950px;
+}
+
+.card {
+  border-radius: 16px;
+  padding: 1.6rem;
+  flex: 1 1 300px;
+  text-align: left;
+  color: var(--text-light);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.3s ease;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.cardTeal {
+  background: linear-gradient(135deg, var(--sidebar-color), #5aa296);
+}
+
+.cardTeal:hover {
+  background: linear-gradient(135deg, var(--sidebar-hover), #408378);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.card .material-icons {
+  font-size: 2.3rem;
+  margin-bottom: 0.8rem;
+}
+
+.card h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.card p {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+/* ================= LOGO ================= */
+.logoSection {
+  margin-top: 2.5rem;
+}
+
+.logoSection img {
+  width: 130px;
+  opacity: 0.9;
+  filter: grayscale(10%);
+  transition: opacity 0.3s;
+}
+
+.logoSection img:hover {
+  opacity: 1;
+}
+
+/* ================= ANIMACIÓN ================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .headerSection {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .welcomeBox {
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  .cardsContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 90%;
+    max-width: 350px;
+  }
+
+  .topBar {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
 }

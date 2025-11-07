@@ -1,8 +1,6 @@
-// auth.ts
-import api from "./index";
+import api from "../Api/index";
 
-
-//Metodo que permite validar el login de un usuario, recibe 2 parametros
+// Método que permite validar el login de un usuario, recibe 2 parámetros
 export const login = async (nombre: string, contrasenia: string) => {
   try {
     const response = await api.post("/Usuario/login", { nombre, contrasenia });
