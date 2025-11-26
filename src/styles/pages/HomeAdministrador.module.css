@@ -1,0 +1,52 @@
+/* ================================
+   Layout principal del administrador
+   ================================ */
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Sidebar ocupa ancho fijo o dinámico */
+.container > aside {
+  flex-shrink: 0;
+  height: 100vh;
+}
+
+/* Contenido principal */
+.mainContent {
+  flex: 1;
+  background-color: #ffffff; /* color claro mejorado */
+  padding: 2rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  text-align: left;
+  overflow-y: auto;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+/* Títulos y párrafos */
+.mainContent h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.mainContent p {
+  font-size: 1.125rem;
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+:global(html, body) {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}

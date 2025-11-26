@@ -1,0 +1,272 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+* {
+  font-family: "Inter", sans-serif;
+}
+
+/* ==========================================
+   LAYOUT GENERAL
+========================================== */
+.mainLayout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  background: #f8f9fa;
+}
+
+.contentArea {
+  flex: 1;
+  padding: 1.5rem 2.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1c3c4f;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* ==========================================
+   FORMULARIO
+========================================== */
+.formSection {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto 2rem auto;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.sectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1c3c4f;
+  margin-top: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 15px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px 15px;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5df;
+  font-size: 0.85rem;
+  background: #fafafa;
+  transition: 0.2s;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #1c3c4f;
+  background: white;
+}
+
+.textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.generateBtn {
+  margin-top: 1.2rem;
+  background: #1e5e5c;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.4rem;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.generateBtn:hover {
+  background: #144746;
+}
+
+/* ==========================================
+   PREVIEW (PDF BASE)
+========================================== */
+
+/* Tamaño real para captura PDF */
+.recetaPreview {
+  position: relative;
+  width: 750px;
+  padding: 1.6rem 2rem;
+
+  background: white;
+  border-radius: 12px;
+  margin: 0 auto 2rem auto;
+  border: 1px solid #dce3e8;
+  box-shadow: 0 3px 10px #0003;
+  font-size: 0.85rem;
+}
+
+/* Miniatura para mostrar en pantalla */
+.recetaPreviewMini {
+  transform: scale(0.75);
+  transform-origin: top center;
+}
+
+/* ================================
+   MARCA DE AGUA
+================================ */
+.watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 450px;
+  height: 450px;
+  background: url("../../assets/logoLargo.png") center/contain no-repeat;
+  opacity: 0.08;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* ==========================================
+   LOGO
+========================================== */
+
+/* Tamaño real para PDF */
+.pdfLogo {
+  width: 200px !important;
+  height: 70px !important;
+  object-fit: contain;
+}
+
+/* Tamaño mini (vista previa) */
+.pdfLogoMini {
+  width: 65px !important;
+  height: 65px !important;
+  object-fit: contain;
+}
+
+/* ==========================================
+   ENCABEZADO
+========================================== */
+.recetaHeader {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 3px solid #0077B6;
+  padding-bottom: 12px;
+}
+
+.recetaDoctor {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.recetaDoctor h2 {
+  font-size: 18px;
+  margin: 0;
+  color: #0077B6;
+}
+
+.recetaDoctor p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.recetaDoctorInfo {
+  text-align: right;
+  font-size: 13px;
+}
+
+/* ==========================================
+   SECCIONES
+========================================== */
+.previewTitle {
+  font-size: 15px;
+  margin-top: 20px;
+  color: #0077B6;
+  font-weight: 700;
+}
+
+.previewGrid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 15px;
+}
+
+.previewGrid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 15px;
+}
+
+.tratamientoBox {
+  margin-top: 10px;
+  padding: 15px;
+  background: #F2F8FC;
+  border-left: 4px solid #0077B6;
+  border-radius: 6px;
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+/* ==========================================
+   FOOTER
+========================================== */
+.footer {
+  background: #0077B6;
+  color: white;
+  text-align: center;
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 30px;
+  font-size: 14px;
+}
+
+.footer strong {
+  font-size: 15px;
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+@media (max-width: 900px) {
+
+  .grid2,
+  .grid3,
+  .previewGrid2,
+  .previewGrid3 {
+    grid-template-columns: 1fr;
+  }
+
+  .recetaHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .recetaDoctorInfo {
+    text-align: center;
+  }
+
+  .recetaPreview {
+    width: 100%;
+    padding: 1rem;
+  }
+}

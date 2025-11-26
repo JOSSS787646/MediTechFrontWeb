@@ -1,0 +1,164 @@
+/*RegisterUserModal.module.css*/
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background-color: #ffffff;
+  width: 600px;
+  max-width: 95%;
+  max-height: 90vh;
+  border-radius: 18px;
+  padding: 30px 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🔹 Contenedor con scroll para los campos */
+.scrollContainer {
+  overflow-y: auto;
+  flex-grow: 1;
+  padding-right: 6px;
+  margin-bottom: 20px;
+}
+
+/* 🔹 Scrollbar personalizado */
+.scrollContainer::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollContainer::-webkit-scrollbar-thumb {
+  background-color: #b0b0b0;
+  border-radius: 6px;
+}
+.scrollContainer::-webkit-scrollbar-thumb:hover {
+  background-color: #8a8a8a;
+}
+
+.title {
+  text-align: center;
+  color: #2f3e46;
+  font-weight: 700;
+  margin-bottom: 25px;
+  font-size: 1.6rem;
+}
+
+.fieldsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 25px;
+}
+
+/* 🔹 Responsive: una sola columna en pantallas pequeñas */
+@media (max-width: 768px) {
+  .fieldsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fieldWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.required {
+  color: #e63946;
+  margin-left: 4px;
+}
+
+.input {
+  border: 1.5px solid #c8d6e5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #4b908e;
+  box-shadow: 0 0 5px rgba(75, 144, 142, 0.3);
+}
+
+.select {
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.inputError {
+  border-color: #e63946 !important;
+}
+
+.error {
+  color: #e63946;
+  font-size: 0.8rem;
+  margin-top: 3px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
+  gap: 10px;
+  flex-direction: row-reverse; /* ✅ Intercambia la posición de los botones */
+}
+
+.saveButton,
+.cancelButton {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  font-size: 0.95rem;
+}
+
+/* ✅ Botón guardar más claro, con hover más marcado */
+.saveButton {
+  background-color: #558a88; /* tono más claro */
+  color: #ffffff;
+}
+
+.saveButton:hover {
+  background-color: #1e5e5c; /* más oscuro al pasar el cursor */
+  box-shadow: 0 0 8px rgba(30, 94, 92, 0.3);
+}
+
+.cancelButton {
+  background-color: #eaeaea;
+  color: #333;
+}
+
+.cancelButton:hover {
+  background-color: #d6d6d6;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

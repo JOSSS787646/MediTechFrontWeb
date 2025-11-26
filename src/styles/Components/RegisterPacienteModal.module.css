@@ -1,0 +1,214 @@
+/* 🎨 Estilos generales del modal */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal {
+  background: #ffffff;
+  width: 640px;
+  max-width: 95%;
+  max-height: 90vh;
+  border-radius: 18px;
+  padding: 30px 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.35s ease-out;
+}
+
+/* 🔹 Encabezado */
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1e5e5c;
+  margin-bottom: 22px;
+}
+
+.title .material-icons {
+  font-size: 1.9rem;
+  color: #4b908e;
+}
+
+/* 🔹 Contenedor con scroll */
+.scrollContainer {
+  overflow-y: auto;
+  flex-grow: 1;
+  padding-right: 8px;
+  margin-bottom: 18px;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollContainer::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 6px;
+}
+.scrollContainer::-webkit-scrollbar-thumb:hover {
+  background-color: #8a8a8a;
+}
+
+/* 🔹 Grid de campos */
+.fieldsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+}
+
+@media (max-width: 768px) {
+  .fieldsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 🔹 Campos */
+.fieldWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  color: #333;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+}
+
+.required {
+  color: #e63946;
+  margin-left: 4px;
+}
+
+/* 🔹 Inputs y selects */
+.input {
+  border: 1.6px solid #c8d6e5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #4b908e;
+  box-shadow: 0 0 6px rgba(75, 144, 142, 0.3);
+}
+
+.select {
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.inputError {
+  border-color: #e63946 !important;
+}
+
+.error {
+  color: #e63946;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+/* 🔹 Acciones (botones) */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+  margin-top: 10px;
+}
+
+.saveButton,
+.cancelButton {
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Botón Guardar */
+.saveButton {
+  background-color: #4b908e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.saveButton:hover {
+  background-color: #1e5e5c;
+  box-shadow: 0 0 10px rgba(30, 94, 92, 0.35);
+}
+
+/* Botón Cancelar */
+.cancelButton {
+  background-color: #eaeaea;
+  color: #333;
+}
+
+.cancelButton:hover {
+  background-color: #d6d6d6;
+}
+
+/* 🔹 Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.hint {
+  font-size: 0.8rem;
+  color: #6b7280; /* gris suave */
+  margin-top: 4px;
+}
+
+.hintError {
+  font-size: 0.8rem;
+  color: #e63946; /* rojo de error */
+  margin-top: 4px;
+}
+.swal2-container {
+  z-index: 3000 !important;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.hintError {
+  font-size: 0.8rem;
+  color: #e63946;
+  margin-top: 4px;
+}

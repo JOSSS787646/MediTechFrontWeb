@@ -1,0 +1,171 @@
+/*sidebarmenu.module.css*/
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #63b2a5;
+  padding: 1rem;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.15);
+  transition: width 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+  overflow: hidden;
+  font-family: "Segoe UI", sans-serif;
+  cursor: pointer;
+  color: #0a2928;
+}
+
+/* ===== Modo oscuro ===== */
+.modoOscuro {
+  background-color: #1e2a2a;
+  color: #e4e4e4;
+}
+
+.sidebarAbierto {
+  width: 200px;
+}
+
+.sidebarCerrado {
+  width: 60px;
+}
+
+/* Logo */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.logoImg {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  border-radius: 10px;
+  margin: 0 auto;
+  display: block;
+}
+
+.logoGrande {
+  width: 200px;
+  height: 160px;
+  object-fit: contain;
+  margin: 0 auto;
+  display: block;
+}
+
+/* Menú */
+.nav {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Pie */
+.pie {
+  margin-top: auto;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+/* === Botón modo oscuro/claro === */
+.modoButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.modoButton:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.modoButton .material-icons {
+  font-size: 24px;
+}
+
+.modoText {
+  margin-left: 8px;
+}
+
+.modoCerrado {
+  flex-direction: column;
+  font-size: 0.8rem;
+}
+
+.modoCerrado .material-icons {
+  margin: 0;
+}
+
+.modoAbierto {
+  flex-direction: row;
+}
+
+/* === Botón de cerrar sesión === */
+.logoutButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.5rem;
+}
+
+.logoutButton:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.logoutButton .material-icons {
+  font-size: 24px;
+}
+
+.logoutText {
+  margin-left: 8px;
+}
+
+.logoutCerrado {
+  flex-direction: column;
+  font-size: 0.8rem;
+}
+
+.logoutCerrado .material-icons {
+  margin: 0;
+}
+
+.logoutAbierto {
+  flex-direction: row;
+}
+
+/* Transición general */
+.sidebar * {
+  transition: all 0.3s ease;
+}
+
+/* ===== Estilo global del modo oscuro ===== */
+body.modo-oscuro {
+  background-color: #121b1b;
+  color: #e4e4e4;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
