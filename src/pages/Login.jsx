@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login as loginApi } from "../api/auth";
@@ -20,9 +19,17 @@ export default function Login() {
       console.log("🟢 Usuario autenticado:", response);
 
       // ⚠️ Backend devuelve minúsculas: exito, token, tipoColaborador
-      if (response.exito && response.token) {
-        // Guardar usuario en localStorage
-        localStorage.setItem("usuario", JSON.stringify(response));
+     if (response.exito && response.token) {
+  // Guardamos un objeto personalizado con nombreUsuario y rol
+  const usuarioData = {
+    nombreUsuario: username,
+    tipoColaborador: response.tipoColaborador,
+    token: response.token,
+  };
+
+  localStorage.setItem("usuario", JSON.stringify(usuarioData));
+
+  console.log("👤 Usuario guardado en localStorage:", usuarioData);
 
         // Normalizamos el texto
         const tipo = response.tipoColaborador?.toString().trim().toLowerCase();

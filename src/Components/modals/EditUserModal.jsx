@@ -1,4 +1,3 @@
-/*EditUserModal.jsx*/
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/Components/RegisterUserModal.module.css";
 import TextField from "../TextField";
@@ -7,39 +6,38 @@ export default function EditUserModal({ user, onClose, onSave }) {
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
 
-  // 🔹 Inicializar datos al abrir el modal
+  // Inicializar datos al abrir el modal
   useEffect(() => {
     if (user) {
       setFormData({
         nombreUsuario: user.nombreUsuario || "",
-        contrasenia: user.contrasenia || "",
+        contrasenia: "", // nunca mostrar contraseña original
         nombre: user.nombre || "",
         apellidoPaterno: user.apellidoPaterno || "",
         apellidoMaterno: user.apellidoMaterno || "",
         curp: user.curp || "",
         email: user.email || "",
-        edad: user.edad || "",
+        edad: Number(user.edad) || 0,
         fechaNacimiento: user.fechaNacimiento
           ? new Date(user.fechaNacimiento).toISOString().split("T")[0]
-          : "",
+          : new Date().toISOString().split("T")[0],
         direccion: user.direccion || "",
         telefono: user.telefono || "",
         fechaContrato: user.fechaContrato
           ? new Date(user.fechaContrato).toISOString().split("T")[0]
-          : "",
+          : new Date().toISOString().split("T")[0],
         matriculaProfesional: user.matriculaProfesional || "",
         licencia: user.licencia || "",
         genero: user.genero || "No especificado",
-        iD_Cede: user.iD_Cede || 1,
-        iD_TipoColaborador: user.iD_TipoColaborador || 1,
-        iD_Modulo: user.iD_Modulo || 1,
-        iD_Especialidad: user.iD_Especialidad || 1,
+        ID_Cede: user.id_Cede || user.iD_Cede || 1,
+        ID_TipoColaborador: user.id_TipoColaborador || user.iD_TipoColaborador || 1,
+        ID_Modulo: user.id_Modulo || user.iD_Modulo || 1,
+        ID_Especialidad: user.id_Especialidad || user.iD_Especialidad || 1,
         esActivo: user.esActivo ?? true,
       });
     }
   }, [user]);
 
-  // 🔹 Validaciones
   const validators = {
     nombre: (val) =>
       /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(val || "")
@@ -75,7 +73,6 @@ export default function EditUserModal({ user, onClose, onSave }) {
         : "Debe contener 8 dígitos numéricos.",
   };
 
-  // 🔹 Calcular edad al cambiar fechaNacimiento
   const calcularEdad = (fechaNacimiento) => {
     if (!fechaNacimiento) return "";
     const hoy = new Date();
@@ -86,37 +83,36 @@ export default function EditUserModal({ user, onClose, onSave }) {
     return edad >= 0 ? edad : "";
   };
 
-  // 🔹 Manejar cambios y validar
   const handleChange = (key, value) => {
     let newValue = value;
 
-    // Transformaciones automáticas
     if (["nombre", "apellidoPaterno", "apellidoMaterno"].includes(key)) {
-      newValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+      newValue =
+        value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
     }
     if (key === "curp") newValue = value.toUpperCase().slice(0, 18);
     if (["telefono", "matriculaProfesional", "licencia"].includes(key))
       newValue = value.replace(/\D/g, "");
 
-    // Calcular edad automáticamente
     if (key === "fechaNacimiento") {
       const edadCalculada = calcularEdad(newValue);
       setFormData((prev) => ({
         ...prev,
         [key]: newValue,
-        edad: edadCalculada,
+        edad: Number(edadCalculada),
       }));
     } else {
       setFormData((prev) => ({ ...prev, [key]: newValue }));
     }
 
-    // Validar en tiempo real
     if (validators[key]) {
-      setErrors((prev) => ({ ...prev, [key]: validators[key](newValue) }));
+      setErrors((prev) => ({
+        ...prev,
+        [key]: validators[key](newValue),
+      }));
     }
   };
 
-  // 🔹 Validar todo antes de guardar
   const validateAll = () => {
     const newErrors = {};
     Object.keys(validators).forEach((key) => {
@@ -124,7 +120,6 @@ export default function EditUserModal({ user, onClose, onSave }) {
       if (error) newErrors[key] = error;
     });
 
-    // Edad mínima (18 años)
     if (formData.edad && formData.edad < 18)
       newErrors.edad = "Debe ser mayor de edad (18 años o más).";
 
@@ -132,7 +127,6 @@ export default function EditUserModal({ user, onClose, onSave }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // 🔹 Guardar datos si todo está bien
   const handleSave = () => {
     if (!validateAll()) {
       alert("⚠️ Corrige los errores antes de guardar.");
@@ -140,17 +134,31 @@ export default function EditUserModal({ user, onClose, onSave }) {
     }
 
     const payload = {
-      ...formData,
+      nombreUsuario: formData.nombreUsuario,
+      contrasenia: formData.contrasenia || undefined,
+      nombre: formData.nombre,
+      apellidoPaterno: formData.apellidoPaterno,
+      apellidoMaterno: formData.apellidoMaterno,
+      curp: formData.curp,
+      email: formData.email,
       edad: Number(formData.edad) || 0,
-      iD_Cede: Number(formData.iD_Cede) || 1,
-      iD_TipoColaborador: Number(formData.iD_TipoColaborador) || 1,
-      iD_Modulo: Number(formData.iD_Modulo) || 1,
-      iD_Especialidad: Number(formData.iD_Especialidad) || 1,
-      fechaNacimiento: new Date(formData.fechaNacimiento || new Date()).toISOString(),
-      fechaContrato: new Date(formData.fechaContrato || new Date()).toISOString(),
+      fechaNacimiento: new Date(formData.fechaNacimiento).toISOString(),
+      direccion: formData.direccion,
+      telefono: formData.telefono,
+      fechaContrato: new Date(formData.fechaContrato).toISOString(),
+      matriculaProfesional: formData.matriculaProfesional,
+      licencia: formData.licencia,
+      genero: formData.genero,
+      esActivo: formData.esActivo ?? true,
+
+      // 🔥 claves EXACTAS que pide el backend
+      ID_Cede: Number(formData.ID_Cede),
+      ID_TipoColaborador: Number(formData.ID_TipoColaborador),
+      ID_Modulo: Number(formData.ID_Modulo),
+      ID_Especialidad: Number(formData.ID_Especialidad),
     };
 
-    console.log("🚀 Payload validado:", payload);
+    console.log("🚀 Payload final enviado al backend:", payload);
     onSave(user.id, payload);
     onClose();
   };
@@ -162,17 +170,20 @@ export default function EditUserModal({ user, onClose, onSave }) {
 
         <div className={styles.scrollContainer}>
           <div className={styles.fieldsGrid}>
-            {/* === Datos generales === */}
             <TextField
               label="Nombre de usuario"
               value={formData.nombreUsuario}
-              onChange={(e) => handleChange("nombreUsuario", e.target.value)}
+              onChange={(e) =>
+                handleChange("nombreUsuario", e.target.value)
+              }
             />
             <TextField
-              label="Contraseña"
+              label="Contraseña (solo si deseas cambiarla)"
               type="password"
               value={formData.contrasenia}
-              onChange={(e) => handleChange("contrasenia", e.target.value)}
+              onChange={(e) =>
+                handleChange("contrasenia", e.target.value)
+              }
             />
             <TextField
               label="Nombre"
@@ -183,13 +194,17 @@ export default function EditUserModal({ user, onClose, onSave }) {
             <TextField
               label="Apellido Paterno"
               value={formData.apellidoPaterno}
-              onChange={(e) => handleChange("apellidoPaterno", e.target.value)}
+              onChange={(e) =>
+                handleChange("apellidoPaterno", e.target.value)
+              }
               error={errors.apellidoPaterno}
             />
             <TextField
               label="Apellido Materno"
               value={formData.apellidoMaterno}
-              onChange={(e) => handleChange("apellidoMaterno", e.target.value)}
+              onChange={(e) =>
+                handleChange("apellidoMaterno", e.target.value)
+              }
               error={errors.apellidoMaterno}
             />
             <TextField
@@ -207,16 +222,19 @@ export default function EditUserModal({ user, onClose, onSave }) {
             <TextField
               label="Teléfono"
               value={formData.telefono}
-              onChange={(e) => handleChange("telefono", e.target.value)}
+              onChange={(e) =>
+                handleChange("telefono", e.target.value)
+              }
               error={errors.telefono}
             />
 
-            {/* === Fechas y edad === */}
             <TextField
               label="Fecha de nacimiento"
               type="date"
               value={formData.fechaNacimiento}
-              onChange={(e) => handleChange("fechaNacimiento", e.target.value)}
+              onChange={(e) =>
+                handleChange("fechaNacimiento", e.target.value)
+              }
             />
             <TextField
               label="Edad"
@@ -228,10 +246,11 @@ export default function EditUserModal({ user, onClose, onSave }) {
               label="Fecha de contrato"
               type="date"
               value={formData.fechaContrato}
-              onChange={(e) => handleChange("fechaContrato", e.target.value)}
+              onChange={(e) =>
+                handleChange("fechaContrato", e.target.value)
+              }
             />
 
-            {/* === Datos profesionales === */}
             <TextField
               label="Matrícula profesional"
               value={formData.matriculaProfesional}
@@ -243,7 +262,9 @@ export default function EditUserModal({ user, onClose, onSave }) {
             <TextField
               label="Licencia"
               value={formData.licencia}
-              onChange={(e) => handleChange("licencia", e.target.value)}
+              onChange={(e) =>
+                handleChange("licencia", e.target.value)
+              }
               error={errors.licencia}
             />
             <TextField
@@ -254,36 +275,42 @@ export default function EditUserModal({ user, onClose, onSave }) {
             <TextField
               label="Dirección"
               value={formData.direccion}
-              onChange={(e) => handleChange("direccion", e.target.value)}
+              onChange={(e) =>
+                handleChange("direccion", e.target.value)
+              }
             />
 
-            {/* === Relaciones externas === */}
+            {/* 🔥 Claves EXACTAS del backend */}
             <TextField
               label="ID Cede"
               type="number"
-              value={formData.iD_Cede}
-              onChange={(e) => handleChange("iD_Cede", e.target.value)}
+              value={formData.ID_Cede}
+              onChange={(e) =>
+                handleChange("ID_Cede", e.target.value)
+              }
             />
             <TextField
               label="ID Tipo Colaborador"
               type="number"
-              value={formData.iD_TipoColaborador}
+              value={formData.ID_TipoColaborador}
               onChange={(e) =>
-                handleChange("iD_TipoColaborador", e.target.value)
+                handleChange("ID_TipoColaborador", e.target.value)
               }
             />
             <TextField
               label="ID Módulo"
               type="number"
-              value={formData.iD_Modulo}
-              onChange={(e) => handleChange("iD_Modulo", e.target.value)}
+              value={formData.ID_Modulo}
+              onChange={(e) =>
+                handleChange("ID_Modulo", e.target.value)
+              }
             />
             <TextField
               label="ID Especialidad"
               type="number"
-              value={formData.iD_Especialidad}
+              value={formData.ID_Especialidad}
               onChange={(e) =>
-                handleChange("iD_Especialidad", e.target.value)
+                handleChange("ID_Especialidad", e.target.value)
               }
             />
           </div>

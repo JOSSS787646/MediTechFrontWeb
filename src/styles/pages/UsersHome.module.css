@@ -1,59 +1,100 @@
 /* ================================
-   Estilos de vista de Usuarios UsersHome.module.css
+   UsersHome.module.css (Header + Estilos completos)
    ================================ */
 
-.usersPageContainer {
-  width: 100%;
-  height: 100%;
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-sizing: border-box;
-  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #4b5563;
+/* === Variables globales / paleta === */
+:root {
+  --sidebar-color: #63b2a5;
+  --sidebar-hover: #4b8e83;
+  --accent-dark: #1e5e5c;
+  --text-dark: #0a2928;
+  --muted: #4b5563;
+  --white: #ffffff;
+  --border: #d1d5db;
+  --font: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* === NAV superior === */
+/* === Layout general === */
+.mainLayout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.usersPageContainer {
+  flex: 1;
+  width: 100%;
+  padding: 2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  color: var(--muted);
+  font-family: var(--font);
+  background: transparent;
+}
+
+/* ===========================
+   HEADER (LOGO + USUARIO)
+   =========================== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.logo {
+  width: 260px;
+  height: auto;
+  object-fit: contain;
+}
+
+.userBox {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text-dark);
+  font-weight: 600;
+  background: rgba(0,0,0,0.00);
+  padding: 0.1rem 0.3rem;
+  border-radius: 6px;
+}
+
+.divider {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  margin: 0.8rem 0 1.4rem;
+}
+
+/* ===========================
+   NAV SUPERIOR (BUSCADOR + ACCIONES)
+   =========================== */
 .usersNav {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  width: 100%;
 }
 
-/* === Botón Registrar === */
-.addUserButton {
-  background-color: #1e5e5c;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  transition: background 0.3s ease;
-}
+/* ============================================================
+   🔥 NUEVO BUSCADOR (con estilo moderno del segundo archivo)
+   ============================================================ */
 
-.addUserButton:hover {
-  background-color: #184e4c;
-}
-
-/* === Buscador moderno === */
 .searchBox {
   display: flex;
   align-items: center;
   background: #f1f5f5;
-  border: 2px solid #1e5e5c;
+  border: 2px solid var(--accent-dark);
   border-radius: 10px;
   padding: 0.4rem 0.8rem;
-  max-width: 400px;
+  max-width: 420px;
   width: 100%;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(30, 94, 92, 0.1);
@@ -84,396 +125,357 @@
   flex: 1;
   font-size: 1rem;
   color: #374151;
-  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .searchInput::placeholder {
-  color: #1e5e5c;
+  color: var(--accent-dark);
   font-style: italic;
 }
 
 .searchInput:focus {
-  color: #1e5e5c;
+  color: var(--accent-dark);
 }
 
-/* === Contenido === */
+/* ===========================
+   BOTONES
+   =========================== */
+.addUserButton,
+.toggleButton,
+.scheduleButtonLarge {
+  background-color: var(--sidebar-color);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: background 0.2s ease, transform 0.12s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(99, 178, 165, 0.06);
+}
+
+.addUserButton:hover,
+.toggleButton:hover,
+.scheduleButtonLarge:hover {
+  background-color: var(--sidebar-hover);
+  transform: translateY(-1px);
+}
+
+.scheduleButtonLarge {
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  height: 46px;
+}
+
+.toggleButton.inactiveMode {
+  background-color: #a63232;
+  box-shadow: 0 6px 18px rgba(166, 50, 50, 0.12);
+}
+
+/* ===========================
+   TITULO
+   =========================== */
 .pageTitle {
-  margin-top: 1rem;
+  margin-top: 0.6rem;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e5e5c;
+  color: var(--accent-dark);
 }
 
-/* === Tabla === */
+/* ===========================
+   TABLA
+   =========================== */
 .tableWrapper {
   flex-grow: 1;
   overflow: auto;
   margin-top: 1rem;
+  width: 100%;
 }
 
 .crudTable {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--white);
   border-radius: 8px;
-  min-width: 800px;
-}
-
-.crudTable th,
-.crudTable td {
-  padding: 0.75rem 1rem;
-  border: 1px solid #e0e0e0;
-  vertical-align: middle;
-  text-align: left;
+  min-width: 780px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.03);
 }
 
 .crudTable th {
-  background-color: #1e5e5c;
-  color: white;
-  font-weight: 600;
+  background-color: var(--accent-dark);
+  color: var(--white);
+  font-weight: 700;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  text-align: left;
 }
 
-.crudTable tr:hover {
-  background-color: #f5f5f5;
+.crudTable td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eef2f2;
+  color: var(--text-dark);
+  vertical-align: middle;
 }
 
-/* === Acciones perfectamente alineadas === */
+.crudTable tr:hover td {
+  background-color: #f7faf9;
+}
+
 .crudTable th:first-child,
 .crudTable td:first-child {
   text-align: center;
   width: 110px;
 }
 
+/* ===========================
+   BOTONES ACCION
+   =========================== */
 .actionCell {
-  text-align: center;
-  vertical-align: middle;
-  padding: 0.4rem 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  align-items: center;
 }
 
-/* Botones dentro de la celda */
 .actionCell button {
+  width: 34px;
+  height: 34px;
   border: none;
   background: transparent;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin: 0 3px;
-  border-radius: 6px;
-  transition: background 0.2s ease, transform 0.2s ease;
+  border-radius: 8px;
+  transition: background 0.18s ease, transform 0.14s ease;
 }
 
 .actionCell button span {
   font-size: 20px;
-  line-height: 1;
 }
 
-/* Colores */
-.editButton span {
-  color: #1e5e5c;
-}
+.editButton span { color: var(--sidebar-color); }
+.deleteButton span { color: #d9372e; }
 
-.deleteButton span {
-  color: #c0392b;
-}
+.editButton:hover { background: rgba(99,178,165,0.1); transform: scale(1.06); }
+.deleteButton:hover { background: rgba(217,55,46,0.08); transform: scale(1.06); }
 
-/* Hover */
-.editButton:hover {
-  background-color: rgba(30, 94, 92, 0.1);
-  transform: scale(1.1);
-}
-
-.deleteButton:hover {
-  background-color: rgba(192, 57, 43, 0.12);
-  transform: scale(1.1);
-}
-
-/* === Campos truncados === */
+/* ===========================
+   ELLIPSIS
+   =========================== */
 .truncateCell {
-  cursor: pointer;
-  color: #1e5e5c;
-  text-decoration: underline;
+  max-width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px;
+  cursor: pointer;
+  color: var(--sidebar-color);
+  text-decoration: underline;
 }
 
-/* === Estado === */
+/* ===========================
+   ESTADO
+   =========================== */
 .statusDot {
   display: inline-block;
   width: 14px;
   height: 14px;
   border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
 }
 
-.active {
-  background-color: #28a745;
-}
+.active { background-color: #28a745; }
+.inactive { background-color: #e74c3c; }
 
-.inactive {
-  background-color: #e74c3c;
-}
-
-/* === Sin resultados === */
+/* ===========================
+   SIN RESULTADOS
+   =========================== */
 .noResults {
   text-align: center;
-  color: #555;
+  color: #6b7280;
   margin-top: 1rem;
+  font-size: 1rem;
 }
 
-/* === Paginación === */
+/* ===========================
+   PAGINACIÓN
+   =========================== */
 .paginationContainer {
-  margin-top: 1rem;
+  margin-top: 1.2rem;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  flex-wrap: wrap;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .rowsSelector select {
   margin-left: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  padding: 0.28rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
 }
 
 .pageControls button {
   border: none;
-  background: #1e5e5c;
-  color: white;
+  background: var(--accent-dark);
+  color: var(--white);
   border-radius: 50%;
   padding: 0.3rem;
   margin: 0 0.25rem;
   cursor: pointer;
+  width: 36px;
+  height: 36px;
 }
 
 .pageControls button:hover:not(:disabled) {
-  background-color: #184e4c;
+  background: #184e4c;
 }
 
 .pageControls button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-.pageControls span {
-  font-weight: 600;
-}
+.pageControls span { font-weight: 700; color: var(--text-dark); }
 
-/* === Switch (toggle activo/inactivo mejorado) === */
+/* ===========================
+   SWITCH
+   =========================== */
 .switch {
   position: relative;
   display: inline-block;
   width: 50px;
   height: 26px;
-  margin-left: 6px;
 }
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
+.switch input { opacity: 0; width: 0; height: 0; }
 
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-color: #e74c3c;
-  transition: all 0.4s ease;
   border-radius: 34px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.35s ease;
+  box-shadow: 0 0 4px rgba(0,0,0,0.06);
 }
 
 .slider:before {
-  position: absolute;
   content: "";
+  position: absolute;
   height: 20px;
   width: 20px;
   left: 3px;
   bottom: 3px;
-  background-color: white;
-  transition: all 0.4s ease;
+  background: #fff;
   border-radius: 50%;
+  transition: transform 0.35s ease;
 }
 
-input:checked + .slider {
-  background-color: #28a745;
-}
+input:checked + .slider { background-color: #28a745; }
+input:checked + .slider:before { transform: translateX(24px); }
 
-input:checked + .slider:before {
-  transform: translateX(24px);
-}
+.switch:hover .slider { transform: scale(1.03); box-shadow: 0 0 8px rgba(0,0,0,0.08); }
 
-.switch:hover .slider {
-  box-shadow: 0 0 6px rgba(30, 94, 92, 0.4);
-  transform: scale(1.05);
-}
-
-input:checked + .slider:hover {
-  box-shadow: 0 0 8px rgba(40, 167, 69, 0.6);
-}
-
-input:not(:checked) + .slider:hover {
-  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
-}
-
-/* === Botón para ver dirección === */
+/* ===========================
+   VER DIRECCIÓN
+   =========================== */
 .eyeButton {
-  background-color: #1e5e5c;
+  background-color: var(--accent-dark);
   border: none;
-  color: white;
+  color: #fff;
   border-radius: 6px;
-  padding: 3px 6px;
+  padding: 4px 8px;
   margin-left: 6px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease, transform 0.15s ease;
+  transition: transform 0.12s ease, background 0.15s ease;
 }
 
-.eyeButton:hover {
-  background-color: #184e4c;
-  transform: scale(1.05);
-}
+.eyeButton:hover { background: #184e4c; transform: translateY(-2px); }
 
-.eyeButton span {
-  font-size: 18px;
-  line-height: 1;
-}
+.eyeButton span { font-size: 18px; }
 
-/* === Card emergente (ver dirección completa) === */
+/* ===========================
+   CARD OVERLAY
+   =========================== */
 .cardOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0,0,0,0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1200;
-  animation: fadeInCard 0.25s ease;
+  animation: fadeInCard 0.22s ease;
 }
 
 .infoCard {
-  background: #ffffff;
+  background: var(--white);
   border-radius: 12px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
-  width: 90%;
-  max-width: 500px;
-  padding: 1.8rem;
-  animation: fadeInCard 0.25s ease;
+  box-shadow: 0 18px 48px rgba(2,6,23,0.12);
+  width: 92%;
+  max-width: 540px;
+  padding: 1.6rem;
   text-align: left;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  white-space: normal;
   line-height: 1.6;
-  box-sizing: border-box;
 }
 
 .infoCard h3 {
-  margin-top: 0;
-  color: #1e5e5c;
+  margin: 0 0 0.8rem 0;
+  color: var(--accent-dark);
   text-align: center;
   font-weight: 700;
-  margin-bottom: 1rem;
 }
 
-.infoCard p {
-  color: #374151;
-  margin: 0.5rem 0;
-  font-size: 1rem;
-  word-break: break-word;
-}
+.infoCard p { color: #374151; margin: 0.4rem 0; }
 
 .closeCardButton {
   display: block;
-  margin: 1.5rem auto 0;
+  margin: 1.25rem auto 0;
   padding: 0.6rem 1rem;
-  background: #1e5e5c;
+  background: var(--accent-dark);
   color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  transition: transform 0.15s ease, background 0.2s ease;
 }
 
-.closeCardButton:hover {
-  background: #184e4c;
-  transform: scale(1.03);
-}
+.closeCardButton:hover { background: #184e4c; transform: translateY(-2px); }
 
 @keyframes fadeInCard {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* === Botón de filtro Activos / Inactivos === */
-.toggleButton {
-  background-color: #1e5e5c;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1.2rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+/* ===========================
+   RESPONSIVE
+   =========================== */
+
+@media (max-width: 1024px) {
+  .logo { width: 220px; }
+  .searchBox { max-width: 360px; }
 }
 
-.toggleButton:hover {
-  background-color: #184e4c;
-  transform: scale(1.03);
-}
-
-/* 🟥 Modo inactivos */
-.toggleButton.inactiveMode {
-  background-color: #a63232;
-  color: #fff;
-  box-shadow: 0 3px 8px rgba(166, 50, 50, 0.3);
-}
-
-.toggleButton.inactiveMode:hover {
-  background-color: #922828;
-  transform: scale(1.05);
-}
-
-/* === Responsivo === */
 @media (max-width: 768px) {
-  .crudTable {
-    font-size: 0.9rem;
-    min-width: 600px;
-  }
-
-  .searchBox {
-    max-width: 100%;
-  }
+  .mainLayout { display: block; }
+  .usersPageContainer { padding: 1.25rem; }
+  .header { margin-bottom: 0.4rem; flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+  .searchBox { width: 100%; max-width: 100%; }
+  .crudTable { min-width: 680px; font-size: 0.95rem; }
 }
 
 @media (max-width: 480px) {
-  .crudTable {
-    font-size: 0.8rem;
-    min-width: 500px;
-  }
-
-  .pageTitle {
-    font-size: 1.2rem;
-  }
+  .crudTable { min-width: 520px; font-size: 0.85rem; }
+  .pageTitle { font-size: 1.2rem; }
+  .logo { width: 180px; }
 }

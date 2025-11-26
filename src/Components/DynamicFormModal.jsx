@@ -1,4 +1,3 @@
-// DynamicFormModal.jsx
 import React, { useState } from "react";
 import styles from "../styles/Components/RegisterUserModal.module.css";
 
@@ -17,58 +16,83 @@ export default function DynamicFormModal({ title, fields, onClose, onSave }) {
     return edad;
   };
 
+  // 🔹 Validar un solo campo en tiempo real
+  const validateField = (field, value) => {
+    if (field.required && !value?.toString().trim()) {
+      return `El campo ${field.label} es obligatorio`;
+    }
+    if (field.validate) {
+      const result = field.validate(value);
+      if (result !== true) return result;
+    }
+    return "";
+  };
+
   // 🔹 Manejar cambios de campo
   const handleChange = (key, value) => {
     const field = fields.find((f) => f.key === key);
     const transformed = field?.transform ? field.transform(value) : value;
 
+    let newFormData = { ...formData };
+    let newErrors = { ...errors };
+
+    // Recalcular edad si cambia la fecha de nacimiento
     if (key === "fechaNacimiento") {
       const edadCalculada = calcularEdad(value);
-      setFormData((prev) => ({
-        ...prev,
+      newFormData = {
+        ...newFormData,
         [key]: transformed,
         edad: edadCalculada >= 0 ? edadCalculada : "",
-      }));
+      };
     } else {
-      setFormData((prev) => ({ ...prev, [key]: transformed }));
+      newFormData[key] = transformed;
     }
+
+    // Validar el campo en tiempo real
+    const errorMsg = validateField(field, transformed);
+    if (errorMsg) newErrors[key] = errorMsg;
+    else delete newErrors[key];
+
+    // Validar dependencias (por ejemplo, edad calculada)
+    if (key === "fechaNacimiento") {
+      const edadField = fields.find((f) => f.key === "edad");
+      if (edadField) delete newErrors["edad"];
+    }
+
+    setFormData(newFormData);
+    setErrors(newErrors);
   };
 
-  // 🔹 Validar antes de guardar
-  const validate = () => {
+  // 🔹 Validar todos los campos antes de guardar
+  const validateAll = () => {
     const newErrors = {};
     fields.forEach((field) => {
       const value = formData[field.key];
-      if (field.required && !value?.toString().trim()) {
-        newErrors[field.key] = `El campo ${field.label} es obligatorio`;
-      } else if (field.validate) {
-        const valid = field.validate(value);
-        if (valid !== true) newErrors[field.key] = valid;
-      }
+      const errorMsg = validateField(field, value);
+      if (errorMsg) newErrors[field.key] = errorMsg;
     });
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = () => {
-    if (!validate()) return;
+    if (!validateAll()) return;
     onSave(formData);
   };
 
-  // 🔹 Restricciones de escritura en tiempo real
+  // 🔹 Restricciones en tiempo real
   const handleInputRestriction = (e, field) => {
     const { key } = field;
     let value = e.target.value;
 
-    // 🔸 Solo letras
+    // Solo letras
     if (["nombre", "apellidoPaterno", "apellidoMaterno"].includes(key)) {
       value = value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
     }
 
-    // 🔸 Solo números (con límites)
+    // Solo números
     if (["cedulaProfesional", "licencia", "telefono", "edad"].includes(key)) {
       value = value.replace(/\D/g, "");
-
       if (["cedulaProfesional", "licencia"].includes(key)) value = value.slice(0, 8);
       if (key === "telefono") value = value.slice(0, 10);
       if (key === "edad") value = value.slice(0, 3);
@@ -80,11 +104,9 @@ export default function DynamicFormModal({ title, fields, onClose, onSave }) {
   const handlePaste = (e, field) => {
     const paste = e.clipboardData.getData("text");
     const { key } = field;
-
     if (["cedulaProfesional", "licencia", "telefono", "edad"].includes(key)) {
       if (!/^\d+$/.test(paste) || paste.length > 10) e.preventDefault();
     }
-
     if (["nombre", "apellidoPaterno", "apellidoMaterno"].includes(key)) {
       if (/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/.test(paste)) e.preventDefault();
     }
@@ -107,32 +129,28 @@ export default function DynamicFormModal({ title, fields, onClose, onSave }) {
                   {field.required && <span className={styles.required}>*</span>}
                 </label>
 
-                {/* 🔹 Campo tipo select */}
                 {field.type === "select" ? (
                   <select
                     value={formData[field.key] || ""}
                     onChange={(e) => handleChange(field.key, e.target.value)}
-                    className={`${styles.input} ${styles.select}`}
+                    className={`${styles.input} ${styles.select} ${
+                      errors[field.key] ? styles.inputError : ""
+                    }`}
                   >
                     <option value="">Seleccione...</option>
-                    {field.options?.map((opt, idx) => {
-                      // Permite opciones tipo string o tipo objeto {label, value}
-                      if (typeof opt === "object" && opt !== null) {
-                        return (
-                          <option key={idx} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        );
-                      }
-                      return (
+                    {field.options?.map((opt, idx) =>
+                      typeof opt === "object" && opt !== null ? (
+                        <option key={idx} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ) : (
                         <option key={idx} value={opt}>
                           {opt}
                         </option>
-                      );
-                    })}
+                      )
+                    )}
                   </select>
                 ) : (
-                  /* 🔹 Campo tipo input */
                   <input
                     type={field.type || "text"}
                     value={formData[field.key] || ""}
@@ -152,13 +170,13 @@ export default function DynamicFormModal({ title, fields, onClose, onSave }) {
                   />
                 )}
 
-                {/* 🔸 Mensaje aclaratorio debajo del campo Edad */}
                 {field.key === "edad" && (
                   <small className={styles.hintText}>
                     ℹ️ Se calcula automáticamente al seleccionar la fecha de nacimiento
                   </small>
                 )}
 
+                {/* 🔸 Mostrar error en tiempo real */}
                 {errors[field.key] && (
                   <p className={styles.error}>{errors[field.key]}</p>
                 )}

@@ -1,4 +1,3 @@
-/* nursehome.module.css */
 :root {
   --sidebar-color: #63b2a5;
   --sidebar-hover: #4b8e83;
@@ -7,26 +6,74 @@
   --border: #d1d5db;
   --font: "Segoe UI", sans-serif;
 }
-
-/* ====== ESTRUCTURA GENERAL ====== */
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  background: var(--white);
+/* APLICA LA MISMA FUENTE A TODO EL CONTENIDO */
+.contentArea,
+.container,
+.mainContent,
+.header,
+.actionRow,
+.tableContainer,
+.citasTable,
+.patientBox,
+.scheduleCard,
+.searchSection,
+.appointments,
+p,
+span,
+td,
+th,
+input,
+button,
+textarea,
+select {
   font-family: var(--font);
-  padding: 1.5rem 2rem;
+}
+
+/* ====== LAYOUT: SIDEBAR + CONTENIDO ======
+   Usamos grid: columna fija para sidebar (270px) y 1fr para contenido.
+   De esta forma el contenido puede centrarse dentro de su columna sin
+   offsets extra que rompan el centrado. */
+/* ====== LAYOUT: SIDEBAR + CONTENIDO ====== */
+.mainLayout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8f9fa;
   box-sizing: border-box;
 }
 
+
+/* ====== ÁREA DE CONTENIDO ====== */
+.contentArea {
+  flex: 1;
+  width: 100%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+
+/* ====== CONTENEDOR CENTRAL ====== */
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+
+/* ====== HEADER ====== */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1100px;
 }
 
 .logo {
@@ -50,12 +97,10 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
-.navButton:hover {
-  color: var(--text-dark);
-}
+.navButton:hover { color: var(--text-dark); }
 
 .userBox {
   display: flex;
@@ -67,7 +112,6 @@
 
 .divider {
   width: 100%;
-  max-width: 1100px;
   border: none;
   border-bottom: 1px solid var(--border);
   margin: 0.8rem 0 2rem;
@@ -76,10 +120,11 @@
 /* ====== CONTENIDO PRINCIPAL ====== */
 .mainContent {
   width: 100%;
-  max-width: 900px;
+  max-width: 900px;        /* igual que DoctorHome */
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-start; /* los items internos (cards) alineados a la izquierda dentro del bloque centrado */
+  gap: 1.25rem;
 }
 
 /* ====== BUSCADOR Y BOTONES ====== */
@@ -89,14 +134,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 2rem;
 }
 
 .searchSection {
   display: flex;
   align-items: center;
   flex: 1;
-  gap: 0.3rem;
+  gap: 0.5rem;
 }
 
 .searchInput {
@@ -108,10 +152,7 @@
   border-radius: 8px;
   font-size: 1rem;
 }
-
-.searchInput::placeholder {
-  color: #dbe9e6;
-}
+.searchInput::placeholder { color: #dbe9e6; }
 
 .searchButton {
   background-color: var(--sidebar-color);
@@ -119,15 +160,10 @@
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease;
   color: white;
 }
+.searchButton:hover { background-color: var(--sidebar-hover); }
 
-.searchButton:hover {
-  background-color: var(--sidebar-hover);
-}
-
-/* ====== BOTÓN AGENDAR ====== */
 .scheduleButton {
   background-color: var(--sidebar-color);
   color: #fff;
@@ -139,18 +175,11 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  transition: all 0.3s ease;
 }
+.scheduleButton:hover { background-color: var(--sidebar-hover); }
 
-.scheduleButton:hover {
-  background-color: var(--sidebar-hover);
-}
-
-/* ====== CITAS ====== */
-.appointments {
-  width: 100%;
-  text-align: left;
-}
+/* ====== CITAS, PACIENTE, HISTORIAL (pequeñas cards) ====== */
+.appointments { width: 100%; text-align: left; }
 
 .appointments p {
   font-size: 1rem;
@@ -159,21 +188,9 @@
   font-weight: 600;
 }
 
-.appointmentBox {
-  width: 100%;
-  height: 150px;
-  border: 1px solid var(--text-dark);
-  border-radius: 4px;
-  background: #fff;
-}
+.appointmentBox { width: 100%; height: 150px; border: 1px solid var(--text-dark); border-radius: 4px; background: #fff; }
 
-/* ====== LISTA DE CITAS ====== */
-.appointmentList {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 1rem;
-}
+.appointmentList { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
 
 .appointmentItem {
   border: 1px solid var(--text-dark);
@@ -183,106 +200,28 @@
   line-height: 1.5;
 }
 
-/* ====== PACIENTE ENCONTRADO ====== */
+/* Paciente encontrado con card individual */
 .patientBox {
   width: 100%;
   border: 1px solid var(--text-dark);
-  border-radius: 4px;
+  border-radius: 8px;
   background: #fff;
   margin-top: 1rem;
-  padding-bottom: 1rem;
+  overflow: hidden;
 }
 
 .patientHeader {
   background-color: var(--sidebar-color);
   color: white;
   padding: 0.6rem 1rem;
-  border-radius: 4px 4px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+.patientName { font-weight: 600; font-size: 1rem; }
+.patientDetails { padding: 1rem; line-height: 1.5; color: var(--text-dark); position: relative; }
 
-.patientName {
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.profileButton {
-  background-color: var(--text-dark);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.profileButton:hover {
-  background-color: var(--sidebar-hover);
-}
-
-.patientDetails {
-  padding: 1rem;
-  line-height: 1.5;
-  color: var(--text-dark);
-  position: relative;
-}
-
-.medButton {
-  background-color: var(--text-dark);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-  transition: all 0.3s ease;
-}
-
-.medButton:hover {
-  background-color: var(--sidebar-hover);
-}
-
-.showMoreContainer {
-  width: 100%;
-  text-align: right;
-  margin-top: 1rem;
-}
-
-.showMoreButton {
-  background-color: var(--sidebar-color);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.showMoreButton:hover {
-  background-color: var(--sidebar-hover);
-}
-
-.historyList {
-  width: 100%;
-  margin-top: 1rem;
-}
-
-.historyItem {
-  border: 1px solid var(--text-dark);
-  border-radius: 4px;
-  padding: 0.8rem 1rem;
-  margin-bottom: 0.6rem;
-  background: #fff;
-}
-
-/* ====== CARD SUPERPUESTA PERFIL ====== */
+/* ====== OVERLAYS (perfil / agendar) ====== */
 .profileOverlay {
   position: fixed;
   inset: 0;
@@ -291,32 +230,60 @@
   justify-content: center;
   align-items: center;
   z-index: 999;
-  animation: fadeIn 0.3s ease-in-out;
 }
-
-.profileCard {
+.profileCard, .scheduleCard {
   background: #ffffff;
   border-radius: 16px;
   width: 90%;
   max-width: 600px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
   overflow: hidden;
-  animation: slideUp 0.35s ease-out;
 }
 
+/* ====== ANIMACIONES ====== */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1024px) {
+  .mainLayout { grid-template-columns: 240px 1fr; }
+  .contentArea { padding: 1.5rem; }
+}
+
+@media (max-width: 768px) {
+  .mainLayout { display: block; } /* coloca sidebar arriba (o tu SidebarMenu debe manejar mobile) */
+  .contentArea { padding: 1rem; margin-top: 4rem; }
+  .container { width: 95%; padding: 1rem; }
+}
+/* ====== MODAL: AGENDAR CITA ====== */
+
+.scheduleCard {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 550px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease, slideUp 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font);
+}
+
+/* === CABECERA DEL MODAL === */
 .profileCardHeader {
-  background: linear-gradient(135deg, var(--sidebar-color), var(--sidebar-hover));
+  background-color: var(--sidebar-color);
   color: #fff;
-  padding: 1.2rem 1.5rem;
+  padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .profileCardHeader h2 {
-  margin: 0;
   font-size: 1.4rem;
-  font-weight: 700;
+  font-weight: 600;
+  margin: 0;
 }
 
 .closeProfileCard {
@@ -324,44 +291,24 @@
   border: none;
   color: #fff;
   cursor: pointer;
+  font-size: 1.5rem;
   transition: transform 0.2s ease;
 }
 
 .closeProfileCard:hover {
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
-.profileCardBody {
-  padding: 1.5rem;
-  color: var(--text-dark);
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-.profileInfoRow {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-
-/* ====== CARD AGENDAR ====== */
-.scheduleCard {
-  background: #ffffff;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  animation: slideUp 0.35s ease-out;
-}
-
+/* === CUERPO DEL MODAL === */
 .scheduleBody {
   padding: 1.5rem;
-  color: var(--text-dark);
-  font-size: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.75rem;
+  background-color: #f9fafb;
+  color: var(--text-dark);
+  overflow-y: auto;
+  max-height: 65vh;
 }
 
 .scheduleBody label {
@@ -369,95 +316,364 @@
   margin-top: 0.5rem;
 }
 
-.inputField {
+.inputField,
+textarea.inputField,
+select.inputField {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 0.6rem;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  background-color: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.inputField:focus,
+textarea.inputField:focus,
+select.inputField:focus {
   outline: none;
-}
-
-.inputField:focus {
   border-color: var(--sidebar-color);
-  box-shadow: 0 0 4px rgba(99, 178, 165, 0.5);
+  box-shadow: 0 0 0 2px rgba(99, 178, 165, 0.2);
 }
 
+/* === RESULTADOS DE PACIENTE === */
+.resultList {
+  border: 1px solid var(--border);
+  background-color: #ffffff;
+  border-radius: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.resultItem {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.resultItem:last-child {
+  border-bottom: none;
+}
+
+.resultItem:hover {
+  background-color: var(--sidebar-color);
+  color: #fff;
+}
+
+/* === PACIENTE SELECCIONADO === */
+.selectedBox {
+  background: #ffffff;
+  border: 1px solid var(--sidebar-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  line-height: 1.5;
+  animation: slideUp 0.4s ease;
+}
+
+.selectedBox h4 {
+  color: var(--sidebar-color);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+/* === BOTONES DEL MODAL === */
 .scheduleFooter {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  background-color: #f8fafc;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cancelButton,
+.confirmButton {
+  padding: 0.7rem 1.3rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
 }
 
 .cancelButton {
-  background-color: #e5e7eb;
-  color: #111827;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  background: #e5e7eb;
+  color: #333;
 }
 
 .cancelButton:hover {
-  background-color: #d1d5db;
+  background: #d1d5db;
 }
 
 .confirmButton {
   background-color: var(--sidebar-color);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1.2rem;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  color: white;
 }
 
 .confirmButton:hover {
   background-color: var(--sidebar-hover);
+  box-shadow: 0 4px 10px rgba(75, 142, 131, 0.3);
 }
 
-/* ====== ANIMACIONES ====== */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* === SCROLL SUAVE DENTRO DEL MODAL === */
+.scheduleBody::-webkit-scrollbar {
+  width: 8px;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.scheduleBody::-webkit-scrollbar-thumb {
+  background: var(--sidebar-color);
+  border-radius: 10px;
 }
 
-/* ====== RESPONSIVE ====== */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
+.scheduleBody::-webkit-scrollbar-thumb:hover {
+  background: var(--sidebar-hover);
+}
+/* GRID de 2 columnas para el formulario */
+.formGridTwoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+/* === TEXTAREA GRANDE PARA MOTIVO === */
+.bigTextarea {
+  width: 95%;
+  min-height: 80px;         /* 🔥 más grande */
+  padding: 0.9rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 1rem;
+  resize: vertical;           /* permite ajustar manualmente */
+  background: #fff;
+  color: var(--text-dark);
+  line-height: 1.5;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
+}
 
-  .navLinks {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+.bigTextarea:focus {
+  outline: none;
+  border-color: var(--sidebar-color);
+  box-shadow: 0 0 0 3px rgba(99, 178, 165, 0.25);
+}
+/* === BUSCADOR TIPO PASTILLA COMO EN LA IMAGEN === */
+.searchBarWrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color: var(--sidebar-color);
+  border-radius: 12px;
+  padding: 0.4rem 0.8rem;
+  margin-bottom: 1rem;
+}
 
-  .searchRow {
-    flex-direction: column;
-    align-items: stretch;
-  }
+.searchBar {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.95rem;
+  padding: 0.6rem;
+  outline: none;
+}
 
-  .scheduleButton {
-    width: 100%;
-  }
+.searchBar::placeholder {
+  color: #dbe9e6;
+}
 
-  .profileCardBody {
-    font-size: 0.95rem;
-  }
+.searchIconBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+}
 
-  .scheduleCard {
-    width: 95%;
-  }
+.searchIconBtn .material-icons {
+  font-size: 1.5rem;
+  color: #000000;
+}
+
+/* === TABLA DE CITAS COMO EN LA IMAGEN === */
+.tableContainer {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--text-dark);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.citasTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.citasTable th {
+  padding: 0.7rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #000000;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+}
+
+.citasTable td {
+  padding: 0.7rem;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.citasTable tr:last-child td {
+  border-bottom: none;
+}
+
+/* Fila input con icono en el modal */
+.inputIconRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.inputIconRow .material-icons {
+  color: var(--sidebar-color);
+}
+.actionRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.searchBarWrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color: var(--sidebar-color);
+  border-radius: 12px;
+  padding: 0.4rem 0.8rem;
+}
+
+.searchBar {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.95rem;
+  padding: 0.6rem;
+  outline: none;
+}
+
+.searchBar::placeholder {
+  color: #dbe9e6;
+}
+
+.searchIconBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+}
+
+.searchIconBtn .material-icons {
+  font-size: 1.5rem;
+  color: #000000;
+}
+
+.tableContainer {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--text-dark);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.citasTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.citasTable th {
+  padding: 0.7rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #000000;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+}
+
+.citasTable td {
+  padding: 0.7rem;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.citasTable tr:last-child td {
+  border-bottom: none;
+}
+
+.inputIconRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.inputIconRow .material-icons {
+  color: var(--sidebar-color);
+}
+
+.scheduleButtonLarge {
+  background-color: var(--sidebar-color);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  white-space: nowrap;
+  height: 46px;
+}
+
+.scheduleButtonLarge:hover {
+  background-color: var(--sidebar-hover);
+}
+.clockBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background: linear-gradient(135deg, var(--sidebar-color), var(--sidebar-hover));
+  padding: 0.8rem 1.5rem;
+  border-radius: 14px;
+  color: white;
+}
+
+.clockRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.time {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.date {
+  font-size: 0.95rem;
+  opacity: 0.8;
 }

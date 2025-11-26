@@ -1,3 +1,4 @@
+/*tipoColaborador.ts */
 import api from "./index";
 
 export interface TipoColaborador {
