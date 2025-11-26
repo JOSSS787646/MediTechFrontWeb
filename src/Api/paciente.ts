@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://localhost:5239/api/Paciente";
+const API_URL = "https://localhost:44389/api/Paciente";
 
 // ✅ Obtener todos los pacientes
 export const getPacientes = async () => {

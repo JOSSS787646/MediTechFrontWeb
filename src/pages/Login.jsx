@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login as loginApi } from "../api/auth";
 import styles from "../styles/Login.module.css";
+import jwtDecode from "jwt-decode"; // <-- IMPORTANTE
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -18,39 +19,48 @@ export default function Login() {
       const response = await loginApi(username, password);
       console.log("🟢 Usuario autenticado:", response);
 
-      // ⚠️ Backend devuelve minúsculas: exito, token, tipoColaborador
-     if (response.exito && response.token) {
-  // Guardamos un objeto personalizado con nombreUsuario y rol
-  const usuarioData = {
-    nombreUsuario: username,
-    tipoColaborador: response.tipoColaborador,
-    token: response.token,
-  };
+      if (response.exito && response.token) {
+        // ============================
+        // 📌 Decodificar token JWT
+        // ============================
+        const decoded = jwtDecode(response.token);
+        console.log("🔍 Token decodificado:", decoded);
 
-  localStorage.setItem("usuario", JSON.stringify(usuarioData));
+        // Obtener idColaborador desde el token
+        const idColaborador = decoded.idColaborador; // <-- asegúrate que tu backend lo envíe
 
-  console.log("👤 Usuario guardado en localStorage:", usuarioData);
+        // ============================
+        // 📌 Guardar usuario completo
+        // ============================
+        const usuarioData = {
+          nombreUsuario: username,
+          tipoColaborador: response.tipoColaborador,
+          token: response.token,
+          idColaborador, // <-- aquí se guarda
+        };
 
-        // Normalizamos el texto
+        localStorage.setItem("usuario", JSON.stringify(usuarioData));
+        console.log("👤 Usuario guardado en localStorage:", usuarioData);
+
+        // Normalizar tipo
         const tipo = response.tipoColaborador?.toString().trim().toLowerCase();
-
         console.log("🔎 Tipo de colaborador detectado:", tipo);
 
-        // ✅ Redirección flexible según tipo
+        // Redirecciones
         if (tipo.includes("médico") || tipo.includes("medico") || tipo === "1") {
           navigate("/home-doctor");
-        } else if (tipo.includes("enfermera") || tipo === "2") {
+        } 
+        else if (tipo.includes("enfermera") || tipo === "2") {
           navigate("/home-nurse");
-        } else if (
-          tipo.includes("admin") ||
-          tipo.includes("administrador") ||
-          tipo === "3"
-        ) {
+        } 
+        else if (tipo.includes("admin") || tipo.includes("administrador") || tipo === "3") {
           navigate("/home-administrator");
-        } else {
+        } 
+        else {
           console.warn("⚠️ Tipo de colaborador no reconocido:", tipo);
           navigate("/login");
         }
+
       } else {
         setTimeout(() => {
           setLoading(false);
@@ -70,10 +80,8 @@ export default function Login() {
 
   return (
     <div className={`${styles.container} ${loading ? styles.blur : ""}`}>
-      {/* Línea superior */}
       <div className={styles.topLine}></div>
 
-      {/* Columna izquierda */}
       <div className={styles.left}>
         <img src="/logo.png" alt="Logo" className={styles.logo} />
         <h1 className={styles.title}>Bienvenido</h1>
@@ -82,7 +90,6 @@ export default function Login() {
         </p>
       </div>
 
-      {/* Columna derecha */}
       <div className={styles.right}>
         <div className={styles.card}>
           <h2 className={styles.cardTitle}>Inicio de sesión</h2>
@@ -109,9 +116,7 @@ export default function Login() {
                 placeholder="Ingresa tu contraseña"
                 required
               />
-              <a href="#" className={styles.forgot}>
-                Olvidé contraseña
-              </a>
+              <a href="#" className={styles.forgot}>Olvidé contraseña</a>
             </div>
 
             <button type="submit" className={styles.button} disabled={loading}>
@@ -121,27 +126,20 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Línea inferior */}
       <div className={styles.bottomLine}></div>
 
-      {/* Spinner */}
       {loading && (
         <div className={styles.spinnerOverlay}>
           <div className={styles.spinner}></div>
         </div>
       )}
 
-      {/* Modal de error */}
       {showModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <h3 className={styles.modalTitle}>MediTech informa</h3>
-            <p className={styles.modalMessage}>
-              Usuario o contraseña incorrectos
-            </p>
-            <button className={styles.modalButton} onClick={closeModal}>
-              Cerrar
-            </button>
+            <p className={styles.modalMessage}>Usuario o contraseña incorrectos</p>
+            <button className={styles.modalButton} onClick={closeModal}>Cerrar</button>
           </div>
         </div>
       )}
