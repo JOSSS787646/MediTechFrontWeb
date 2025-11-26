@@ -5,8 +5,21 @@ import styles from "../../styles/pages/DoctorCitasView.module.css";
 import logo from "../../assets/logoLargo.png";
 import { SidebarDoctor } from "../../Config/sidebars";
 
+// 🔹 Servicios
+import { getEspecialidades } from "../../Api/especialidad";
+import { getColaboradoresByEspecialidad } from "../../Api/colaborator";
+import { getCedes } from "../../Api/cede";
+
 export default function DoctorCitasView() {
   const [usuario, setUsuario] = useState(null);
+
+  // 🔹 Listas dinámicas
+  const [especialidades, setEspecialidades] = useState([]);
+  const [medicos, setMedicos] = useState([]);
+  const [cedes, setCedes] = useState([]);
+
+  const [loadingEspecialidades, setLoadingEspecialidades] = useState(true);
+  const [loadingMedicos, setLoadingMedicos] = useState(false);
 
   const [formData, setFormData] = useState({
     curp: "",
@@ -18,14 +31,64 @@ export default function DoctorCitasView() {
     motivo: "",
   });
 
+  // 🔹 Cargar datos del usuario
   useEffect(() => {
     const userData = localStorage.getItem("usuario");
     if (userData) setUsuario(JSON.parse(userData));
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // 🔹 Cargar especialidades y cedes al iniciar
+  useEffect(() => {
+    loadEspecialidades();
+    loadCedes();
+  }, []);
+
+  const loadEspecialidades = async () => {
+    try {
+      const data = await getEspecialidades();
+      setEspecialidades(data);
+    } catch (err) {
+      console.error("Error cargando especialidades:", err);
+    } finally {
+      setLoadingEspecialidades(false);
+    }
   };
+
+  const loadCedes = async () => {
+    try {
+      const data = await getCedes();
+      setCedes(data);
+    } catch (err) {
+      console.error("Error cargando cedes:", err);
+    }
+  };
+
+  // 🔹 Cargar médicos cuando cambia la especialidad
+  useEffect(() => {
+    if (!formData.especialidad) {
+      setMedicos([]);
+      return;
+    }
+
+    const loadMedicos = async () => {
+      setLoadingMedicos(true);
+      try {
+        const data = await getColaboradoresByEspecialidad(formData.especialidad);
+        setMedicos(data);
+      } catch (err) {
+        console.error("Error cargando médicos:", err);
+      } finally {
+        setLoadingMedicos(false);
+      }
+    };
+
+    loadMedicos();
+  }, [formData.especialidad]);
+
+  
+  // 🔹 Form handlers
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSave = () => {
     alert("Cita registrada:\n" + JSON.stringify(formData, null, 2));
@@ -37,11 +100,9 @@ export default function DoctorCitasView() {
 
       <main className={styles.contentArea}>
         <div className={styles.container}>
-
           {/* HEADER */}
           <header className={styles.header}>
             <img src={logo} alt="Logo" className={styles.logo} />
-
             <div className={styles.userBox}>
               <span className="material-icons">account_circle</span>
               {usuario?.nombreUsuario || "Doctor"}
@@ -49,13 +110,9 @@ export default function DoctorCitasView() {
           </header>
 
           <hr className={styles.divider} />
-
-          {/* TITULO */}
           <h2 className={styles.title}>Registrar nueva cita</h2>
 
-          {/* FORMULARIO ALINEADO IGUAL QUE CitasView */}
           <form className={styles.fullForm}>
-
             {/* CURP */}
             <div className={styles.inputGroupFull}>
               <label>CURP del paciente:</label>
@@ -78,9 +135,15 @@ export default function DoctorCitasView() {
                   onChange={handleChange}
                 >
                   <option value="">Seleccione</option>
-                  <option>Cardiología</option>
-                  <option>Medicina General</option>
-                  <option>Ginecología</option>
+
+                  {loadingEspecialidades && <option>Cargando...</option>}
+
+                  {!loadingEspecialidades &&
+                    especialidades.map((esp) => (
+                      <option key={esp.id} value={esp.id}>
+                        {esp.nombre}
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -90,10 +153,18 @@ export default function DoctorCitasView() {
                   name="medico"
                   value={formData.medico}
                   onChange={handleChange}
+                  disabled={!formData.especialidad}
                 >
                   <option value="">Seleccione</option>
-                  <option>Dr. Juan Pérez</option>
-                  <option>Dra. Sonia García</option>
+
+                  {loadingMedicos && <option>Cargando...</option>}
+
+                  {!loadingMedicos &&
+                    medicos.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.nombre} {m.apellidoPaterno}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
@@ -108,8 +179,12 @@ export default function DoctorCitasView() {
                   onChange={handleChange}
                 >
                   <option value="">Seleccione</option>
-                  <option>Unidad Norte</option>
-                  <option>Unidad Sur</option>
+
+                  {cedes.map((sede) => (
+                    <option key={sede.id} value={sede.id}>
+                      {sede.nombre}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -150,14 +225,12 @@ export default function DoctorCitasView() {
                 onChange={handleChange}
               ></textarea>
             </div>
-
           </form>
 
           {/* BOTÓN FIJO */}
           <button className={styles.fixedSaveBtn} onClick={handleSave}>
             Registrar cita
           </button>
-
         </div>
       </main>
     </div>
