@@ -23,6 +23,7 @@ export default function Login() {
 
       if (response.exito && response.token) {
         const usuarioData = {
+          id: response.id,              // 👈 GUARDAMOS EL ID
           nombreUsuario: username,
           tipoColaborador: response.tipoColaborador,
           token: response.token,
@@ -41,13 +42,13 @@ export default function Login() {
           tipo === "1"
         ) {
           navigate("/home-doctor");
-        } 
+        }
         else if (tipo.includes("enfermera") || tipo === "2") {
           navigate("/home-nurse");
-        } 
+        }
         else if (tipo.includes("admin") || tipo.includes("administrador") || tipo === "3") {
           navigate("/home-administrator");
-        } 
+        }
         else {
           console.warn("⚠️ Tipo de colaborador no reconocido:", tipo);
           navigate("/login");
@@ -197,9 +198,8 @@ export default function Login() {
                   </div>
                   <input
                     type="text"
-                    className={`${styles.input} ${
-                      focusedInput === "username" ? styles.inputFocused : ""
-                    }`}
+                    className={`${styles.input} ${focusedInput === "username" ? styles.inputFocused : ""
+                      }`}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     onFocus={() => setFocusedInput("username")}
@@ -235,9 +235,8 @@ export default function Login() {
                   </div>
                   <input
                     type="password"
-                    className={`${styles.input} ${
-                      focusedInput === "password" ? styles.inputFocused : ""
-                    }`}
+                    className={`${styles.input} ${focusedInput === "password" ? styles.inputFocused : ""
+                      }`}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setFocusedInput("password")}

@@ -677,3 +677,79 @@ textarea,
 select {
   font-family: var(--font);
 }
+
+
+/* ============================
+      TABLA DE CITAS
+============================ */
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.citasTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: var(--font);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.citasTable thead {
+  background-color: var(--sidebar-color);
+  color: white;
+}
+
+.citasTable th {
+  padding: 0.9rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.citasTable td {
+  padding: 0.85rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.93rem;
+  color: var(--text-dark);
+}
+
+/* Zebra */
+.citasTable tbody tr:nth-child(even) {
+  background-color: #f6f8f7;
+}
+
+/* Hover */
+.citasTable tbody tr:hover {
+  background: #e8f3f1;
+  transition: 0.2s ease;
+}
+
+/* Mensaje vacío */
+.emptyRow {
+  text-align: center;
+  padding: 1.4rem !important;
+  font-weight: 600;
+  color: #888;
+}
+
+/* Botón atender */
+.btnAtender {
+  background: var(--sidebar-color);
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: background 0.2s ease;
+}
+
+.btnAtender:hover {
+  background: var(--sidebar-hover);
+}
