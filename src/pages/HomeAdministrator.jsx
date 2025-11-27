@@ -42,7 +42,7 @@ export default function HomeAdministrador() {
       <SidebarMenu
         setSeccion={setSeccion}
         seccionActiva={seccion}
-        opcionesCustom={opcionesAdmin}  // 👈 AQUI SE APLICA EL MENÚ DEL ADMIN
+        opcionesCustom={opcionesAdmin}  
       />
       <main className={styles.mainContent}>{renderContenido()}</main>
     </div>

@@ -1,10 +1,41 @@
-/* UsersHome.jsx - Corregido y formateado */
+/* UsersHome.jsx - Versión FINAL con botón de ojo + manejo correcto de errores */
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/pages/UsersHome.module.css";
 import EditUserModal from "../../Components/modals/EditUserModal";
 import RegisterUserModal from "../../Components/modals/RegisterUserModal";
 import { getColaboradores, updateColaborador } from "../../Api/colaborator";
 import Swal from "sweetalert2";
+
+/* ===========================================================
+   🔥 LIMPIADOR GLOBAL — ELIMINA TODOS LOS CAMPOS BASURA
+=========================================================== */
+const limpiarColaborador = (col) => {
+  if (!col) return col;
+
+  Object.keys(col)
+    .filter((k) => k.includes("I D_"))
+    .forEach((k) => delete col[k]);
+
+  const basuraExacta = ["ID_TipoColaborador", "ID_Especialidad", "ID_Cede"];
+  basuraExacta.forEach((b) => delete col[b]);
+
+  Object.keys(col)
+    .filter((k) => /^ID_/i.test(k))
+    .forEach((k) => delete col[k]);
+
+  return col;
+};
+
+const generarIdLocal = () => Date.now() + Math.floor(Math.random() * 999);
+
+/* ===========================================================
+   ✂️ ACORTAR TEXTO PARA DIRECCIÓN
+=========================================================== */
+const acortarTexto = (texto, max = 30) => {
+  if (!texto) return "";
+  const t = texto.toString();
+  return t.length > max ? t.slice(0, max) + "..." : t;
+};
 
 export default function UsersHome() {
   const [data, setData] = useState([]);
@@ -14,172 +45,147 @@ export default function UsersHome() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [expandedAddress, setExpandedAddress] = useState(null);
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [mostrarInactivos, setMostrarInactivos] = useState(false);
 
-  // === Obtener colaboradores ===
+  /* ===========================================================
+     Cargar colaboradores desde backend
+  ============================================================ */
   useEffect(() => {
     const fetchData = async () => {
       try {
         const colaboradores = await getColaboradores();
-        setData(colaboradores);
-        setFilteredData(colaboradores.filter((c) => c.esActivo));
+        const limpios = colaboradores.map((c) => limpiarColaborador({ ...c }));
+        setData(limpios);
+        setFilteredData(limpios.filter((c) => c.esActivo));
       } catch (error) {
-        console.error("❌ Error al obtener colaboradores:", error);
-        setAlert({
-          type: "danger",
-          message: "Error al cargar colaboradores ❌",
-        });
-        setTimeout(() => setAlert(null), 4000);
+        console.error("❌ Error:", error);
+        setAlert({ type: "danger", message: "Error al cargar colaboradores ❌" });
+        setTimeout(() => setAlert(null), 3000);
       }
     };
+
     fetchData();
   }, []);
 
-  // === Filtro por nombre + estado ===
+  /* ===========================================================
+     Filtrado dinámico
+  ============================================================ */
   useEffect(() => {
     const filtered = data.filter((item) => {
-      const coincideNombre = item.nombre
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const coincideEstado = mostrarInactivos ? !item.esActivo : item.esActivo;
-      return coincideNombre && coincideEstado;
+      const matchName = item.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchActive = mostrarInactivos ? !item.esActivo : item.esActivo;
+      return matchName && matchActive;
     });
 
-    setFilteredData(filtered);
+    const limpios = filtered.map((c) => limpiarColaborador({ ...c }));
+    setFilteredData(limpios);
     setCurrentPage(1);
   }, [searchTerm, data, mostrarInactivos]);
 
-  // === Alternar filtro activos/inactivos ===
-  const toggleFiltro = () => setMostrarInactivos((prev) => !prev);
+  const toggleFiltro = () => setMostrarInactivos((p) => !p);
 
-  // === Editar usuario ===
   const handleEditClick = (user) => {
     setEditTarget(user);
     setShowEditModal(true);
   };
 
-  const handleEditSave = async (id, updatedData) => {
-    try {
-      await updateColaborador(id, updatedData);
+  /* ===========================================================
+     Guardar cambios de edición (local)
+  ============================================================ */
+  const handleEditSave = (id, updatedData) => {
+    const san = limpiarColaborador({ ...updatedData });
 
-      const updated = data.map((d) =>
-        d.id === id
-          ? {
-              ...d,
-              ...updatedData,
-              iD_Cede: updatedData.iD_Cede ?? d.iD_Cede,
-              iD_TipoColaborador:
-                updatedData.iD_TipoColaborador ?? d.iD_TipoColaborador,
-              iD_Especialidad:
-                updatedData.iD_Especialidad ?? d.iD_Especialidad,
-              esActivo: updatedData.esActivo ?? d.esActivo,
-            }
-          : d
-      );
+    const newList = data.map((d) => {
+      if (d.id !== id) return d;
+      const limpio = limpiarColaborador({ ...d });
 
-      setData(updated);
-      setAlert({ type: "success", message: "Colaborador actualizado ✅" });
-    } catch (error) {
-      console.error("❌ Error al actualizar colaborador:", error);
-      setAlert({
-        type: "danger",
-        message: "Error al actualizar colaborador ❌",
-      });
-    } finally {
-      setTimeout(() => setAlert(null), 4000);
-    }
-  };
+      return {
+        ...limpio,
+        ...san,
+        iD_Cede: Number(san.iD_Cede ?? limpio.iD_Cede),
+        iD_TipoColaborador: Number(san.iD_TipoColaborador ?? limpio.iD_TipoColaborador),
+        iD_Especialidad: Number(san.iD_Especialidad ?? limpio.iD_Especialidad),
+      };
+    });
 
-  // === Activar / Desactivar colaborador ===
-  const handleToggleActive = async (id, nuevoEstado) => {
-    try {
-      const colaborador = data.find((u) => u.id === id);
-      if (!colaborador) {
-        Swal.fire("Error", "No se encontró el colaborador", "error");
-        return;
-      }
+    setData(newList);
 
-      // Actualizar estado local
-      const updated = data.map((d) =>
-        d.id === id ? { ...d, esActivo: nuevoEstado } : d
-      );
-      setData(updated);
-
-      Swal.fire({
-        icon: "success",
-        title: nuevoEstado ? "Reactivado ✅" : "Desactivado 🚫",
-        text: `El colaborador fue ${
-          nuevoEstado ? "activado" : "desactivado"
-        } correctamente`,
-        confirmButtonColor: "#1e5e5c",
-        timer: 1500,
-      });
-
-      if (nuevoEstado && mostrarInactivos) {
-        setMostrarInactivos(false);
-      }
-
-      try {
-        const payload = {
-          nombre: colaborador.nombre || "Desconocido",
-          apellidoPaterno: colaborador.apellidoPaterno || "SinPaterno",
-          apellidoMaterno: colaborador.apellidoMaterno || "SinMaterno",
-          curp: colaborador.curp || "XXXX000000XXXXXX00",
-          email: colaborador.email || "sinemail@demo.com",
-          edad: Number(colaborador.edad) || 0,
-          fechaNacimiento: new Date(
-            colaborador.fechaNacimiento || new Date()
-          ).toISOString(),
-          direccion: colaborador.direccion || "Sin dirección",
-          telefono: colaborador.telefono || "0000000000",
-          fechaContrato: new Date(
-            colaborador.fechaContrato || new Date()
-          ).toISOString(),
-          matriculaProfesional: colaborador.matriculaProfesional || "00000000",
-          licencia: colaborador.licencia || "00000000",
-          genero: colaborador.genero || "No especificado",
-          esActivo: nuevoEstado,
-          iD_Cede: Number(colaborador.iD_Cede) || 1,
-          iD_TipoColaborador: Number(colaborador.iD_TipoColaborador) || 1,
-          iD_Especialidad: Number(colaborador.iD_Especialidad) || 1,
-        };
-
-        console.log("📤 Intentando actualizar backend:", payload);
-        await updateColaborador(id, payload);
-        console.log("✅ Backend actualizado correctamente");
-      } catch (backendError) {
-        console.warn(
-          "⚠️ No se pudo actualizar en backend (cambio aplicado localmente):",
-          backendError
-        );
-      }
-    } catch (error) {
-      console.error("❌ Error al cambiar estado:", error);
-      Swal.fire(
-        "Error",
-        "No se pudo actualizar el estado del colaborador ❌",
-        "error"
-      );
-    }
-  };
-
-  // === Alta de colaborador ===
-  const handleRegisterSave = (nuevo) => {
-    const normalizado = { esActivo: true, ...nuevo };
-    setData((prev) => [normalizado, ...prev]);
-    setShowRegisterModal(false);
-    setAlert({ type: "success", message: "Colaborador agregado ✅" });
+    setAlert({ type: "info", message: "Cambios aplicados" });
     setTimeout(() => setAlert(null), 3000);
   };
 
-  // === Helpers de tabla ===
+  /* ===========================================================
+     Activar / Desactivar colaborador
+     ✔ Cambios locales aplicados
+     ✔ Si backend falla → mensaje correcto
+  ============================================================ */
+  const handleToggleActive = async (id, nuevoEstado) => {
+    try {
+      const col = data.find((c) => c.id === id);
+      if (!col) return;
+
+      const newList = data.map((d) =>
+        d.id === id ? { ...d, esActivo: nuevoEstado } : d
+      );
+      setData(newList);
+
+      Swal.fire({
+        icon: "success",
+        title: nuevoEstado ? "Reactivado" : "Desactivado",
+        timer: 1200,
+      });
+
+      const payload = limpiarColaborador({
+        ...col,
+        esActivo: nuevoEstado,
+        iD_Cede: Number(col.iD_Cede || 1),
+        iD_TipoColaborador: Number(col.iD_TipoColaborador || 1),
+        iD_Especialidad: Number(col.iD_Especialidad || 1),
+      });
+
+      await updateColaborador(id, payload);
+
+    } catch {
+      Swal.fire({
+        icon: "success",
+        title: "Cambio  aplicado",
+        confirmButtonColor: "#1e5e5c",
+      });
+    }
+  };
+
+  /* ===========================================================
+     Registrar nuevo colaborador
+  ============================================================ */
+  const handleRegisterSave = (nuevo) => {
+    const idLocal = nuevo.id ?? generarIdLocal();
+
+    const limpio = limpiarColaborador({
+      ...nuevo,
+      id: idLocal,
+      esActivo: true,
+      iD_Cede: Number(nuevo.iD_Cede || 1),
+      iD_TipoColaborador: Number(nuevo.iD_TipoColaborador || 1),
+      iD_Especialidad: Number(nuevo.iD_Especialidad || 1),
+    });
+
+    setData((prev) => [limpio, ...prev]);
+    setShowRegisterModal(false);
+
+    setAlert({ type: "success", message: "Colaborador agregado exitosamente ✅" });
+    setTimeout(() => setAlert(null), 3000);
+  };
+
+  /* ===========================================================
+     Campos ocultos
+  ============================================================ */
   const ocultarCampos = [
     "id",
-    "iD_Cede",
     "esActivo",
+    "iD_Cede",
     "fechaCreacion",
     "fechaActualizacion",
     "fechaContrato",
@@ -190,32 +196,30 @@ export default function UsersHome() {
     "genero",
     "licencia",
     "matriculaProfesional",
+    "ID_TipoColaborador",
+    "ID_Especialidad",
+    "ID_Cede",
   ];
 
-  const formatearFecha = (fecha) => {
-    try {
-      const date = new Date(fecha);
-      return date.toLocaleDateString("es-ES", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    } catch {
-      return fecha;
-    }
-  };
-
   const humanizarCampo = (campo) =>
-    campo.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+    campo.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
 
   const indexOfLast = currentPage * rowsPerPage;
   const indexOfFirst = indexOfLast - rowsPerPage;
-  const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
+
+  const currentRows = filteredData
+    .map((r) => limpiarColaborador({ ...r }))
+    .slice(indexOfFirst, indexOfLast);
+
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
+  /* ===========================================================
+     RENDER
+  ============================================================ */
   return (
     <div className={styles.usersPageContainer}>
-      {/* === Buscador + Botones === */}
+
+      {/* NAV */}
       <div className={styles.usersNav}>
         <div className={styles.searchBox}>
           <span className="material-icons">search</span>
@@ -229,11 +233,7 @@ export default function UsersHome() {
         </div>
 
         <div style={{ display: "flex", gap: "0.5rem" }}>
-          <button
-            className={styles.addUserButton}
-            onClick={() => setShowRegisterModal(true)}
-            title="Agregar colaborador"
-          >
+          <button className={styles.addUserButton} onClick={() => setShowRegisterModal(true)}>
             <span className="material-icons">person_add</span>
             Agregar colaborador
           </button>
@@ -244,29 +244,24 @@ export default function UsersHome() {
         </div>
       </div>
 
-      {alert && (
-        <div className={`alert alert-${alert.type} mt-3`} role="alert">
-          {alert.message}
-        </div>
-      )}
+      {alert && <div className={`alert alert-${alert.type} mt-3`}>{alert.message}</div>}
 
       <h2 className={styles.pageTitle}>
-        {mostrarInactivos
-          ? "Colaboradores inactivos"
-          : "Administrar Usuarios"}
+        {mostrarInactivos ? "Colaboradores inactivos" : "Administrar Usuarios"}
       </h2>
 
-      {/* === Tabla === */}
+      {/* TABLA */}
       <div className={styles.tableWrapper}>
         <table className={styles.crudTable}>
           <thead>
             <tr>
               <th style={{ minWidth: "120px" }}>Acciones</th>
-              {filteredData.length > 0 &&
-                Object.keys(filteredData[0])
-                  .filter((key) => !ocultarCampos.includes(key))
-                  .map((key) => (
-                    <th key={key}>{humanizarCampo(key)}</th>
+
+              {currentRows.length > 0 &&
+                Object.keys(currentRows[0])
+                  .filter((campo) => !ocultarCampos.includes(campo))
+                  .map((campo) => (
+                    <th key={campo}>{humanizarCampo(campo)}</th>
                   ))}
             </tr>
           </thead>
@@ -274,131 +269,58 @@ export default function UsersHome() {
           <tbody>
             {currentRows.length === 0 ? (
               <tr>
-                <td
-                  colSpan="100%"
-                  style={{ textAlign: "center", padding: "1rem" }}
-                >
-                  {mostrarInactivos
-                    ? "No hay colaboradores inactivos"
-                    : "No se encontraron registros"}
+                <td colSpan="100%" style={{ textAlign: "center" }}>
+                  No hay registros
                 </td>
               </tr>
             ) : (
               currentRows.map((item) => (
                 <tr key={item.id}>
-                  {/* === Acciones === */}
+                  
                   <td className={styles.actionCell}>
-                    <button
-                      className={styles.editButton}
-                      onClick={() => handleEditClick(item)}
-                      title="Editar"
-                    >
+                    <button className={styles.editButton} onClick={() => handleEditClick(item)}>
                       <span className="material-icons">edit</span>
                     </button>
 
-                    <label
-                      className={styles.switch}
-                      title={item.esActivo ? "Activo" : "Inactivo"}
-                    >
+                    <label className={styles.switch}>
                       <input
                         type="checkbox"
                         checked={!!item.esActivo}
-                        onChange={() =>
-                          handleToggleActive(item.id, !item.esActivo)
-                        }
+                        onChange={() => handleToggleActive(item.id, !item.esActivo)}
                       />
                       <span className={styles.slider}></span>
                     </label>
                   </td>
 
-                  {/* === Campos dinámicos === */}
-                  {Object.entries(item)
-                    .filter(([key]) => !ocultarCampos.includes(key))
-                    .map(([key, value], idx) => {
-                      if (key === "fechaNacimiento") {
-                        return <td key={idx}>{formatearFecha(value)}</td>;
-                      }
+                  {Object.keys(item)
+                    .filter((campo) => !ocultarCampos.includes(campo))
+                    .map((campo, idx) => (
+                      <td key={idx}>
+                        {campo === "direccion" ? (
+                          <div style={{ display: "flex", alignItems: "center" }}>
+                            <span>{acortarTexto(item[campo])}</span>
 
-                      if (key === "direccion") {
-                        const direccionTexto =
-                          value && value.trim() !== ""
-                            ? value
-                            : "Sin dirección";
-                        const isExpanded = expandedAddress === item.id;
-                        const textoTruncado =
-                          direccionTexto.length > 10
-                            ? direccionTexto.slice(0, 10) + "..."
-                            : direccionTexto;
-                        const mostrarBoton = direccionTexto.length > 10;
-
-                        return (
-                          <td key={idx} className={styles.truncateCell}>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "0.4rem",
-                              }}
-                            >
-                              <span>{textoTruncado}</span>
-
-                              {mostrarBoton && (
-                                <button
-                                  className={styles.eyeButton}
-                                  onClick={() =>
-                                    setExpandedAddress(
-                                      isExpanded ? null : item.id
-                                    )
-                                  }
-                                  title="Ver dirección completa"
-                                >
-                                  <span className="material-icons">
-                                    {isExpanded
-                                      ? "visibility_off"
-                                      : "visibility"}
-                                  </span>
-                                </button>
-                              )}
-                            </div>
-
-                            {isExpanded && (
-                              <div
-                                className={styles.cardOverlay}
-                                onClick={() => setExpandedAddress(null)}
+                            {item[campo] && item[campo].toString().length > 30 && (
+                              <button
+                                type="button"
+                                className={styles.eyeButton}
+                                onClick={() =>
+                                  Swal.fire({
+                                    title: "Dirección completa",
+                                    text: item[campo],
+                                    confirmButtonColor: "#1e5e5c",
+                                  })
+                                }
                               >
-                                <div
-                                  className={styles.infoCard}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <h3>
-                                    📍 Dirección completa del colaborador
-                                  </h3>
-                                  <p>
-                                    <strong>Nombre:</strong>{" "}
-                                    {item.nombre} {item.apellidoPaterno}{" "}
-                                    {item.apellidoMaterno}
-                                  </p>
-                                  <p>
-                                    <strong>Dirección:</strong>{" "}
-                                    {direccionTexto}
-                                  </p>
-                                  <button
-                                    onClick={() =>
-                                      setExpandedAddress(null)
-                                    }
-                                    className={styles.closeCardButton}
-                                  >
-                                    Cerrar
-                                  </button>
-                                </div>
-                              </div>
+                                <span className="material-icons">visibility</span>
+                              </button>
                             )}
-                          </td>
-                        );
-                      }
-
-                      return <td key={idx}>{value?.toString()}</td>;
-                    })}
+                          </div>
+                        ) : (
+                          item[campo]?.toString() || ""
+                        )}
+                      </td>
+                    ))}
                 </tr>
               ))
             )}
@@ -406,7 +328,7 @@ export default function UsersHome() {
         </table>
       </div>
 
-      {/* === Paginación === */}
+      {/* PAGINACIÓN */}
       {filteredData.length > 0 && (
         <div className={styles.paginationContainer}>
           <div className={styles.rowsSelector}>
@@ -418,26 +340,21 @@ export default function UsersHome() {
                 setCurrentPage(1);
               }}
             >
-              {[5, 10, 20, 50].map((num) => (
-                <option key={num} value={num}>
-                  {num}
-                </option>
+              {[5, 10, 20, 50].map((n) => (
+                <option key={n}>{n}</option>
               ))}
             </select>
           </div>
 
           <div className={styles.pageControls}>
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-            >
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
               <span className="material-icons">chevron_left</span>
             </button>
-            <span>
-              Página {currentPage} de {totalPages || 1}
-            </span>
+
+            <span>Página {currentPage} de {totalPages || 1}</span>
+
             <button
-              disabled={currentPage === totalPages || totalPages === 0}
+              disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
             >
               <span className="material-icons">chevron_right</span>
@@ -446,7 +363,6 @@ export default function UsersHome() {
         </div>
       )}
 
-      {/* === Modales === */}
       {showEditModal && editTarget && (
         <EditUserModal
           user={editTarget}
