@@ -7,9 +7,29 @@ const API_URL = "https://localhost:44389/api/Cita";
 // =========================================================
 export const createCita = async (citaData: CreateCitaDto, token: string) => {
   try {
-    const response = await axios.post(`${API_URL}`, citaData, {
+    // ✅ Combinar fecha y hora en formato ISO
+    const fechaHoraCompleta = `${citaData.fechaCita}T${citaData.horaCita}:00`;
+
+    // ✅ IMPORTANTE: El backend NO espera un "command", 
+    // solo los datos directamente en el body
+    const payload = {
+      nombre: citaData.nombre,
+      apellidoPaterno: citaData.apellidoPaterno,
+      apellidoMaterno: citaData.apellidoMaterno,
+      curp: citaData.curp,
+      fechaNacimiento: citaData.fechaNacimiento, // "YYYY-MM-DD"
+      fechaCita: fechaHoraCompleta, // "YYYY-MM-DDTHH:mm:ss"
+      horaCita: citaData.horaCita, // "HH:mm"
+      especialidad: citaData.especialidad, // Nombre de la especialidad como string
+      medico: citaData.medico, // Nombre del médico como string
+      sede: citaData.sede, // Dirección de la sede como string
+      motivo: citaData.motivo
+    };
+
+    console.log("📤 Enviando payload:", JSON.stringify(payload, null, 2));
+
+    const response = await axios.post(`${API_URL}/publico`, payload, {
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -18,7 +38,8 @@ export const createCita = async (citaData: CreateCitaDto, token: string) => {
     return response.data;
 
   } catch (error: any) {
-    console.error("❌ Error al crear la cita:", error);
+    console.error("❌ Error al crear cita pública:", error);
+    console.error("❌ Detalles:", error.response?.data);
     throw error.response?.data || error.message;
   }
 };
@@ -37,7 +58,7 @@ export const getMisCitas = async (token: string) => {
     return response.data;
 
   } catch (error: any) {
-    console.error("❌ Error al obtener mis citas:", error);
+    console.error("❌ Error al obtener citas públicas:", error);
     throw error.response?.data || error.message;
   }
 };
@@ -56,7 +77,7 @@ export const getCitaById = async (id: number, token: string) => {
     return response.data;
 
   } catch (error: any) {
-    console.error(`❌ Error al obtener la cita con ID ${id}:`, error);
+    console.error(`❌ Error al obtener cita pública ID ${id}:`, error);
     throw error.response?.data || error.message;
   }
 };

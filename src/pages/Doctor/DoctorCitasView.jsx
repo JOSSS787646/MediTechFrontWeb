@@ -5,10 +5,11 @@ import styles from "../../styles/pages/DoctorCitasView.module.css";
 import logo from "../../assets/logoLargo.png";
 import { SidebarDoctor } from "../../Config/sidebars";
 
-// 🔹 Servicios
+// 🔹 Servicios externos
 import { getEspecialidades } from "../../Api/especialidad";
 import { getColaboradoresByEspecialidad } from "../../Api/colaborator";
 import { getCedes } from "../../Api/cede";
+import { createCita } from "../../Api/cita";
 
 export default function DoctorCitasView() {
   const [usuario, setUsuario] = useState(null);
@@ -18,26 +19,32 @@ export default function DoctorCitasView() {
   const [medicos, setMedicos] = useState([]);
   const [cedes, setCedes] = useState([]);
 
-  const [loadingEspecialidades, setLoadingEspecialidades] = useState(true);
-  const [loadingMedicos, setLoadingMedicos] = useState(false);
+  //const [loadingEspecialidades, setLoadingEspecialidades] = useState(true);
+  //const [loadingMedicos, setLoadingMedicos] = useState(false);
 
+  // 🔹 Datos del formulario (actualizado)
   const [formData, setFormData] = useState({
+    nombre: "",
+    apellidoPaterno: "",
+    apellidoMaterno: "",
     curp: "",
+    fechaNacimiento: "",
+    fechaCita: "",
+    horaCita: "",
     especialidad: "",
     medico: "",
     sede: "",
-    fecha: "",
-    hora: "",
     motivo: "",
   });
 
-  // 🔹 Cargar datos del usuario
+  // 🔹 Cargar usuario
   useEffect(() => {
     const userData = localStorage.getItem("usuario");
+    
     if (userData) setUsuario(JSON.parse(userData));
   }, []);
 
-  // 🔹 Cargar especialidades y cedes al iniciar
+  // 🔹 Cargar catálogos
   useEffect(() => {
     loadEspecialidades();
     loadCedes();
@@ -49,8 +56,6 @@ export default function DoctorCitasView() {
       setEspecialidades(data);
     } catch (err) {
       console.error("Error cargando especialidades:", err);
-    } finally {
-      setLoadingEspecialidades(false);
     }
   };
 
@@ -71,28 +76,108 @@ export default function DoctorCitasView() {
     }
 
     const loadMedicos = async () => {
-      setLoadingMedicos(true);
       try {
         const data = await getColaboradoresByEspecialidad(formData.especialidad);
         setMedicos(data);
       } catch (err) {
         console.error("Error cargando médicos:", err);
-      } finally {
-        setLoadingMedicos(false);
-      }
+      } 
+      
     };
 
     loadMedicos();
   }, [formData.especialidad]);
 
-  
-  // 🔹 Form handlers
+  // 🔹 Change handler
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSave = () => {
-    alert("Cita registrada:\n" + JSON.stringify(formData, null, 2));
-  };
+  // 🔹 Guardar cita real
+const handleSave = async () => {
+  try {
+    // ✅ Validaciones básicas
+    if (!formData.nombre || !formData.apellidoPaterno || !formData.apellidoMaterno) {
+      return alert("Por favor completa nombre completo");
+    }
+    if (!formData.curp || !formData.fechaNacimiento) {
+      return alert("Por favor completa CURP y fecha de nacimiento");
+    }
+    if (!formData.fechaCita || !formData.horaCita) {
+      return alert("Por favor seleccione fecha y hora de la cita");
+    }
+    if (!formData.especialidad || !formData.medico || !formData.sede) {
+      return alert("Por favor seleccione especialidad, médico y sede");
+    }
+    if (!formData.motivo) {
+      return alert("Por favor ingrese el motivo de la consulta");
+    }
+
+    // ✅ Obtener los nombres reales de los dropdowns
+    const especialidadSeleccionada = especialidades.find(
+      e => e.id === parseInt(formData.especialidad)
+    );
+    const medicoSeleccionado = medicos.find(
+      m => m.id === parseInt(formData.medico)
+    );
+    const sedeSeleccionada = cedes.find(
+      s => s.id === parseInt(formData.sede)
+    );
+
+    if (!especialidadSeleccionada || !medicoSeleccionado || !sedeSeleccionada) {
+      return alert("Error al obtener los datos seleccionados");
+    }
+
+    // ✅ Preparar datos para enviar
+    const citaData = {
+      nombre: formData.nombre.trim(),
+      apellidoPaterno: formData.apellidoPaterno.trim(),
+      apellidoMaterno: formData.apellidoMaterno.trim(),
+      curp: formData.curp.trim(),
+      fechaNacimiento: formData.fechaNacimiento, // "YYYY-MM-DD"
+      fechaCita: formData.fechaCita, // "YYYY-MM-DD"
+      horaCita: formData.horaCita, // "HH:mm"
+      especialidad: especialidadSeleccionada.nombre, // Nombre de la especialidad
+      medico: medicoSeleccionado.nombre, // Solo el nombre (sin apellidos)
+      sede: sedeSeleccionada.direccion, // Dirección exacta
+      motivo: formData.motivo.trim()
+    };
+
+    console.log("📤 Enviando cita:", citaData);
+
+    const resultado = await createCita(citaData);
+
+    alert(`✅ Cita registrada correctamente con ID: ${resultado.id || resultado.ID}`);
+
+    // Limpiar formulario
+    setFormData({
+      nombre: "",
+      apellidoPaterno: "",
+      apellidoMaterno: "",
+      curp: "",
+      fechaNacimiento: "",
+      fechaCita: "",
+      horaCita: "",
+      especialidad: "",
+      medico: "",
+      sede: "",
+      motivo: "",
+    });
+
+  } catch (error) {
+    console.error("❌ Error:", error);
+    
+    // Mostrar errores de validación del backend
+    if (error.errors) {
+      const mensajesError = Object.entries(error.errors)
+        .map(([campo, mensajes]) => `${campo}: ${mensajes.join(", ")}`)
+        .join("\n");
+      alert(`Errores de validación:\n${mensajesError}`);
+    } else {
+      alert("Error al registrar la cita: " + (error.title || "Error desconocido"));
+    }
+  }
+};
+
 
   return (
     <div className={styles.mainLayout}>
@@ -113,14 +198,58 @@ export default function DoctorCitasView() {
           <h2 className={styles.title}>Registrar nueva cita</h2>
 
           <form className={styles.fullForm}>
-            {/* CURP */}
+
+            {/* DATOS PERSONALES */}
+            <div className={styles.twoCols}>
+              <div>
+                <label>Nombre</label>
+                <input
+                  type="text"
+                  name="nombre"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Apellido paterno</label>
+                <input
+                  type="text"
+                  name="apellidoPaterno"
+                  value={formData.apellidoPaterno}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className={styles.twoCols}>
+              <div>
+                <label>Apellido materno</label>
+                <input
+                  type="text"
+                  name="apellidoMaterno"
+                  value={formData.apellidoMaterno}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>CURP</label>
+                <input
+                  type="text"
+                  name="curp"
+                  value={formData.curp}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
             <div className={styles.inputGroupFull}>
-              <label>CURP del paciente:</label>
+              <label>Fecha de nacimiento</label>
               <input
-                type="text"
-                name="curp"
-                placeholder="Ingresa CURP y presiona ENTER"
-                value={formData.curp}
+                type="date"
+                name="fechaNacimiento"
+                value={formData.fechaNacimiento}
                 onChange={handleChange}
               />
             </div>
@@ -135,15 +264,11 @@ export default function DoctorCitasView() {
                   onChange={handleChange}
                 >
                   <option value="">Seleccione</option>
-
-                  {loadingEspecialidades && <option>Cargando...</option>}
-
-                  {!loadingEspecialidades &&
-                    especialidades.map((esp) => (
-                      <option key={esp.id} value={esp.id}>
-                        {esp.nombre}
-                      </option>
-                    ))}
+                  {especialidades.map((esp) => (
+                    <option key={esp.id} value={esp.id}>
+                      {esp.nombre}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -156,15 +281,11 @@ export default function DoctorCitasView() {
                   disabled={!formData.especialidad}
                 >
                   <option value="">Seleccione</option>
-
-                  {loadingMedicos && <option>Cargando...</option>}
-
-                  {!loadingMedicos &&
-                    medicos.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.nombre} {m.apellidoPaterno}
-                      </option>
-                    ))}
+                  {medicos.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.nombre} {m.apellidoPaterno}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -179,10 +300,9 @@ export default function DoctorCitasView() {
                   onChange={handleChange}
                 >
                   <option value="">Seleccione</option>
-
                   {cedes.map((sede) => (
                     <option key={sede.id} value={sede.id}>
-                      {sede.nombre}
+                      {`${sede.ciudad} - ${sede.direccion}`}
                     </option>
                   ))}
                 </select>
@@ -192,8 +312,8 @@ export default function DoctorCitasView() {
                 <label>Fecha de cita</label>
                 <input
                   type="date"
-                  name="fecha"
-                  value={formData.fecha}
+                  name="fechaCita"
+                  value={formData.fechaCita}
                   onChange={handleChange}
                 />
               </div>
@@ -201,10 +321,10 @@ export default function DoctorCitasView() {
 
             {/* HORA */}
             <div className={styles.inputGroupFull}>
-              <label>Hora</label>
+              <label>Hora de cita</label>
               <select
-                name="hora"
-                value={formData.hora}
+                name="horaCita"
+                value={formData.horaCita}
                 onChange={handleChange}
               >
                 <option value="">Seleccione</option>
@@ -217,17 +337,18 @@ export default function DoctorCitasView() {
 
             {/* MOTIVO */}
             <div className={styles.inputGroupFull}>
-              <label>Motivo de consulta:</label>
+              <label>Motivo de consulta</label>
               <textarea
                 name="motivo"
-                placeholder="Describe brevemente el motivo..."
                 value={formData.motivo}
                 onChange={handleChange}
+                placeholder="Describa el motivo de la cita..."
               ></textarea>
             </div>
+
           </form>
 
-          {/* BOTÓN FIJO */}
+          {/* BOTÓN */}
           <button className={styles.fixedSaveBtn} onClick={handleSave}>
             Registrar cita
           </button>
