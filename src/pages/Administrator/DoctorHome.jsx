@@ -127,20 +127,35 @@ export default function DoctorHome() {
           </header>
 
           {/* BUSCADOR */}
-          <div className={styles.searchSection}>
-            <div className={styles.searchBarWrapper}>
-              <span className="material-icons" style={{ fontSize: 22, color: "#999" }}>
-                search
-              </span>
-              <input
-                type="text"
-                placeholder="Buscar paciente por nombre..."
-                value={search}
-                onChange={handleSearch}
-                className={styles.searchBar}
-              />
-            </div>
-          </div>
+          {/* BUSCADOR (estilo igual que NurseHome) */}
+<div className={styles.searchSection}>
+  <div className={styles.searchBarWrapper}>
+    <span className="material-icons" style={{ fontSize: 22, color: "#999" }}>
+      search
+    </span>
+
+    <input
+      type="text"
+      className={styles.searchBar}
+      placeholder="Buscar paciente por nombre..."
+      value={search}
+      onChange={handleSearch}
+    />
+
+    {search.trim() !== "" && (
+      <button
+        className={styles.clearBtn}
+        onClick={() => {
+          setSearch("");
+          setFilteredAppointments(appointments);
+        }}
+      >
+        <span className="material-icons">close</span>
+      </button>
+    )}
+  </div>
+</div>
+
 
           {/* TITLE + COUNT */}
           <div className={styles.sectionHeader}>

@@ -103,4 +103,5 @@ export interface CreateCitaDto {
   medico: string;
   sede: string;
   motivo: string;
+   fechaCita: string;
 }

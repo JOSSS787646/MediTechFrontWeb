@@ -116,17 +116,20 @@
 }
 
 /* ===== Barra de búsqueda ===== */
+/* ===== Buscador (estilo igual a NurseHome) ===== */
 .searchSection {
-  width: 100%;
   background: white;
   padding: 1rem 1.5rem;
   border-radius: 12px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .searchBarWrapper {
-  width: 100%;
+  flex: 1;
   display: flex;
   align-items: center;
   background: #fafafa;
@@ -147,25 +150,26 @@
   background: white;
 }
 
-.searchIcon {
-  opacity: 0.7;
-  margin-right: 0.75rem;
-  font-size: 1.1rem;
-}
-
 .searchBar {
   flex: 1;
   background: transparent;
   border: none;
+  outline: none;
   color: var(--text-dark);
   font-size: 0.95rem;
-  padding: 0.3rem;
-  outline: none;
-  font-weight: 500;
 }
 
-.searchBar::placeholder {
-  color: var(--text-light);
+.clearBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  padding: 0 0.3rem;
+  transition: 0.2s;
+}
+
+.clearBtn:hover {
+  color: var(--sidebar-color);
 }
 
 /* ===== Encabezado de sección ===== */
