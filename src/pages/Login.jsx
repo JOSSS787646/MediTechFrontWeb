@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { login as loginApi } from "../api/auth";
 import styles from "../styles/Login.module.css";
 
+
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -30,6 +31,7 @@ export default function Login() {
         localStorage.setItem("usuario", JSON.stringify(usuarioData));
         console.log("👤 Usuario guardado en localStorage:", usuarioData);
 
+        // Normalizamos el texto
         const tipo = response.tipoColaborador?.toString().trim().toLowerCase();
         console.log("🔎 Tipo de colaborador detectado:", tipo);
 
@@ -39,18 +41,18 @@ export default function Login() {
           tipo === "1"
         ) {
           navigate("/home-doctor");
-        } else if (tipo.includes("enfermera") || tipo === "2") {
+        } 
+        else if (tipo.includes("enfermera") || tipo === "2") {
           navigate("/home-nurse");
-        } else if (
-          tipo.includes("admin") ||
-          tipo.includes("administrador") ||
-          tipo === "3"
-        ) {
+        } 
+        else if (tipo.includes("admin") || tipo.includes("administrador") || tipo === "3") {
           navigate("/home-administrator");
-        } else {
+        } 
+        else {
           console.warn("⚠️ Tipo de colaborador no reconocido:", tipo);
           navigate("/login");
         }
+
       } else {
         setTimeout(() => {
           setLoading(false);
