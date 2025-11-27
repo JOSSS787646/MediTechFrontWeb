@@ -1,256 +1,716 @@
+/* Responsive */
+/* Container Principal */
 .container {
-  display: flex;
-  height: 100vh;
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
   background: linear-gradient(135deg, #f0fafa 40%, #d9eeee 100%);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  position: relative;
-  overflow: hidden;
-  opacity: 0;
-  animation: fadeInContent 1s ease forwards;
-  animation-delay: 1.6s;
 }
 
-/* Líneas animadas */
+/* Animated Background Particles */
+.backgroundParticles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(75, 144, 142, 0.3), rgba(107, 186, 186, 0.2));
+  filter: blur(60px);
+  animation: float 15s ease-in-out infinite;
+}
+
+/* Líneas animadas superior e inferior */
 .topLine,
 .bottomLine {
   position: absolute;
   left: 0;
   width: 100%;
-  height: 50%;
   z-index: 10;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
+
 .topLine {
   top: 0;
-  background-color: #4B908E;
-  animation: slideTop 1.5s ease forwards;
-  animation-delay: 0.2s;
+  height: 12px;
+  background: linear-gradient(90deg, #4B908E, #5fa9a7, #6bbaba);
+  animation: slideDown 1.5s ease-out;
 }
+
 .bottomLine {
   bottom: 0;
-  background-color: #2e5d5d;
-  animation: slideBottom 1.5s ease forwards;
-  animation-delay: 0.2s;
+  height: 12px;
+  background: linear-gradient(90deg, #6bbaba, #5fa9a7, #4B908E);
+  animation: slideUp 1.5s ease-out;
 }
-@keyframes slideTop { from { height: 50%; } to { height: 12px; } }
-@keyframes slideBottom { from { height: 50%; } to { height: 12px; } }
-@keyframes fadeInContent { to { opacity: 1; } }
 
-/* Columna izquierda */
-.left {
+/* Content Wrapper */
+.contentWrapper {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Columna Izquierda */
+.leftColumn {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* pegado arriba */
-  align-items: flex-start;     /* alineado a la izquierda */
-  padding: 40px 50px;
-  position: relative;
-  z-index: 1;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 3rem 4rem;
+}
+
+.logoContainer {
+  margin-bottom: 2rem;
+  animation: fadeInDown 0.8s ease-out;
 }
 
 .logo {
-  width: 200px;
-  margin-bottom: 20px;
-  align-self: flex-start;
+  height: 8rem;
+  width: auto;
 }
 
-.title {
-  font-size: 42px;
+.mainTitle {
+  font-size: 3.5rem;
   font-weight: 800;
   color: #21514f;
-  margin: 10px 0 25px 0;
+  margin: 0.5rem 0 1.5rem 0;
+  line-height: 1.2;
+  animation: fadeInLeft 0.8s ease-out;
 }
 
-/* Franja slogan */
 .subtitle {
-  font-size: 18px;
-  color: #fff;
-  background: linear-gradient(90deg, #4B908E, #6bbaba);
-  padding: 12px 30px;
-  border-radius: 0 15px 15px 0;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-  position: relative; /* ahora ya no es absoluta */
-  margin-top: 5px;    /* un poco más cerca del título */
-  width: auto;        /* que se adapte al texto */
-  max-width: 90%;
-}
-.subtitle span {
-  text-align: left;
-  font-weight: 500;
+  display: block;
+  font-size: 2rem;
+  font-weight: 300;
+  color: #4B908E;
+  margin-top: 0.5rem;
 }
 
-/* Columna derecha */
-.right {
+/* Slogan Badge */
+.sloganWrapper {
+  position: relative;
+  margin-bottom: 3rem;
+  animation: fadeInLeft 0.8s ease-out;
+  animation-delay: 0.2s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.sloganBadge {
+  background: linear-gradient(90deg, #4B908E, #6bbaba);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 0 1rem 1rem 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+.sloganBadge:hover {
+  transform: translateX(0.5rem);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.sloganText {
+  font-size: 1.125rem;
+  font-weight: 500;
+  text-align: left;
+  margin: 0;
+}
+
+.sloganUnderline {
+  position: absolute;
+  bottom: -0.5rem;
+  left: 1rem;
+  width: 4rem;
+  height: 0.25rem;
+  background: linear-gradient(90deg, #4B908E, transparent);
+  border-radius: 9999px;
+}
+
+/* Floating 3D Logo Container */
+.floatingLogoContainer {
+  position: relative;
+  width: 16rem;
+  height: 16rem;
+  animation: fadeInUp 0.8s ease-out;
+  animation-delay: 0.4s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.floatingLogoInner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Glow Effect */
+.glowEffect {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(75, 144, 142, 0.3), rgba(107, 186, 186, 0.3));
+  border-radius: 50%;
+  filter: blur(50px);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+/* 3D Rotating Logo */
+.rotatingLogo {
+  position: relative;
+  width: 12rem;
+  height: 12rem;
+  animation: floatRotate 8s ease-in-out infinite;
+}
+
+.logoBackground {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #4B908E, #6bbaba);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transform: rotate(12deg);
+  animation: tilt 4s ease-in-out infinite;
+}
+
+.logoCard {
+  position: absolute;
+  inset: 1rem;
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoIcon {
+  width: 6rem;
+  height: 6rem;
+  color: #4B908E;
+}
+
+/* Orbiting Particles */
+.orbitParticle {
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: #4B908E;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  animation: orbit 3s linear infinite;
+}
+
+/* Columna Derecha */
+.rightColumn {
   flex: 1;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: 2rem;
 }
 
-/* Card login */
-.card {
-  background: #fff;
-  padding: 50px;
-  border-radius: 24px;
-  width: 380px;
-  color: #2f3d3d;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  text-align: center;
-  z-index: 2;
-  transition: transform 0.3s ease;
+/* Login Card */
+.loginCard {
+  width: 100%;
+  max-width: 28rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeInRight 0.8s ease-out;
+  transition: transform 0.5s ease;
 }
-.card:hover {
-  transform: translateY(-5px);
+
+.loginCard:hover {
+  transform: scale(1.02);
+}
+
+/* Card Header */
+.cardHeader {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
 .cardTitle {
-  font-size: 28px;
-  margin-bottom: 25px;
+  font-size: 1.875rem;
   font-weight: 700;
   color: #21514f;
+  margin: 0 0 0.5rem 0;
 }
 
-/* Form */
+.cardTitleUnderline {
+  width: 4rem;
+  height: 0.25rem;
+  background: linear-gradient(90deg, #4B908E, #6bbaba);
+  margin: 0 auto;
+  border-radius: 9999px;
+}
+
+/* Form Container */
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .formGroup {
-  margin-bottom: 20px;
-  text-align: left;
+  position: relative;
 }
+
 .label {
-  font-size: 14px;
-  margin-bottom: 8px;
   display: block;
-  color: #555;
-}
-.input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccdcdc;
-  border-radius: 14px;
-  outline: none;
-  font-size: 15px;
-  transition: all 0.25s ease;
-}
-.input:hover {
-  border-color: #79adad;
-}
-.input:focus {
-  border-color: #4B908E;
-  box-shadow: 0 0 8px rgba(75,144,142,0.3);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
 }
 
-.forgot {
-  font-size: 13px;
-  display: block;
-  text-align: right;
-  margin-top: 6px;
-  color: #4B908E;
-  text-decoration: none;
-}
-.forgot:hover {
-  text-decoration: underline;
+.inputWrapper {
+  position: relative;
 }
 
-/* Botón */
-.button {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #4B908E, #2e5d5d);
-  color: white;
-  border: none;
-  border-radius: 14px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-.button:hover {
-  background: linear-gradient(135deg, #39706e, #224645);
-  transform: scale(1.03);
-}
-/* Modal Overlay */
-.modalOverlay {
-  position: fixed;
+.inputIcon {
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 100;
-}
-
-/* Modal Container */
-.modal {
-  background: #e6f2f2; /* mismo color suave del login */
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  text-align: center;
-  max-width: 400px;
-  width: 90%;
-}
-
-/* Título del modal */
-.modalTitle {
-  font-size: 1.5rem;
-  color: #0f4c75; /* color del título del login o similar */
-  margin-bottom: 1rem;
-}
-
-/* Mensaje del modal */
-.modalMessage {
-  font-size: 1rem;
-  color: #333;
-  margin-bottom: 1.5rem;
-}
-
-/* Botón del modal */
-.modalButton {
-  background-color: #0f4c75; /* mismo color de botones login */
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.modalButton:hover {
-  background-color: #0876a3;
-}
-
-/* Fondo borroso al cargar */
-.blur {
-  filter: blur(5px);
+  padding-left: 1rem;
   pointer-events: none;
 }
 
-/* Spinner overlay */
-.spinnerOverlay {
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #9ca3af;
+  transition: color 0.3s ease;
+}
+
+.iconActive {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #4B908E;
+  transition: color 0.3s ease;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  outline: none;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.input:hover {
+  border-color: #6bbaba;
+}
+
+.inputFocused {
+  border-color: #4B908E !important;
+  box-shadow: 0 0 0 4px rgba(75, 144, 142, 0.1);
+}
+
+.forgotPassword {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #4B908E;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgotPassword:hover {
+  color: #2e5d5d;
+  text-decoration: underline;
+}
+
+/* Submit Button */
+.submitButton {
+  position: relative;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(90deg, #4B908E, #6bbaba);
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.submitButton:hover {
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.buttonText {
+  position: relative;
+  z-index: 10;
+}
+
+.buttonOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #39706e, #4B908E);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.submitButton:hover .buttonOverlay {
+  transform: scaleX(1);
+}
+
+/* Additional Options */
+.additionalOptions {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.additionalText {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.additionalLink {
+  color: #4B908E;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.additionalLink:hover {
+  color: #2e5d5d;
+}
+
+/* Loading Overlay */
+.loadingOverlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 50;
+  animation: fadeIn 0.3s ease-out;
 }
 
-/* Animación del spinner */
-.spinner {
-  width: 70px;
-  height: 70px;
-  border: 6px solid #ffffff33;
-  border-top-color: #316064;
+.spinnerContainer {
+  position: relative;
+}
+
+.spinnerOuter {
+  width: 6rem;
+  height: 6rem;
+  border: 4px solid rgba(75, 144, 142, 0.2);
+  border-top-color: #4B908E;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
+.spinnerInner {
+  position: absolute;
+  inset: 0.75rem;
+  border: 4px solid rgba(107, 186, 186, 0.2);
+  border-bottom-color: #6bbaba;
+  border-radius: 50%;
+  animation: spinReverse 1s linear infinite;
+}
+
+.spinnerCenter {
+  position: absolute;
+  inset: 2rem;
+  background: linear-gradient(135deg, #4B908E, #6bbaba);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 28rem;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.3s ease-out;
+}
+
+.modalContent {
+  text-align: center;
+}
+
+.modalIconContainer {
+  margin: 0 auto 1rem;
+  width: 4rem;
+  height: 4rem;
+  background: #fee2e2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalIcon {
+  width: 2rem;
+  height: 2rem;
+  color: #dc2626;
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+}
+
+.modalMessage {
+  color: #6b7280;
+  margin: 0 0 1.5rem 0;
+}
+
+.modalButton {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.modalButton:hover {
+  background: linear-gradient(90deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ========== ANIMATIONS ========== */
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(0) translateX(20px);
+  }
+  75% {
+    transform: translateY(20px) translateX(10px);
+  }
+}
+
+@keyframes floatRotate {
+  0% {
+    transform: translateY(0) rotateY(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotateY(180deg);
+  }
+  100% {
+    transform: translateY(0) rotateY(360deg);
+  }
+}
+
+@keyframes tilt {
+  0%, 100% {
+    transform: rotate(12deg);
+  }
+  50% {
+    transform: rotate(-12deg);
+  }
+}
+
+@keyframes orbit {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg) translateX(100px) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg) translateX(100px) rotate(-360deg);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 @keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
   to {
     transform: rotate(360deg);
   }
 }
 
+@keyframes spinReverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 1024px) {
+  .contentWrapper {
+    flex-direction: column;
+  }
+
+  .leftColumn {
+    padding: 2rem;
+  }
+
+  .mainTitle {
+    font-size: 2.5rem;
+  }
+
+  .floatingLogoContainer {
+    width: 12rem;
+    height: 12rem;
+  }
+
+  .rotatingLogo {
+    width: 9rem;
+    height: 9rem;
+  }
+
+  .rightColumn {
+    padding: 1rem;
+  }
+}
