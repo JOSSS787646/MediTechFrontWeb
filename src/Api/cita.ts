@@ -87,27 +87,7 @@ export const getCitaById = async (id: number, token: string) => {
 // =========================================================
 // ⚠️ Aquí NO uso ningún método raro ni URL incorrecta.
 // ⚠️ Sólo uso tu misma estructura: /colaborador/{id}
-export const getCitasDeColaborador = async (colaboradorId: number, token: string) => {
-  if (!colaboradorId) {
-    console.warn("⚠️ No se proporcionó ID de colaborador.");
-    throw "El ID del colaborador no puede ser null o undefined.";
-  }
 
-  try {
-    const response = await axios.get(`${API_URL}/colaborador/${colaboradorId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("📌 Citas del colaborador:", response.data);
-    return response.data;
-
-  } catch (error: any) {
-    console.error(`❌ Error al obtener citas del colaborador ${colaboradorId}:`, error);
-    throw error.response?.data || error.message;
-  }
-};
 
 // =========================================================
 // 🔹 Tipado

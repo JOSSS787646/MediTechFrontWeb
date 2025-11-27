@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import styles from "../../styles/pages/DoctorHome.module.css";
 import logo from "../../assets/logoLargo.png";
 import { useNavigate } from "react-router-dom";
-import { getCitasDeColaborador } from "../../Api/cita";
+import { getCitasDeColaborador } from "../../Api/colaborator";
+
+// Importar Material Icons
+import "material-icons/iconfont/material-icons.css";
 
 export default function DoctorHome() {
   const navigate = useNavigate();
@@ -11,32 +14,23 @@ export default function DoctorHome() {
   const [horaActual, setHoraActual] = useState("");
   const [fechaActual, setFechaActual] = useState("");
   const [appointments, setAppointments] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
 
-  // =====================================================
-  // 📌 Leer usuario desde localStorage
-  // =====================================================
-  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const [idColaborador, setIdColaborador] = useState(null);
+  const [nombreUsuario, setNombreUsuario] = useState("Doctor");
 
-  const token = usuario?.token || null;
-  const idColaborador = usuario?.idColaborador || null;
-  const nombreUsuario = usuario?.nombreUsuario || "Doctor";
+  useEffect(() => {
+    const u = JSON.parse(localStorage.getItem("usuario"));
+    if (u) {
+      setIdColaborador(u.id);
+      setNombreUsuario(u.nombreUsuario || "Doctor");
+    }
+  }, []);
 
-  // =====================================================
-  // 📌 Cargar citas desde API
-  // =====================================================
   const cargarCitas = async () => {
     try {
-      if (!token) {
-        console.warn("⚠️ No existe token en localStorage");
-        return;
-      }
-
-      if (!idColaborador) {
-        console.warn("⚠️ No existe idColaborador en usuario");
-        return;
-      }
-
-      const response = await getCitasDeColaborador(idColaborador, token);
+      const response = await getCitasDeColaborador(idColaborador);
+      if (!Array.isArray(response)) return;
 
       const citasFormateadas = response.map((c) => ({
         nombre: c.pacienteNombre,
@@ -51,28 +45,21 @@ export default function DoctorHome() {
       }));
 
       setAppointments(citasFormateadas);
+      setFilteredAppointments(citasFormateadas);
     } catch (error) {
-      console.error("❌ Error al cargar citas:", error);
+      console.error("Error al cargar citas:", error);
     }
   };
 
-  // =====================================================
-  // 📌 Calcular edad
-  // =====================================================
   const calcularEdad = (fecha) => {
     const nacimiento = new Date(fecha);
     const hoy = new Date();
     let edad = hoy.getFullYear() - nacimiento.getFullYear();
     const m = hoy.getMonth() - nacimiento.getMonth();
-    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
-      edad--;
-    }
+    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
     return edad;
   };
 
-  // =====================================================
-  // ⏰ Reloj en vivo
-  // =====================================================
   useEffect(() => {
     const updateClock = () => {
       setHoraActual(
@@ -81,13 +68,12 @@ export default function DoctorHome() {
           minute: "2-digit",
         })
       );
-      setFechaActual(
-        new Date().toLocaleDateString("es-MX", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      );
+      const f = new Date().toLocaleDateString("es-MX", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      setFechaActual(f.charAt(0).toUpperCase() + f.slice(1));
     };
 
     updateClock();
@@ -95,149 +81,154 @@ export default function DoctorHome() {
     return () => clearInterval(interval);
   }, []);
 
-  // =====================================================
-  // 🚀 Cargar citas cuando usuario esté listo
-  // =====================================================
   useEffect(() => {
-    if (usuario && idColaborador && token) {
-      cargarCitas();
-    }
-  }, [usuario, idColaborador, token]);
+    if (idColaborador) cargarCitas();
+  }, [idColaborador]);
 
-  // =====================================================
-  // 🔎 Buscador
-  // =====================================================
-  const handleSearch = () => {
-    alert("Buscando: " + search);
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearch(value);
+
+    if (value.trim() === "") {
+      setFilteredAppointments(appointments);
+    } else {
+      const filtered = appointments.filter((cita) => {
+        const nombreCompleto = `${cita.nombre} ${cita.apellidoPaterno} ${cita.apellidoMaterno}`.toLowerCase();
+        return nombreCompleto.includes(value.toLowerCase());
+      });
+      setFilteredAppointments(filtered);
+    }
   };
 
-  // =====================================================
-  // 🩺 Atender paciente
-  // =====================================================
   const handleAtender = (cita) => {
-    navigate("/doctor/prescription", { state: { cita } });
+    navigate("/home-doctor/recetas", { state: { cita } });
   };
 
   return (
-    <main className={styles.contentArea}>
-      <div className={styles.container}>
+    <div className={styles.mainLayout}>
+      <div className={styles.contentArea}>
+        <div className={styles.container}>
 
-        {/* HEADER */}
-        <header className={styles.header}>
-          <img src={logo} alt="Logo" className={styles.logo} />
-
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div className={styles.userBox}>
-              <span className="material-icons">account_circle</span>
-              {nombreUsuario}
+          {/* HEADER */}
+          <header className={styles.header}>
+            <div className={styles.logoBox}>
+              <img src={logo} alt="Logo" className={styles.logo} />
             </div>
 
-            <div className={styles.clockBox}>
-              <div className={styles.clockRow}>
-                <span className="material-icons">schedule</span>
+            <div className={styles.userInfo}>
+              <span className={styles.userName}>
+                {nombreUsuario}
+              </span>
+              <div className={styles.timeInfo}>
                 <span className={styles.time}>{horaActual}</span>
+                <span className={styles.date}>{fechaActual}</span>
               </div>
-              <span className={styles.date}>{fechaActual}</span>
             </div>
-          </div>
-        </header>
+          </header>
 
-        <hr className={styles.divider} />
-
-        {/* BUSCADOR */}
-        <div className={styles.actionRow}>
+          {/* BUSCADOR */}
           <div className={styles.searchSection}>
             <div className={styles.searchBarWrapper}>
+              <span className="material-icons" style={{ fontSize: 22, color: "#999" }}>
+                search
+              </span>
               <input
                 type="text"
-                placeholder="Buscar paciente"
+                placeholder="Buscar paciente por nombre..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={handleSearch}
                 className={styles.searchBar}
               />
-              <button className={styles.searchIconBtn} onClick={handleSearch}>
-                <span className="material-icons">search</span>
-              </button>
             </div>
           </div>
 
-          <button
-            className={styles.scheduleButtonLarge}
-            onClick={() => navigate("/home-doctor/citas")}
-          >
-            <span className="material-icons">event</span>
-            Agendar cita
-          </button>
+          {/* TITLE + COUNT */}
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Citas del Día</h2>
 
-          <button
-            className={styles.scheduleButtonLarge}
-            onClick={() => navigate("/home-doctor/recetas")}
-          >
-            <span className="material-icons">receipt_long</span>
-            Recetas
-          </button>
+            <span className={styles.appointmentCount}>
+              {filteredAppointments.length} {filteredAppointments.length === 1 ? "cita" : "citas"}
+            </span>
+          </div>
+
+          {/* TABLA */}
+          <div className={styles.scrollContainer}>
+            <div className={styles.tableWrapper}>
+              <div className={styles.tableContainer}>
+                <table className={styles.citasTable}>
+                  <thead>
+                    <tr>
+                      <th>
+                        <span className="material-icons" style={{ fontSize: 18 }}>person</span>
+                        Paciente
+                      </th>
+                      <th>Edad</th>
+                      <th>
+                        <span className="material-icons" style={{ fontSize: 18 }}>event</span>
+                        Fecha
+                      </th>
+                      <th>
+                        <span className="material-icons" style={{ fontSize: 18 }}>schedule</span>
+                        Hora
+                      </th>
+                      <th>Motivo</th>
+                      <th>Doctor</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredAppointments.length > 0 ? (
+                      filteredAppointments.map((cita, i) => (
+                        <tr key={i} className={styles.tableRow}>
+                          <td className={styles.patientCell}>
+                            {cita.nombre} {cita.apellidoPaterno} {cita.apellidoMaterno}
+                          </td>
+
+                          <td>{cita.edad} años</td>
+
+                          <td>{cita.fecha}</td>
+
+                          <td>{cita.hora}</td>
+
+                          <td>{cita.motivo}</td>
+
+                          <td>{cita.doctor}</td>
+
+                          <td>
+                            <button
+                              className={styles.btnAtender}
+                              onClick={() => handleAtender(cita.citaOriginal)}
+                            >
+                              <span className="material-icons" style={{ fontSize: 20 }}>
+                                medical_services
+                              </span>
+                              Atender
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={7} className={styles.emptyRow}>
+                          <div className={styles.emptyState}>
+                            <span className="material-icons" style={{ fontSize: 40, color: "#ccc" }}>
+                              hourglass_empty
+                            </span>
+                            <p>No hay citas programadas</p>
+                            <small>Las citas aparecerán cuando se agenden</small>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
         </div>
-
-        <p style={{ fontWeight: 600, marginTop: "0.8rem" }}>
-          Citas del doctor — <span>{fechaActual}</span>
-        </p>
-
-        {/* TABLA DE CITAS */}
-        <div className={styles.tableContainer}>
-          <table className={styles.citasTable}>
-            <thead>
-              <tr>
-                <th>Paciente</th>
-                <th>Edad</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Motivo</th>
-                <th>Acciones</th>
-                <th></th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {appointments.length > 0 ? (
-                appointments.map((cita, i) => (
-                  <tr key={i}>
-                    <td>
-                      {cita.nombre} {cita.apellidoPaterno} {cita.apellidoMaterno}
-                    </td>
-                    <td>{cita.edad}</td>
-                    <td>{cita.fecha}</td>
-                    <td>{cita.hora}</td>
-                    <td>{cita.motivo}</td>
-                    <td>{cita.doctor}</td>
-                    <td>
-                      <button
-                        style={{
-                          background: "#63b2a5",
-                          color: "white",
-                          border: "none",
-                          padding: "0.3rem 0.8rem",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => handleAtender(cita.citaOriginal)}
-                      >
-                        Atender
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: "center", padding: "1rem" }}>
-                    No hay citas programadas.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
       </div>
-    </main>
+    </div>
   );
 }
