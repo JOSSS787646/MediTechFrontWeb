@@ -1,21 +1,78 @@
-// DoctorHome.jsx
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/pages/DoctorHome.module.css";
 import logo from "../../assets/logoLargo.png";
 import { useNavigate } from "react-router-dom";
+import { getCitasDeColaborador } from "../../Api/cita";
 
-export default function DoctorHome({ usuario }) {
+export default function DoctorHome() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [horaActual, setHoraActual] = useState("");
   const [fechaActual, setFechaActual] = useState("");
+  const [appointments, setAppointments] = useState([]);
 
-  const [appointments] = useState([]); // Si luego conectas el backend, quedará listo.
+  // =====================================================
+  // 📌 Leer usuario desde localStorage
+  // =====================================================
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
 
-  // ===============================
-  // RELOJ EN VIVO
-  // ===============================
+  const token = usuario?.token || null;
+  const idColaborador = usuario?.idColaborador || null;
+  const nombreUsuario = usuario?.nombreUsuario || "Doctor";
+
+  // =====================================================
+  // 📌 Cargar citas desde API
+  // =====================================================
+  const cargarCitas = async () => {
+    try {
+      if (!token) {
+        console.warn("⚠️ No existe token en localStorage");
+        return;
+      }
+
+      if (!idColaborador) {
+        console.warn("⚠️ No existe idColaborador en usuario");
+        return;
+      }
+
+      const response = await getCitasDeColaborador(idColaborador, token);
+
+      const citasFormateadas = response.map((c) => ({
+        nombre: c.pacienteNombre,
+        apellidoPaterno: c.pacienteApellidoPaterno,
+        apellidoMaterno: c.pacienteApellidoMaterno,
+        fecha: new Date(c.fechaCita).toLocaleDateString("es-MX"),
+        hora: c.horaCita,
+        motivo: c.motivo,
+        doctor: c.medico,
+        edad: calcularEdad(c.fechaNacimiento),
+        citaOriginal: c,
+      }));
+
+      setAppointments(citasFormateadas);
+    } catch (error) {
+      console.error("❌ Error al cargar citas:", error);
+    }
+  };
+
+  // =====================================================
+  // 📌 Calcular edad
+  // =====================================================
+  const calcularEdad = (fecha) => {
+    const nacimiento = new Date(fecha);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const m = hoy.getMonth() - nacimiento.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    return edad;
+  };
+
+  // =====================================================
+  // ⏰ Reloj en vivo
+  // =====================================================
   useEffect(() => {
     const updateClock = () => {
       setHoraActual(
@@ -38,16 +95,25 @@ export default function DoctorHome({ usuario }) {
     return () => clearInterval(interval);
   }, []);
 
-  // ===============================
-  // BUSCAR PACIENTE
-  // ===============================
+  // =====================================================
+  // 🚀 Cargar citas cuando usuario esté listo
+  // =====================================================
+  useEffect(() => {
+    if (usuario && idColaborador && token) {
+      cargarCitas();
+    }
+  }, [usuario, idColaborador, token]);
+
+  // =====================================================
+  // 🔎 Buscador
+  // =====================================================
   const handleSearch = () => {
     alert("Buscando: " + search);
   };
 
-  // ===============================
-  // ATENDER PACIENTE
-  // ===============================
+  // =====================================================
+  // 🩺 Atender paciente
+  // =====================================================
   const handleAtender = (cita) => {
     navigate("/doctor/prescription", { state: { cita } });
   };
@@ -56,14 +122,14 @@ export default function DoctorHome({ usuario }) {
     <main className={styles.contentArea}>
       <div className={styles.container}>
 
-        {/* ================= HEADER ================= */}
+        {/* HEADER */}
         <header className={styles.header}>
           <img src={logo} alt="Logo" className={styles.logo} />
 
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <div className={styles.userBox}>
               <span className="material-icons">account_circle</span>
-              {usuario?.nombreUsuario || "Doctor"}
+              {nombreUsuario}
             </div>
 
             <div className={styles.clockBox}>
@@ -78,10 +144,8 @@ export default function DoctorHome({ usuario }) {
 
         <hr className={styles.divider} />
 
-        {/* ================= BUSCADOR + BOTONES ================= */}
+        {/* BUSCADOR */}
         <div className={styles.actionRow}>
-
-          {/* === BUSCADOR === */}
           <div className={styles.searchSection}>
             <div className={styles.searchBarWrapper}>
               <input
@@ -97,7 +161,6 @@ export default function DoctorHome({ usuario }) {
             </div>
           </div>
 
-          {/* === AGENDAR CITA === */}
           <button
             className={styles.scheduleButtonLarge}
             onClick={() => navigate("/home-doctor/citas")}
@@ -106,7 +169,6 @@ export default function DoctorHome({ usuario }) {
             Agendar cita
           </button>
 
-          {/* === GENERAR RECETA === */}
           <button
             className={styles.scheduleButtonLarge}
             onClick={() => navigate("/home-doctor/recetas")}
@@ -116,12 +178,11 @@ export default function DoctorHome({ usuario }) {
           </button>
         </div>
 
-        {/* ================= FECHA ================= */}
         <p style={{ fontWeight: 600, marginTop: "0.8rem" }}>
           Citas del doctor — <span>{fechaActual}</span>
         </p>
 
-        {/* ================= TABLA DE CITAS ================= */}
+        {/* TABLA DE CITAS */}
         <div className={styles.tableContainer}>
           <table className={styles.citasTable}>
             <thead>
@@ -158,7 +219,7 @@ export default function DoctorHome({ usuario }) {
                           borderRadius: "6px",
                           cursor: "pointer",
                         }}
-                        onClick={() => handleAtender(cita)}
+                        onClick={() => handleAtender(cita.citaOriginal)}
                       >
                         Atender
                       </button>
