@@ -1,27 +1,91 @@
 @import "./NurseHome.module.css";
+/* =======================================
+   VARIABLES
+======================================= */
+:root {
+  --primary-color: #63b2a5;
+  --primary-hover: #4b8e83;
+  --text-dark: #0a2928;
+  --border: #d1d5db;
+  --font: "Segoe UI", sans-serif;
+}
 
 /* =======================================
-   LAYOUT GENERAL
+   LAYOUT PRINCIPAL
 ======================================= */
 .mainLayout {
   display: flex;
   width: 100%;
-  height: 100vh;
-  background: #f8f9fa;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e8f5f3 0%, #f0f8f7 50%, #fef9f7 100%);
+  font-family: var(--font);
+  position: relative;
+  overflow: hidden;
 }
 
+/* Patrón de fondo animado */
+.mainLayout::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(99, 178, 165, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: backgroundMove 60s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes backgroundMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(30px, 30px); }
+}
+
+/* Partícula flotante decorativa */
+.mainLayout::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(99, 178, 165, 0.08), transparent);
+  border-radius: 50%;
+  top: 15%;
+  right: 10%;
+  animation: float 10s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-30px) rotate(5deg); }
+}
+
+/* =======================================
+   ÁREA DE CONTENIDO
+======================================= */
 .contentArea {
-  height: 100vh;
-  overflow-y: hidden;
+  flex: 1;
+  padding: 2rem 3rem;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 
+/* =======================================
+   CONTENEDOR CENTRAL
+======================================= */
 .container {
-  flex: 1;
-  padding: 0.5rem 2rem 0 2rem;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
 }
 
 /* =======================================
@@ -31,105 +95,503 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  animation: headerSlideDown 0.6s ease-out;
+}
+
+@keyframes headerSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .logo {
-  height: 55px;
+  height: 70px;
+  filter: drop-shadow(0px 4px 12px rgba(99, 178, 165, 0.3));
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
 
 .userBox {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  font-weight: 600;
+  gap: 0.6rem;
+  color: var(--text-dark);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1.3rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(99, 178, 165, 0.2);
+  border: 2px solid rgba(99, 178, 165, 0.2);
+  transition: all 0.3s ease;
 }
 
-/* Divider */
-.divider {
-  border: none;
-  height: 1px;
-  background: #d8e0e4;
-  margin: 0.5rem 0 1.2rem;
+.userBox:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 178, 165, 0.3);
+  border-color: var(--primary-color);
+}
+
+.userBox .material-icons {
+  color: var(--primary-color);
+  font-size: 1.8rem;
 }
 
 /* =======================================
-   TITLE
+   DIVIDER
+======================================= */
+.divider {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+  border: none;
+  margin: 1rem 0 2rem;
+}
+
+/* =======================================
+   TÍTULO PRINCIPAL
 ======================================= */
 .title {
-  font-size: 1.4rem;
+  font-size: 2.4rem;
   text-align: center;
-  margin-bottom: 1.2rem;
-  color: #1c3c4f;
+  margin: 0 0 2.5rem;
+  color: var(--text-dark);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  letter-spacing: 0.5px;
+  animation: titleSlideIn 0.6s ease-out;
+}
+
+.title::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+  border-radius: 2px;
+}
+
+@keyframes titleSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =======================================
-   FORMULARIO FULL
+   FORMULARIO PREMIUM
 ======================================= */
 .fullForm {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 1.3rem;
   width: 100%;
-  max-width: 1100px;
+  max-width: 900px;
   margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 2.5rem;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(99, 178, 165, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  animation: formFadeIn 0.5s ease-out;
 }
 
-.inputGroupFull {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-/* Dos columnas perfectamente alineadas */
-.twoCols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
-  align-items: start;
-}
-
-/* Inputs */
-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #2e4a57;
-}
-
-input,
-select,
-textarea {
-  border: 1px solid #cbd5df;
-  border-radius: 8px;
-  padding: 0.55rem 0.7rem;
-  width: 100%;
-  font-size: 0.95rem;
-  box-sizing: border-box;
-}
-
-textarea {
-  min-height: 45px;
-  max-height: 45px;
-  resize: none;
+@keyframes formFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =======================================
-   BOTÓN FIJO
+   GRUPOS DE INPUTS
+======================================= */
+.inputGroupFull {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  animation: fieldFadeIn 0.4s ease-out backwards;
+}
+
+/* Dos columnas responsive */
+.twoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.twoCols > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+@keyframes fieldFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Delays escalonados para animación */
+.fullForm > div:nth-child(1) { animation-delay: 0.1s; }
+.fullForm > div:nth-child(2) { animation-delay: 0.15s; }
+.fullForm > div:nth-child(3) { animation-delay: 0.2s; }
+.fullForm > div:nth-child(4) { animation-delay: 0.25s; }
+.fullForm > div:nth-child(5) { animation-delay: 0.3s; }
+.fullForm > div:nth-child(6) { animation-delay: 0.35s; }
+.fullForm > div:nth-child(7) { animation-delay: 0.4s; }
+
+/* =======================================
+   LABELS PREMIUM
+======================================= */
+.fullForm label,
+.twoCols label,
+.inputGroupFull label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a4d5f;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.fullForm label::before,
+.twoCols label::before,
+.inputGroupFull label::before {
+  content: "";
+  width: 4px;
+  height: 18px;
+  background: linear-gradient(180deg, var(--primary-color), var(--primary-hover));
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(99, 178, 165, 0.3);
+}
+
+/* =======================================
+   INPUTS Y SELECTS - GLASSMORPHISM
+======================================= */
+.fullForm input,
+.fullForm select,
+.fullForm textarea,
+.twoCols input,
+.twoCols select,
+.inputGroupFull input,
+.inputGroupFull select,
+.inputGroupFull textarea {
+  width: 100%;
+  padding: 1rem 1.3rem;
+  border: 2px solid rgba(99, 178, 165, 0.2);
+  border-radius: 14px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #2d3748;
+  font-weight: 500;
+  box-sizing: border-box;
+  font-family: var(--font);
+}
+
+/* Select personalizado */
+.fullForm select,
+.twoCols select,
+.inputGroupFull select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%2363b2a5' d='M7 10L2 5h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.2rem center;
+  padding-right: 3rem;
+}
+
+/* Hover effects */
+.fullForm input:hover,
+.fullForm select:hover,
+.fullForm textarea:hover,
+.twoCols input:hover,
+.twoCols select:hover,
+.inputGroupFull input:hover,
+.inputGroupFull select:hover,
+.inputGroupFull textarea:hover {
+  border-color: rgba(99, 178, 165, 0.4);
+  box-shadow: 0 6px 16px rgba(99, 178, 165, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Focus effects */
+.fullForm input:focus,
+.fullForm select:focus,
+.fullForm textarea:focus,
+.twoCols input:focus,
+.twoCols select:focus,
+.inputGroupFull input:focus,
+.inputGroupFull select:focus,
+.inputGroupFull textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 20px rgba(99, 178, 165, 0.2),
+              0 0 0 4px rgba(99, 178, 165, 0.1);
+  transform: translateY(-2px);
+  background: #ffffff;
+}
+
+/* Textarea específico */
+.fullForm textarea,
+.inputGroupFull textarea {
+  min-height: 100px;
+  max-height: 200px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+/* Placeholder styling */
+.fullForm input::placeholder,
+.fullForm textarea::placeholder,
+.inputGroupFull input::placeholder,
+.inputGroupFull textarea::placeholder {
+  color: #a0aec0;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Estado disabled */
+.fullForm select:disabled,
+.fullForm input:disabled,
+.twoCols select:disabled,
+.inputGroupFull select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f0f4f8;
+}
+
+/* =======================================
+   LOADERS PREMIUM
+======================================= */
+.loader {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.3rem;
+  background: linear-gradient(135deg, #e8fffa 0%, #d4f7f0 100%);
+  border-radius: 14px;
+  border-left: 5px solid var(--primary-color);
+  font-size: 0.95rem;
+  color: var(--primary-hover);
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(99, 178, 165, 0.15);
+  animation: loaderPulse 2s ease-in-out infinite;
+}
+
+.loader::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(99, 178, 165, 0.3);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: loaderSpin 0.8s linear infinite;
+}
+
+@keyframes loaderSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes loaderPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+/* =======================================
+   BOTÓN FLOTANTE PREMIUM (FAB)
 ======================================= */
 .fixedSaveBtn {
   position: fixed;
-  bottom: 18px;
-  right: 25px;
-  background: #009879;
+  bottom: 32px;
+  right: 32px;
+  padding: 1.2rem 2.8rem;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  border-radius: 50px;
+  font-size: 1.05rem;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 3px 10px #0003;
+  box-shadow: 0 8px 24px rgba(99, 178, 165, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: var(--font);
+}
+
+.fixedSaveBtn::before {
+  content: "✓";
+  font-size: 1.5rem;
+  font-weight: 900;
 }
 
 .fixedSaveBtn:hover {
-  background: #06795e;
+  background: linear-gradient(135deg, #4b8e83 0%, #3d7267 100%);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 32px rgba(99, 178, 165, 0.5);
+}
+
+.fixedSaveBtn:active {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(99, 178, 165, 0.4);
+}
+
+/* Efecto ripple */
+.fixedSaveBtn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.fixedSaveBtn:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* =======================================
+   CALENDAR PICKER PERSONALIZADO
+======================================= */
+.fullForm input[type="date"]::-webkit-calendar-picker-indicator,
+.twoCols input[type="date"]::-webkit-calendar-picker-indicator,
+.inputGroupFull input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.fullForm input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.twoCols input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.inputGroupFull input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  background-color: rgba(99, 178, 165, 0.15);
+}
+
+/* =======================================
+   RESPONSIVE
+======================================= */
+@media (max-width: 900px) {
+  .twoCols {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .fullForm {
+    padding: 2rem 1.5rem;
+  }
+
+  .contentArea {
+    padding: 1.5rem 1.2rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .fixedSaveBtn {
+    bottom: 20px;
+    right: 20px;
+    padding: 1rem 2rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .mainLayout {
+    flex-direction: column;
+  }
+
+  .logo {
+    height: 55px;
+  }
+
+  .title {
+    font-size: 1.7rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+/* =======================================
+   SCROLLBAR PERSONALIZADO
+======================================= */
+.contentArea::-webkit-scrollbar {
+  width: 10px;
+}
+
+.contentArea::-webkit-scrollbar-track {
+  background: rgba(99, 178, 165, 0.05);
+  border-radius: 10px;
+}
+
+.contentArea::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary-color), var(--primary-hover));
+  border-radius: 10px;
+}
+
+.contentArea::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--primary-hover), #3d7267);
+}
+
+/* =======================================
+   ACCESSIBILITY
+======================================= */
+.fullForm input:focus-visible,
+.fullForm select:focus-visible,
+.fullForm textarea:focus-visible,
+.twoCols input:focus-visible,
+.twoCols select:focus-visible {
+  outline: 3px solid rgba(99, 178, 165, 0.5);
+  outline-offset: 2px;
 }
