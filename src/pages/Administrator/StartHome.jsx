@@ -1,13 +1,11 @@
 //StartHome
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; 
 import styles from "../../styles/pages/StartHome.module.css";
 import logo from "../../assets/logo.png";
 
 export default function StartHome({ usuario, setSeccion }) {
   const [hora, setHora] = useState("");
   const [fecha, setFecha] = useState("");
-  const navigate = useNavigate(); // ✅ Hook de navegación
 
   useEffect(() => {
     const actualizarFechaHora = () => {
@@ -33,7 +31,6 @@ export default function StartHome({ usuario, setSeccion }) {
     return () => clearInterval(timer);
   }, []);
 
-  // 🔹 Mostrar nombre del usuario si existe
   const nombreCompleto =
     usuario?.nombre || usuario?.nombreUsuario || "Administrador";
 
@@ -69,7 +66,7 @@ export default function StartHome({ usuario, setSeccion }) {
             ¡Bienvenido de nuevo,{" "}
             {usuario?.nombreUsuario || usuario?.nombre || "Administrador"}!
           </h1>
-          <p>Gestiona usuarios y pacientes desde este panel.</p>
+          <p>Gestiona usuarios desde este panel.</p>
         </div>
       </div>
 
@@ -84,17 +81,6 @@ export default function StartHome({ usuario, setSeccion }) {
           <span className="material-icons">group</span>
           <h3>Usuarios Registrados</h3>
           <p>Administra fácilmente los colaboradores del sistema.</p>
-        </div>
-
-        {/* Card: Pacientes */}
-        <div
-          className={`${styles.card} ${styles.cardTeal}`}
-          onClick={() => navigate("/home-pacientes")} // ✅ Navegación directa a la vista de pacientes
-          style={{ cursor: "pointer" }}
-        >
-          <span className="material-icons">personal_injury</span>
-          <h3>Pacientes</h3>
-          <p>Accede rápidamente al historial y datos médicos.</p>
         </div>
       </div>
 

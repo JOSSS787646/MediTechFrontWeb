@@ -29,11 +29,6 @@ select {
   font-family: var(--font);
 }
 
-/* ====== LAYOUT: SIDEBAR + CONTENIDO ======
-   Usamos grid: columna fija para sidebar (270px) y 1fr para contenido.
-   De esta forma el contenido puede centrarse dentro de su columna sin
-   offsets extra que rompan el centrado. */
-/* ====== LAYOUT: SIDEBAR + CONTENIDO ====== */
 .mainLayout {
   display: flex;
   width: 100%;
