@@ -6,32 +6,55 @@ import styles from "../../styles/pages/DoctorRecetaView.module.css";
 import logo from "../../assets/logoLargo.png";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import "material-icons/iconfont/material-icons.css";
+
+// Iconos de Material Icons
+const Iconos = {
+  medico: "medical_services",
+  paciente: "person",
+  signos: "monitor_heart",
+  tratamiento: "vaccines",
+  guardar: "picture_as_pdf",
+  usuario: "account_circle",
+  reloj: "schedule",
+  calendario: "calendar_today",
+  buscar: "search",
+  cerrar: "close",
+  descargar: "download",
+  vista: "visibility"
+};
 
 export default function DoctorRecetaView() {
+  const [horaActual, setHoraActual] = useState("");
+  const [fechaActual, setFechaActual] = useState("");
+  const [usuario, setUsuario] = useState(null);
+
   const [formData, setFormData] = useState({
     doctorNombre: "",
     doctorCedula: "",
     doctorTelefono: "",
     doctorEmail: "",
-
     pacienteNombre: "",
     pacienteEdad: "",
     pacienteNacimiento: "",
     pacienteTelefono: "",
     pacienteAlergias: "",
-
     temperatura: "",
     presion: "",
     estatura: "",
-
     tratamiento: "",
   });
 
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
+  const [mostrarPreview, setMostrarPreview] = useState(false);
 
+  // ===========================
+  // CARGAR USUARIO ACTUAL
+  // ===========================
   useEffect(() => {
     const u = JSON.parse(localStorage.getItem("usuario"));
     if (u) {
+      setUsuario(u);
       setFormData((prev) => ({
         ...prev,
         doctorNombre: `${u.nombre} ${u.apellidoPaterno || ""}`,
@@ -42,40 +65,221 @@ export default function DoctorRecetaView() {
     }
   }, []);
 
+  // ===========================
+  // RELOJ
+  // ===========================
+  useEffect(() => {
+    const int = setInterval(() => {
+      const now = new Date();
+
+      setHoraActual(
+        now.toLocaleTimeString("es-MX", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+
+      const f = now.toLocaleDateString("es-MX", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      setFechaActual(f.charAt(0).toUpperCase() + f.slice(1));
+    }, 1000);
+
+    return () => clearInterval(int);
+  }, []);
+
+  // ===========================
+  // HANDLER DE INPUTS
+  // ===========================
   const handleInput = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ==========================================
-  // GENERAR PDF EXACTO A LA VISTA PREVIA
-  // ==========================================
-  const generarPdfEnPantalla = async () => {
-    const receta = document.getElementById("recetaPreview");
-    const logoEl = document.querySelector(`.${styles.pdfLogo}`);
+  // ===========================
+  // FUNCIONES PARA PDF
+  // ===========================
+  const safe = (str) => {
+    return str ? String(str) : "";
+  };
 
-    // Remover miniatura
-    receta.classList.remove(styles.recetaPreviewMini);
-    logoEl.classList.remove(styles.pdfLogoMini);
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-MX", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+  };
 
-    await new Promise((res) => setTimeout(res, 150));
+  // ===========================
+  // GENERAR VISTA PREVIA PDF
+  // ===========================
+  const generarVistaPreviaPDF = async () => {
+    const html = `
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8"/>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            color: #333;
+            line-height: 1.4;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 4px solid #63b2a5;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+          }
+          .logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+          }
+          .doctor-info h1 {
+            font-size: 22px;
+            color: #63b2a5;
+            margin: 0;
+          }
+          .section-title {
+            font-size: 18px;
+            margin-top: 25px;
+            color: #63b2a5;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 5px;
+          }
+          .data-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 20px;
+            margin-top: 10px;
+          }
+          .field {
+            width: 45%;
+          }
+          .rx-symbol {
+            font-size: 70px;
+            color: #63b2a5;
+            margin: 25px 0;
+            text-align: center;
+            opacity: 0.7;
+          }
+          .box {
+            background: #F8FAFC;
+            padding: 20px;
+            border-left: 4px solid #63b2a5;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.6;
+          }
+          .footer {
+            margin-top: 40px;
+            padding: 15px;
+            background: #63b2a5;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            font-size: 14px;
+          }
+          .field strong {
+            color: #555;
+          }
+        </style>
+      </head>
 
-    const canvas = await html2canvas(receta, { scale: 3 });
+      <body>
+
+        <!-- Encabezado con logo + info médico -->
+        <div class="header">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="width: 70px; height: 70px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+              <span style="font-size: 24px;">🏥</span>
+            </div>
+            <div class="doctor-info">
+              <h1>${safe(formData.doctorNombre)}</h1>
+              <div>Médico General</div>
+              <div>Cédula: ${safe(formData.doctorCedula)}</div>
+            </div>
+          </div>
+
+          <div style="text-align: right; font-size: 13px;">
+            Tel: ${safe(formData.doctorTelefono)}<br>
+            Email: ${safe(formData.doctorEmail)}
+          </div>
+        </div>
+
+        <!-- Datos del Paciente -->
+        <div class="section-title">Datos del Paciente</div>
+        <div class="data-grid">
+          <div class="field"><strong>Paciente:</strong> ${safe(formData.pacienteNombre)}</div>
+          <div class="field"><strong>Edad:</strong> ${safe(formData.pacienteEdad)} años</div>
+          <div class="field"><strong>Fecha Nac.:</strong> ${formatDate(formData.pacienteNacimiento)}</div>
+          <div class="field"><strong>Teléfono:</strong> ${safe(formData.pacienteTelefono)}</div>
+          <div class="field"><strong>Alergias:</strong> ${safe(formData.pacienteAlergias) || "Ninguna registrada"}</div>
+          <div class="field"><strong>Fecha de Receta:</strong> ${formatDate(new Date().toISOString())}</div>
+        </div>
+
+        <!-- Signos Vitales -->
+        <div class="section-title">Signos Vitales</div>
+        <div class="data-grid">
+          <div class="field"><strong>Temperatura:</strong> ${safe(formData.temperatura) || "N/A"}°C</div>
+          <div class="field"><strong>Presión:</strong> ${safe(formData.presion) || "N/A"}</div>
+          <div class="field"><strong>Estatura:</strong> ${safe(formData.estatura) || "N/A"} cm</div>
+        </div>
+
+        <!-- RX -->
+        <div class="rx-symbol">℞</div>
+
+        <!-- Tratamiento -->
+        <div class="section-title">Tratamiento</div>
+        <div class="box">${safe(formData.tratamiento) || "No se ha especificado tratamiento."}</div>
+
+        <!-- Footer -->
+        <div class="footer">
+          <div><strong>${safe(formData.doctorNombre)}</strong> - Médico General</div>
+          <div>Cédula: ${safe(formData.doctorCedula)} | Tel: ${safe(formData.doctorTelefono)} | Email: ${safe(formData.doctorEmail)}</div>
+        </div>
+
+      </body>
+    </html>
+    `;
+
+    // Crear blob del HTML
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    setPdfPreviewUrl(url);
+    setMostrarPreview(true);
+  };
+
+  // ===========================
+  // GENERAR PDF DESCARGABLE
+  // ===========================
+  const generarPDFDescargable = async () => {
+    const element = document.createElement("div");
+    element.innerHTML = `
+      <div style="font-family: Arial, sans-serif; padding: 30px; color: #333; line-height: 1.4;">
+        <!-- Contenido del PDF igual al preview -->
+        ${document.querySelector('.pdfPreviewContent')?.innerHTML || ''}
+      </div>
+    `;
+
+    const canvas = await html2canvas(element, { scale: 2 });
     const imgData = canvas.toDataURL("image/png");
 
-    // Restaurar miniatura
-    receta.classList.add(styles.recetaPreviewMini);
-    logoEl.classList.add(styles.pdfLogoMini);
-
     const pdf = new jsPDF("p", "mm", "letter");
-    const pdfWidth = 215;
+    const pdfWidth = 210;
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-
-    const pdfBlob = pdf.output("blob");
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-
-    setPdfPreviewUrl(pdfUrl);
+    pdf.save(`receta-${formData.pacienteNombre || 'paciente'}-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   return (
@@ -83,114 +287,207 @@ export default function DoctorRecetaView() {
       <SidebarMenu opcionesCustom={SidebarDoctor} />
 
       <div className={styles.contentArea}>
-        <h1 className={styles.title}>Generar Receta Médica</h1>
-
-        {/* FORMULARIO */}
-        <div className={styles.formSection}>
-          <h2 className={styles.sectionTitle}>Datos del Médico</h2>
-          <div className={styles.grid2}>
-            <input type="text" name="doctorNombre" placeholder="Nombre" value={formData.doctorNombre} onChange={handleInput} />
-            <input type="text" name="doctorCedula" placeholder="Cédula" value={formData.doctorCedula} onChange={handleInput} />
-            <input type="text" name="doctorTelefono" placeholder="Teléfono" value={formData.doctorTelefono} onChange={handleInput} />
-            <input type="email" name="doctorEmail" placeholder="Email" value={formData.doctorEmail} onChange={handleInput} />
+        {/* ======= HEADER COMPACTO ======= */}
+        <header className={styles.header}>
+          <div className={styles.logoBox}>
+            <img src={logo} alt="Logo" className={styles.logo} />
           </div>
 
-          <h2 className={styles.sectionTitle}>Datos del Paciente</h2>
-          <div className={styles.grid2}>
-            <input type="text" name="pacienteNombre" placeholder="Nombre" value={formData.pacienteNombre} onChange={handleInput} />
-            <input type="number" name="pacienteEdad" placeholder="Edad" value={formData.pacienteEdad} onChange={handleInput} />
-            <input type="date" name="pacienteNacimiento" value={formData.pacienteNacimiento} onChange={handleInput} />
-            <input type="text" name="pacienteTelefono" placeholder="Teléfono" value={formData.pacienteTelefono} onChange={handleInput} />
-            <input type="text" name="pacienteAlergias" placeholder="Alergias" value={formData.pacienteAlergias} onChange={handleInput} />
+          <div className={styles.userInfo}>
+            <span className={styles.userName}>
+              <span className="material-icons">{Iconos.usuario}</span>
+              {usuario?.nombreUsuario || "Doctor"}
+            </span>
+            <div className={styles.timeInfo}>
+              <span className={styles.time}>
+                <span className="material-icons">{Iconos.reloj}</span>
+                {horaActual}
+              </span>
+              <span className={styles.date}>
+                <span className="material-icons">{Iconos.calendario}</span>
+                {fechaActual}
+              </span>
+            </div>
           </div>
+        </header>
 
-          <h2 className={styles.sectionTitle}>Signos Vitales</h2>
-          <div className={styles.grid3}>
-            <input type="text" name="temperatura" placeholder="Temperatura" value={formData.temperatura} onChange={handleInput} />
-            <input type="text" name="presion" placeholder="Presión" value={formData.presion} onChange={handleInput} />
-            <input type="text" name="estatura" placeholder="Estatura" value={formData.estatura} onChange={handleInput} />
-          </div>
+        {/* ======= CONTENIDO PRINCIPAL CON SCROLL ======= */}
+        <div className={styles.scrollContainer}>
+          <div className={styles.mainContent}>
+            
+            {/* ======= FORMULARIO COMPACTO ======= */}
+            <form className={styles.compactForm}>
+              
+              {/* SECCIÓN MÉDICO Y PACIENTE EN GRID */}
+              <div className={styles.doubleSection}>
+                {/* MÉDICO */}
+                <div className={styles.formSection}>
+                  <h2 className={styles.sectionTitle}>
+                    <span className="material-icons">{Iconos.medico}</span>
+                    Datos del Médico
+                  </h2>
+                  <div className={styles.gridForm}>
+                    <div className={styles.inputGroup}>
+                      <label>Nombre Completo</label>
+                      <input type="text" name="doctorNombre" value={formData.doctorNombre} onChange={handleInput} />
+                    </div>
 
-          <h2 className={styles.sectionTitle}>Tratamiento</h2>
-          <textarea
-            className={styles.textarea}
-            name="tratamiento"
-            rows="5"
-            placeholder="Escribe la receta..."
-            value={formData.tratamiento}
-            onChange={handleInput}
-          />
+                    <div className={styles.inputGroup}>
+                      <label>Cédula Profesional</label>
+                      <input type="text" name="doctorCedula" value={formData.doctorCedula} onChange={handleInput} />
+                    </div>
 
-          <button className={styles.generateBtn} onClick={generarPdfEnPantalla}>
-            <span className="material-icons">send</span>
-            Guardar y mandar receta
-          </button>
-        </div>
+                    <div className={styles.inputGroup}>
+                      <label>Teléfono</label>
+                      <input type="text" name="doctorTelefono" value={formData.doctorTelefono} onChange={handleInput} />
+                    </div>
 
-        {/* ==========================================
-            PREVIEW HTML BASE PARA PDF
-        ========================================== */}
-        <div id="recetaPreview" className={`${styles.recetaPreview} ${styles.recetaPreviewMini}`}>
-          
-          <div className={styles.recetaHeader}>
-            <div className={styles.recetaDoctor}>
-              <img src={logo} className={`${styles.pdfLogo} ${styles.pdfLogoMini}`} alt="logo" />
-              <div>
-                <h2>{formData.doctorNombre || "Médico"}</h2>
-                <p>Médico General</p>
-                <p>Cédula: {formData.doctorCedula}</p>
+                    <div className={styles.inputGroup}>
+                      <label>Email</label>
+                      <input type="email" name="doctorEmail" value={formData.doctorEmail} onChange={handleInput} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* PACIENTE */}
+                <div className={styles.formSection}>
+                  <h2 className={styles.sectionTitle}>
+                    <span className="material-icons">{Iconos.paciente}</span>
+                    Datos del Paciente
+                  </h2>
+                  <div className={styles.gridForm}>
+                    <div className={styles.inputGroup}>
+                      <label>Nombre Completo</label>
+                      <input type="text" name="pacienteNombre" value={formData.pacienteNombre} onChange={handleInput} />
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                      <label>Edad</label>
+                      <input type="number" name="pacienteEdad" value={formData.pacienteEdad} onChange={handleInput} />
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                      <label>Fecha Nacimiento</label>
+                      <input type="date" name="pacienteNacimiento" value={formData.pacienteNacimiento} onChange={handleInput} />
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                      <label>Teléfono</label>
+                      <input type="text" name="pacienteTelefono" value={formData.pacienteTelefono} onChange={handleInput} />
+                    </div>
+
+                    <div className={styles.inputGroupFull}>
+                      <label>Alergias Conocidas</label>
+                      <input type="text" name="pacienteAlergias" value={formData.pacienteAlergias} onChange={handleInput} placeholder="Lista de alergias o condiciones relevantes" />
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              {/* SIGNOS VITALES */}
+              <div className={styles.formSection}>
+                <h2 className={styles.sectionTitle}>
+                  <span className="material-icons">{Iconos.signos}</span>
+                  Signos Vitales
+                </h2>
+                <div className={styles.vitalsGrid}>
+                  <div className={styles.inputGroup}>
+                    <label>Temperatura (°C)</label>
+                    <input type="text" name="temperatura" value={formData.temperatura} onChange={handleInput} placeholder="Ej: 36.5" />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>Presión Arterial</label>
+                    <input type="text" name="presion" value={formData.presion} onChange={handleInput} placeholder="Ej: 120/80" />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>Estatura (cm)</label>
+                    <input type="text" name="estatura" value={formData.estatura} onChange={handleInput} placeholder="Ej: 170" />
+                  </div>
+                </div>
+              </div>
+
+              {/* TRATAMIENTO */}
+              <div className={styles.formSection}>
+                <h2 className={styles.sectionTitle}>
+                  <span className="material-icons">{Iconos.tratamiento}</span>
+                  Tratamiento
+                </h2>
+                <div className={styles.inputGroup}>
+                  <label>Descripción del Tratamiento</label>
+                  <textarea
+                    name="tratamiento"
+                    value={formData.tratamiento}
+                    onChange={handleInput}
+                    placeholder="Describa el tratamiento completo, incluyendo medicamentos, dosis, frecuencia, duración, recomendaciones, etc."
+                    rows="6"
+                  ></textarea>
+                </div>
+              </div>
+
+            </form>
+
+            {/* ======= BOTONES DE ACCIÓN ======= */}
+            <div className={styles.actionBar}>
+              <button 
+                className={styles.previewBtn} 
+                onClick={generarVistaPreviaPDF}
+                disabled={!formData.pacienteNombre}
+              >
+                <span className="material-icons">{Iconos.vista}</span>
+                Vista Previa PDF
+              </button>
+              
+              <button 
+                className={styles.saveBtn} 
+                onClick={generarPDFDescargable}
+                disabled={!formData.pacienteNombre}
+              >
+                <span className="material-icons">{Iconos.guardar}</span>
+                Descargar Receta
+              </button>
             </div>
 
-            <div className={styles.recetaDoctorInfo}>
-              <p>Tel: {formData.doctorTelefono}</p>
-              <p>Email: {formData.doctorEmail}</p>
-            </div>
-          </div>
-
-          <h3 className={styles.previewTitle}>Datos del Paciente</h3>
-          <div className={styles.previewGrid2}>
-            <p><strong>Paciente:</strong> {formData.pacienteNombre}</p>
-            <p><strong>Edad:</strong> {formData.pacienteEdad}</p>
-            <p><strong>Fecha Nac.:</strong> {formData.pacienteNacimiento}</p>
-            <p><strong>Teléfono:</strong> {formData.pacienteTelefono}</p>
-            <p><strong>Alergias:</strong> {formData.pacienteAlergias}</p>
-            <p><strong>Fecha de Receta:</strong> {new Date().toLocaleDateString()}</p>
-          </div>
-
-          <h3 className={styles.previewTitle}>Signos Vitales</h3>
-          <div className={styles.previewGrid3}>
-            <p><strong>Temperatura:</strong> {formData.temperatura}°C</p>
-            <p><strong>Presión:</strong> {formData.presion}</p>
-            <p><strong>Estatura:</strong> {formData.estatura} cm</p>
-          </div>
-
-          {/* MARCA DE AGUA */}
-          <div className={styles.watermark}></div>
-
-          <h3 className={styles.previewTitle}>Tratamiento</h3>
-          <div className={styles.tratamientoBox}>{formData.tratamiento}</div>
-
-          <div className={styles.footer}>
-            <strong>{formData.doctorNombre}</strong>
-            <p>Tel: {formData.doctorTelefono} — Email: {formData.doctorEmail}</p>
+            {/* ======= VISTA PREVIA PDF ======= */}
+            {mostrarPreview && pdfPreviewUrl && (
+              <div className={styles.pdfPreview}>
+                <div className={styles.previewHeader}>
+                  <h2 className={styles.previewTitle}>
+                    <span className="material-icons">{Iconos.vista}</span>
+                    Vista Previa de la Receta
+                  </h2>
+                  <button 
+                    className={styles.closePreview} 
+                    onClick={() => setMostrarPreview(false)}
+                  >
+                    <span className="material-icons">{Iconos.cerrar}</span>
+                  </button>
+                </div>
+                
+                <div className={styles.previewContainer}>
+                  <iframe
+                    src={pdfPreviewUrl}
+                    width="100%"
+                    height="600px"
+                    className={styles.previewFrame}
+                    title="Vista previa de la receta médica"
+                  />
+                </div>
+                
+                <div className={styles.previewActions}>
+                  <button 
+                    className={styles.downloadBtn}
+                    onClick={generarPDFDescargable}
+                  >
+                    <span className="material-icons">{Iconos.descargar}</span>
+                    Descargar PDF
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* ==========================================
-            VISOR PDF
-        ========================================== */}
-        {pdfPreviewUrl && (
-          <div style={{ marginTop: "2rem" }}>
-            <h2>Vista previa del PDF generado</h2>
-            <iframe
-              src={pdfPreviewUrl}
-              width="100%"
-              height="700px"
-              style={{ border: "1px solid #ccc", borderRadius: "10px" }}
-            />
-          </div>
-        )}
       </div>
     </div>
   );

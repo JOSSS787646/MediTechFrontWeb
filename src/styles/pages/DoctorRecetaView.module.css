@@ -1,272 +1,430 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-
-* {
-  font-family: "Inter", sans-serif;
+:root {
+  --sidebar-color: #63b2a5;
+  --sidebar-hover: #4b8e83;
+  --text-dark: #0a2928;
+  --text-light: #64748b;
+  --white: #ffffff;
+  --background: #f8fafc;
+  --border-light: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+  --font: "Segoe UI", sans-serif;
 }
 
-/* ==========================================
-   LAYOUT GENERAL
-========================================== */
+/* ===== Layout general mejorado ===== */
 .mainLayout {
   display: flex;
   width: 100%;
-  height: 100vh;
-  background: #f8f9fa;
+  min-height: 100vh;
+  background: var(--background);
+  font-family: var(--font);
 }
 
+/* ===== Área de contenido optimizada ===== */
 .contentArea {
   flex: 1;
-  padding: 1.5rem 2.5rem;
-  overflow-y: auto;
+  padding: 1.5rem 2rem;
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #1c3c4f;
-  text-align: center;
-  margin-bottom: 1.5rem;
+/* ===== Contenedor de scroll ===== */
+.scrollContainer {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* ==========================================
-   FORMULARIO
-========================================== */
-.formSection {
-  max-width: 900px;
-  width: 100%;
-  margin: 0 auto 2rem auto;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-  border-radius: 0;
+.scrollContainer::-webkit-scrollbar {
+  width: 8px;
 }
 
-.sectionTitle {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #1c3c4f;
-  margin-top: 1rem;
-  margin-bottom: 0.6rem;
+.scrollContainer::-webkit-scrollbar-thumb {
+  background: var(--sidebar-color);
+  border-radius: 4px;
 }
 
-.grid2 {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px 15px;
+.scrollContainer::-webkit-scrollbar-track {
+  background: #f1f5f9;
 }
 
-.grid3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px 15px;
-}
-
-input,
-textarea {
-  width: 100%;
-  padding: 0.55rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid #cbd5df;
-  font-size: 0.85rem;
-  background: #fafafa;
-  transition: 0.2s;
-}
-
-input:focus,
-textarea:focus {
-  outline: none;
-  border-color: #1c3c4f;
-  background: white;
-}
-
-.textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-.generateBtn {
-  margin-top: 1.2rem;
-  background: #1e5e5c;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.4rem;
-  font-size: 0.9rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.generateBtn:hover {
-  background: #144746;
-}
-
-/* ==========================================
-   PREVIEW (PDF BASE)
-========================================== */
-
-/* Tamaño real para captura PDF */
-.recetaPreview {
-  position: relative;
-  width: 750px;
-  padding: 1.6rem 2rem;
-
-  background: white;
-  border-radius: 12px;
-  margin: 0 auto 2rem auto;
-  border: 1px solid #dce3e8;
-  box-shadow: 0 3px 10px #0003;
-  font-size: 0.85rem;
-}
-
-/* Miniatura para mostrar en pantalla */
-.recetaPreviewMini {
-  transform: scale(0.75);
-  transform-origin: top center;
-}
-
-/* ================================
-   MARCA DE AGUA
-================================ */
-.watermark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 450px;
-  height: 450px;
-  background: url("../../assets/logoLargo.png") center/contain no-repeat;
-  opacity: 0.08;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-/* ==========================================
-   LOGO
-========================================== */
-
-/* Tamaño real para PDF */
-.pdfLogo {
-  width: 200px !important;
-  height: 70px !important;
-  object-fit: contain;
-}
-
-/* Tamaño mini (vista previa) */
-.pdfLogoMini {
-  width: 65px !important;
-  height: 65px !important;
-  object-fit: contain;
-}
-
-/* ==========================================
-   ENCABEZADO
-========================================== */
-.recetaHeader {
+/* ===== Header compacto ===== */
+.header {
   display: flex;
   justify-content: space-between;
-  border-bottom: 3px solid #0077B6;
-  padding-bottom: 12px;
+  align-items: center;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
+  flex-shrink: 0;
 }
 
-.recetaDoctor {
+.logoBox {
   display: flex;
   align-items: center;
-  gap: 14px;
 }
 
-.recetaDoctor h2 {
-  font-size: 18px;
-  margin: 0;
-  color: #0077B6;
+.logo {
+  width: 200px;
+  height: auto;
 }
 
-.recetaDoctor p {
-  margin: 0;
-  font-size: 13px;
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.recetaDoctorInfo {
-  text-align: right;
-  font-size: 13px;
+.userName {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  background: #f1f5f9;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
 }
 
-/* ==========================================
-   SECCIONES
-========================================== */
-.previewTitle {
-  font-size: 15px;
-  margin-top: 20px;
-  color: #0077B6;
+.timeInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.time, .date {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.time {
   font-weight: 700;
+  color: var(--sidebar-color);
+  font-size: 1.1rem;
 }
 
-.previewGrid2 {
+.date {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.icon {
+  opacity: 0.8;
+  font-size: 0.9em;
+}
+
+/* ===== Contenido principal ===== */
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+/* ===== Formulario compacto ===== */
+.compactForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Sección doble (Médico + Paciente) */
+.doubleSection {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px 15px;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
 }
 
-.previewGrid3 {
+.formSection {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
+}
+
+/* Título de sección mejorado */
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.sectionIcon {
+  opacity: 0.8;
+  font-size: 1.1rem;
+}
+
+/* Grid de formularios optimizado */
+.gridForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.vitalsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px 15px;
+  gap: 1rem;
 }
 
-.tratamientoBox {
-  margin-top: 10px;
-  padding: 15px;
-  background: #F2F8FC;
-  border-left: 4px solid #0077B6;
-  border-radius: 6px;
-  font-size: 14px;
-  white-space: pre-wrap;
+/* Inputs de ancho completo */
+.inputGroupFull {
+  grid-column: 1 / -1;
 }
 
-/* ==========================================
-   FOOTER
-========================================== */
-.footer {
-  background: #0077B6;
+/* Grupos de input mejorados */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.inputGroup label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-left: 0.2rem;
+}
+
+.inputGroup input,
+.inputGroup textarea {
+  padding: 0.75rem;
+  border: 1.5px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: var(--font);
+  transition: all 0.2s ease;
+  background: #fafafa;
+}
+
+.inputGroup textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.4;
+}
+
+.inputGroup input:focus,
+.inputGroup textarea:focus {
+  border-color: var(--sidebar-color);
+  box-shadow: 0 0 0 3px rgba(99,178,165,0.1);
+  outline: none;
+  background: white;
+}
+
+.inputGroup input:hover,
+.inputGroup textarea:hover {
+  border-color: #cbd5e1;
+}
+
+/* ===== Barra de acciones ===== */
+.actionBar {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
+  flex-wrap: wrap;
+}
+
+.previewBtn, .saveBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 180px;
+  justify-content: center;
+}
+
+.previewBtn {
+  background: #e2e8f0;
+  color: var(--text-dark);
+}
+
+.previewBtn:hover:not(:disabled) {
+  background: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.saveBtn {
+  background: var(--sidebar-color);
   color: white;
-  text-align: center;
-  padding: 15px;
-  border-radius: 6px;
-  margin-top: 30px;
-  font-size: 14px;
 }
 
-.footer strong {
-  font-size: 15px;
+.saveBtn:hover:not(:disabled) {
+  background: var(--sidebar-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
 }
 
-/* ==========================================
-   RESPONSIVE
-========================================== */
-@media (max-width: 900px) {
+.previewBtn:disabled, .saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
 
-  .grid2,
-  .grid3,
-  .previewGrid2,
-  .previewGrid3 {
+.btnIcon {
+  font-size: 1.1rem;
+}
+
+/* ===== Preview PDF mejorado ===== */
+.pdfPreview {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+  background: #f8fafc;
+}
+
+.previewTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.previewIcon {
+  opacity: 0.8;
+}
+
+.closePreview {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  color: var(--text-light);
+}
+
+.closePreview:hover {
+  background: #e2e8f0;
+  color: var(--text-dark);
+}
+
+.previewContainer {
+  padding: 1.5rem;
+}
+
+.previewFrame {
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.previewActions {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-light);
+  background: #f8fafc;
+}
+
+.downloadBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--sidebar-color);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.downloadBtn:hover {
+  background: var(--sidebar-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1200px) {
+  .doubleSection {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .contentArea {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .userInfo {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .gridForm {
     grid-template-columns: 1fr;
   }
-
-  .recetaHeader {
+  
+  .vitalsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .logo {
+    width: 160px;
+  }
+  
+  .actionBar {
     flex-direction: column;
-    text-align: center;
-    gap: 12px;
+    align-items: center;
   }
-
-  .recetaDoctorInfo {
-    text-align: center;
-  }
-
-  .recetaPreview {
+  
+  .previewBtn, .saveBtn {
     width: 100%;
-    padding: 1rem;
+    max-width: 300px;
+  }
+  
+  .timeInfo {
+    align-items: center;
   }
 }
