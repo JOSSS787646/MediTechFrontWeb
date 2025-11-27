@@ -24,6 +24,17 @@ export const getPacienteById = async (id: number) => {
   }
 };
 
+// ✅ Obtener un paciente por CURP
+export const getPacienteByCurp = async (curp: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/curp/${curp}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("❌ Error al obtener el paciente por CURP:", error);
+    throw new Error("Error al obtener el paciente");
+  }
+};
+
 // ✅ Crear un nuevo paciente
 export const addPaciente = async (pacienteData: any) => {
   try {

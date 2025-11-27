@@ -22,6 +22,15 @@ export default function PacientesHome() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [, setSeccion] = useState("Pacientes");
   const [usuario, setUsuario] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // === Actualizar hora en tiempo real ===
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // === Cargar usuario ===
   useEffect(() => {
@@ -85,11 +94,23 @@ export default function PacientesHome() {
     setCurrentPage(1);
   }, [searchTerm, data]);
 
-  // === Campos ocultos ===
-  const ocultarCampos = ["id", "fechaCreacion", "esActivo", "fechaNacimiento"];
+  // === Formatear fecha y hora ===
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('es-MX', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
 
-  const humanizarCampo = (campo) =>
-    campo.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+  const formatDate = (date) => {
+    return date.toLocaleDateString('es-MX', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   // === Paginación ===
   const indexOfLast = currentPage * rowsPerPage;
@@ -113,116 +134,244 @@ export default function PacientesHome() {
           />
       )}
 
-      <div className={styles.usersPageContainer}>
-        
-        {/* ===================================================== */}
-        {/* HEADER */}
-        {/* ===================================================== */}
-        <header className={styles.header}>
-          <img src={logo} alt="Logo" className={styles.logo} />
+      <div className={styles.contentArea}>
+        <div className={styles.container}>
+          
+          {/* ===== HEADER COMPACTO ===== */}
+          <header className={styles.header}>
+            <div className={styles.logoBox}>
+              <img src={logo} alt="Logo" className={styles.logo} />
+            </div>
 
-          <div className={styles.userBox}>
-            <span className="material-icons">account_circle</span>
-            {usuario?.nombreUsuario || "Usuario"}
+            <div className={styles.userInfo}>
+              <div className={styles.userName}>
+                <span className="material-icons">account_circle</span>
+                {usuario?.nombreUsuario || "Usuario"}
+              </div>
+              
+              <div className={styles.timeInfo}>
+                <div className={styles.time}>
+                  <span className="material-icons">schedule</span>
+                  {formatTime(currentTime)}
+                </div>
+                <div className={styles.date}>
+                  <span className="material-icons">calendar_today</span>
+                  {formatDate(currentTime)}
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* ===== BARRA DE BÚSQUEDA ===== */}
+          <section className={styles.searchSection}>
+            <div className={styles.searchBarWrapper}>
+              <span className={`material-icons ${styles.searchIcon}`}>search</span>
+              <input
+                type="text"
+                placeholder="Buscar paciente por nombre..."
+                className={styles.searchBar}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </section>
+
+          {/* ===== ENCABEZADO DE SECCIÓN ===== */}
+          <section className={styles.sectionHeader}>
+            <div className={styles.sectionTitle}>
+              <span className="material-icons">people</span>
+              Administrar Pacientes
+            </div>
+            
+            <div className={styles.appointmentCount}>
+              <span className="material-icons">person</span>
+              {filteredData.length} Pacientes
+            </div>
+
+            
+          </section>
+
+          {/* ===== ALERTAS ===== */}
+          {alert && (
+            <div className={`alert alert-${alert.type}`}>{alert.message}</div>
+          )}
+
+          {/* ===== CONTENEDOR DE SCROLL CON TABLA ===== */}
+          <div className={styles.scrollContainer}>
+            <div className={styles.tableWrapper}>
+              <TablaPacientes
+                currentRows={currentRows}
+                filteredData={filteredData}
+              />
+            </div>
           </div>
-        </header>
 
-        <hr className={styles.divider} />
-
-        {/* ===================================================== */}
-        {/* BARRA BUSQUEDA + BOTON REGISTRAR */}
-        {/* ===================================================== */}
-        <div className={styles.usersNav}>
-          <div className={styles.searchBox}>
-            <span className="material-icons">search</span>
-            <input
-              type="text"
-              placeholder="Buscar paciente..."
-              className={styles.searchInput}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <button
-            className={styles.toggleButton}
-            onClick={() => setShowRegisterModal(true)}
-          >
-            <span className="material-icons">person_add</span>
-            Registrar Paciente
-          </button>
-        </div>
-
-        {alert && (
-          <div className={`alert alert-${alert.type} mt-3`}>{alert.message}</div>
-        )}
-
-        <h2 className={styles.pageTitle}>Administrar Pacientes</h2>
-
-        {/* ===================================================== */}
-        {/* TABLA */}
-        {/* ===================================================== */}
-        <TablaPacientes
-          filteredData={filteredData}
-          currentRows={currentRows}
-          ocultarCampos={ocultarCampos}
-          humanizarCampo={humanizarCampo}
-        />
-
-        {/* ===================================================== */}
-        {/* PAGINACIÓN */}
-        {/* ===================================================== */}
-        <Paginacion
-          filteredData={filteredData}
-          rowsPerPage={rowsPerPage}
-          setRowsPerPage={setRowsPerPage}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          totalPages={totalPages}
-        />
-
-        {showRegisterModal && (
-          <RegisterPacienteModal
-            onClose={() => setShowRegisterModal(false)}
-            onSave={fetchPacientes}
+          {/* ===== PAGINACIÓN ===== */}
+          <Paginacion
+            filteredData={filteredData}
+            rowsPerPage={rowsPerPage}
+            setRowsPerPage={setRowsPerPage}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            totalPages={totalPages}
           />
-        )}
+
+          {showRegisterModal && (
+            <RegisterPacienteModal
+              onClose={() => setShowRegisterModal(false)}
+              onSave={fetchPacientes}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
 /* ================================================================
-   TABLA PACIENTES
+   TABLA PACIENTES - SOLO CAMPOS SOLICITADOS
 ================================================================ */
-function TablaPacientes({ filteredData, currentRows, ocultarCampos, humanizarCampo }) {
+function TablaPacientes({ currentRows}) {
+  // Función para calcular edad desde fecha de nacimiento
+  const calcularEdad = (fechaNacimiento) => {
+    if (!fechaNacimiento) return 'N/A';
+    try {
+      const nacimiento = new Date(fechaNacimiento);
+      const hoy = new Date();
+      let edad = hoy.getFullYear() - nacimiento.getFullYear();
+      const mes = hoy.getMonth() - nacimiento.getMonth();
+      if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+      }
+      return `${edad} años`;
+    } catch{
+      return 'N/A';
+    }
+  };
+
+  // Función para formatear género
+  const formatearGenero = (genero) => {
+    if (!genero) return 'No especificado';
+    const gen = genero.toString().toLowerCase();
+    if (gen === 'm' || gen === 'masculino') return 'Masculino';
+    if (gen === 'f' || gen === 'femenino') return 'Femenino';
+    return genero;
+  };
+
   return (
-    <div className={styles.tableWrapper}>
-      <table className={styles.crudTable}>
+    <div className={styles.tableContainer}>
+      <table className={styles.citasTable}>
         <thead>
           <tr>
-            {filteredData.length > 0 &&
-              Object.keys(filteredData[0])
-                .filter((key) => !ocultarCampos.includes(key))
-                .map((key) => <th key={key}>{humanizarCampo(key)}</th>)}
+            <th>
+             
+              Nombre Completo
+            </th>
+            <th>
+              
+              Edad
+            </th>
+            <th>
+              
+              CURP
+            </th>
+            <th>
+             
+              Email
+            </th>
+            <th>
+             
+              Teléfono
+            </th>
+            <th>
+              
+              Género
+            </th>
+            
           </tr>
         </thead>
 
         <tbody>
           {currentRows.length === 0 ? (
-            <tr>
-              <td colSpan="100%" style={{ textAlign: "center", padding: "1rem" }}>
-                No se encontraron registros
+            <tr className={styles.emptyRow}>
+              <td colSpan="7">
+                <div className={styles.emptyState}>
+                  <span className={`material-icons ${styles.emptyIcon}`}>search_off</span>
+                  <p>No se encontraron pacientes</p>
+                  <small>Intenta con otros términos de búsqueda</small>
+                </div>
               </td>
             </tr>
           ) : (
             currentRows.map((paciente) => (
-              <tr key={paciente.id}>
-                {Object.entries(paciente)
-                  .filter(([key]) => !ocultarCampos.includes(key))
-                  .map(([key, value]) => (
-                    <td key={key}>{String(value ?? "")}</td>
-                  ))}
+              <tr key={paciente.id} className={styles.tableRow}>
+                {/* Nombre Completo */}
+                <td className={styles.patientCell}>
+                  <div className={styles.patientInfo}>
+                    <span className={`material-icons ${styles.patientIcon}`}>person</span>
+                    <div className={styles.patientDetails}>
+                      <div className={styles.patientName}>
+                        {paciente.nombre || 'N/A'} {paciente.apellidoPaterno || ''} {paciente.apellidoMaterno || ''}
+                      </div>
+                      <small className={styles.patientSubtext}>
+                        {[paciente.apellidoPaterno, paciente.apellidoMaterno].filter(Boolean).join(' ')}
+                      </small>
+                    </div>
+                  </div>
+                </td>
+
+                {/* Edad */}
+                <td>
+                  <div className={styles.edadBadge}>
+                    
+                    {calcularEdad(paciente.fechaNacimiento)}
+                  </div>
+                </td>
+
+                {/* CURP */}
+                <td>
+                  <div className={styles.curpCell}>
+                    {paciente.curp ? (
+                      <code className={styles.curpCode}>{paciente.curp}</code>
+                    ) : (
+                      <span className={styles.noData}>No asignada</span>
+                    )}
+                  </div>
+                </td>
+
+                {/* Email */}
+                <td>
+                  {paciente.email ? (
+                    <div className={styles.emailCell}>
+                      
+                      {paciente.email}
+                    </div>
+                  ) : (
+                    <span className={styles.noData}>No especificado</span>
+                  )}
+                </td>
+
+                {/* Teléfono */}
+                <td>
+                  {paciente.telefono ? (
+                    <div className={styles.phoneCell}>
+                      
+                      {paciente.telefono}
+                    </div>
+                  ) : (
+                    <span className={styles.noData}>No especificado</span>
+                  )}
+                </td>
+
+                {/* Género */}
+                <td>
+                  <div className={styles.generoCell}>
+                    
+                    {formatearGenero(paciente.genero)}
+                  </div>
+                </td>
+
+                
               </tr>
             ))
           )}
@@ -233,7 +382,7 @@ function TablaPacientes({ filteredData, currentRows, ocultarCampos, humanizarCam
 }
 
 /* ================================================================
-   PAGINACIÓN
+   PAGINACIÓN - ESTILO MEITECH
 ================================================================ */
 function Paginacion({
   filteredData,
@@ -255,6 +404,7 @@ function Paginacion({
                 setRowsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
+              className={styles.paginationSelect}
             >
               {[5, 10, 20, 50].map((num) => (
                 <option key={num} value={num}>
@@ -265,15 +415,20 @@ function Paginacion({
           </div>
 
           <div className={styles.pageControls}>
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
+            <button 
+              className={styles.paginationBtn}
+              disabled={currentPage === 1} 
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
               <span className="material-icons">chevron_left</span>
             </button>
 
-            <span>
+            <span className={styles.pageInfo}>
               Página {currentPage} de {totalPages || 1}
             </span>
 
             <button
+              className={styles.paginationBtn}
               disabled={currentPage === totalPages || totalPages === 0}
               onClick={() => setCurrentPage((p) => p + 1)}
             >
@@ -285,4 +440,3 @@ function Paginacion({
     </>
   );
 }
-//.

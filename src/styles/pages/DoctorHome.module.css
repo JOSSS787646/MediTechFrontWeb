@@ -115,7 +115,7 @@
   font-size: 0.9em;
 }
 
-/* ===== Barra de búsqueda ===== */
+/* ===== Barra de búsqueda SEPARADA ===== */
 .searchSection {
   width: 100%;
   background: white;
@@ -123,6 +123,8 @@
   border-radius: 12px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-light);
+  /* Se asegura que esté separada del header */
+  margin-top: 0;
 }
 
 .searchBarWrapper {
@@ -213,39 +215,34 @@
   opacity: 0.9;
 }
 
-/* ===== Contenedor de scroll ===== */
+/* ===== CONTENEDOR PRINCIPAL CON ALTURA FIJA Y SCROLL INTERNO ===== */
 .scrollContainer {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
   background: white;
   border-radius: 12px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-light);
+  /* Eliminamos el overflow general */
+  overflow: hidden;
 }
 
-.scrollContainer::-webkit-scrollbar {
-  width: 8px;
-}
-
-.scrollContainer::-webkit-scrollbar-thumb {
-  background: var(--sidebar-color);
-  border-radius: 4px;
-}
-
-.scrollContainer::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-/* ===== Tabla de citas ===== */
+/* ===== TABLA CON SCROLL INTERNO EN EL TBODY ===== */
 .tableWrapper {
   width: 100%;
-  height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .tableContainer {
   width: 100%;
-  overflow-x: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .citasTable {
@@ -253,6 +250,9 @@
   border-collapse: collapse;
   font-family: var(--font);
   min-width: 900px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .citasTable thead {
@@ -261,6 +261,41 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  flex-shrink: 0;
+}
+
+.citasTable thead tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.citasTable tbody {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: block;
+  max-height: calc(100vh - 400px); /* Altura ajustable según necesidad */
+}
+
+.citasTable tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Scroll personalizado para el tbody */
+.citasTable tbody::-webkit-scrollbar {
+  width: 8px;
+}
+
+.citasTable tbody::-webkit-scrollbar-thumb {
+  background: var(--sidebar-color);
+  border-radius: 4px;
+}
+
+.citasTable tbody::-webkit-scrollbar-track {
+  background: #f1f5f9;
 }
 
 .citasTable th {
@@ -479,6 +514,10 @@
   .timeInfo {
     align-items: center;
   }
+
+  .citasTable tbody {
+    max-height: calc(100vh - 450px); /* Ajuste para pantallas más pequeñas */
+  }
 }
 
 @media (max-width: 768px) {
@@ -498,6 +537,7 @@
   
   .citasTable {
     font-size: 0.8rem;
+    min-width: 700px;
   }
   
   .citasTable th,
@@ -527,11 +567,16 @@
   .motivoCell {
     max-width: 120px;
   }
+
+  .citasTable tbody {
+    max-height: calc(100vh - 500px);
+  }
 }
 
 @media (max-width: 480px) {
   .contentArea {
     padding: 0.8rem;
+    gap: 1rem;
   }
   
   .header {
@@ -544,6 +589,8 @@
   
   .sectionHeader {
     padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
   }
   
   .sectionTitle {
@@ -563,5 +610,9 @@
   .citasTable td {
     font-size: 0.75rem;
     padding: 0.6rem 0.3rem;
+  }
+
+  .citasTable tbody {
+    max-height: calc(100vh - 350px);
   }
 }
