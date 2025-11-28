@@ -203,6 +203,7 @@ export default function DoctorRecetaView() {
       setHoraActual(ahora.toLocaleTimeString("es-MX", {
         hour: "2-digit",
         minute: "2-digit",
+        second:"2-digit"
       }));
       setFechaActual(ahora.toLocaleDateString("es-MX", {
         year: "numeric",

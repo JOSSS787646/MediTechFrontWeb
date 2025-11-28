@@ -1,9 +1,8 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login as loginApi } from "../Api/auth";
+import { useAuth } from "../context/AuthContext"; // o "../hooks/useAuth"
 import styles from "../styles/Login.module.css";
-
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -11,7 +10,35 @@ export default function Login() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
+  
   const navigate = useNavigate();
+  const { isAuthenticated, isCheckingAuth, usuario, login } = useAuth();
+
+  // 🔄 Redirigir si ya está autenticado
+  useEffect(() => {
+    if (!isCheckingAuth && isAuthenticated) {
+      console.log("🔄 Usuario ya autenticado, redirigiendo...");
+      redirectPorTipoUsuario(usuario);
+    }
+  }, [isAuthenticated, isCheckingAuth, usuario, navigate]);
+
+  // Función para redirigir según el tipo de usuario
+  const redirectPorTipoUsuario = (usuarioData) => {
+    const tipo = usuarioData?.tipoColaborador?.toString().trim().toLowerCase();
+    console.log("🔎 Redirigiendo por tipo:", tipo);
+
+    if (tipo?.includes("médico") || tipo?.includes("medico") || tipo === "1") {
+      navigate("/home-doctor", { replace: true });
+    } else if (tipo?.includes("enfermera") || tipo === "2") {
+      navigate("/home-nurse", { replace: true });
+    } else if (tipo?.includes("admin") || tipo?.includes("administrador") || tipo === "3") {
+      navigate("/home-administrator", { replace: true });
+    } else {
+      console.warn("⚠️ Tipo de colaborador no reconocido:", tipo);
+      // Por defecto, ir al login
+      navigate("/login", { replace: true });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,36 +50,18 @@ export default function Login() {
 
       if (response.exito && response.token) {
         const usuarioData = {
-          id: response.id,              // 👈 GUARDAMOS EL ID
+          id: response.id,
           nombreUsuario: username,
           tipoColaborador: response.tipoColaborador,
           token: response.token,
         };
 
-        localStorage.setItem("usuario", JSON.stringify(usuarioData));
-        console.log("👤 Usuario guardado en localStorage:", usuarioData);
+        // Usar el contexto de autenticación para hacer login
+        login(response.token, usuarioData);
+        console.log("👤 Usuario guardado en contexto y localStorage:", usuarioData);
 
-        // Normalizamos el texto
-        const tipo = response.tipoColaborador?.toString().trim().toLowerCase();
-        console.log("🔎 Tipo de colaborador detectado:", tipo);
-
-        if (
-          tipo.includes("médico") ||
-          tipo.includes("medico") ||
-          tipo === "1"
-        ) {
-          navigate("/home-doctor");
-        }
-        else if (tipo.includes("enfermera") || tipo === "2") {
-          navigate("/home-nurse");
-        }
-        else if (tipo.includes("admin") || tipo.includes("administrador") || tipo === "3") {
-          navigate("/home-administrator");
-        }
-        else {
-          console.warn("⚠️ Tipo de colaborador no reconocido:", tipo);
-          navigate("/login");
-        }
+        // Redirigir según el tipo de usuario
+        redirectPorTipoUsuario(usuarioData);
 
       } else {
         setTimeout(() => {
@@ -71,6 +80,34 @@ export default function Login() {
 
   const closeModal = () => setShowModal(false);
 
+  // 🔄 Mostrar loading mientras se verifica la autenticación
+  if (isCheckingAuth) {
+    return (
+      <div className={styles.loadingOverlay}>
+        <div className={styles.spinnerContainer}>
+          <div className={styles.spinnerOuter} />
+          <div className={styles.spinnerInner} />
+          <div className={styles.spinnerCenter} />
+        </div>
+      </div>
+    );
+  }
+
+  // 🔄 Si ya está autenticado, no mostrar el formulario de login
+  if (isAuthenticated) {
+    return (
+      <div className={styles.loadingOverlay}>
+        <div className={styles.spinnerContainer}>
+          <div className={styles.spinnerOuter} />
+          <div className={styles.spinnerInner} />
+          <div className={styles.spinnerCenter} />
+          <p style={{ color: 'white', marginTop: '20px' }}>Redirigiendo...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ Mostrar formulario de login solo si NO está autenticado
   return (
     <div className={styles.container}>
       {/* Animated Background Elements */}

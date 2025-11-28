@@ -1,16 +1,10 @@
-// Components/SidebarMenu.jsx
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Importa el hook de autenticación
 import MenuButton from "./MenuButton";
 import styles from "../styles/Components/SidebarMenu.module.css";
 import logo from "../assets/logoimg.png";
 import logoGrande from "../assets/logo.png";
 import React, { useState, useEffect, useMemo } from "react";
-
-/*
-  🔹 Sidebar universal
-  🔹 Usa opcionesCustom (SidebarAdmin / SidebarNurse / SidebarDoctor)
-  🔹 Detecta la opción activa por ruta (la más específica)
-*/
 
 export default function SidebarMenu({
   setSeccion,
@@ -24,14 +18,13 @@ export default function SidebarMenu({
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth(); // 🔥 Obtén la función logout del contexto
 
   // Opciones del menú:
-  // - Si mandas opcionesCustom (SidebarAdmin/SidebarNurse/SidebarDoctor), se usan esas
-  // - Si no mandas nada, se usa un sidebar "genérico" con rutas base
   const opciones = useMemo(() => {
     if (opcionesCustom && opcionesCustom.length > 0) return opcionesCustom;
 
-    // Fallback genérico (por si algún Home no manda opcionesCustom)
+    // Fallback genérico
     return [
       { text: "Inicio", icon: "home", ruta: "/home-administrator" },
       { text: "Usuarios", icon: "group", ruta: "/home-administrator/users" },
@@ -59,28 +52,22 @@ export default function SidebarMenu({
   useEffect(() => {
     if (!opciones || opciones.length === 0) return;
 
-    // Coincidencias de ruta con el pathname actual
     const coincidencias = opciones.filter(
       (o) =>
         o.ruta &&
         (
-          location.pathname === o.ruta ||                 // ruta exacta
-          location.pathname.startsWith(o.ruta + "/")      // subrutas (ej. /home-administrator/users/123)
+          location.pathname === o.ruta ||
+          location.pathname.startsWith(o.ruta + "/")
         )
     );
 
     let opcionActiva = null;
 
     if (coincidencias.length > 0) {
-      // Elegimos la ruta más larga = más específica
       opcionActiva = coincidencias.reduce((prev, curr) =>
         prev.ruta.length >= curr.ruta.length ? prev : curr
       );
     } else {
-      // 🔁 Fallback:
-      // 1. Sección que venga por prop
-      // 2. "Inicio"
-      // 3. Primera opción del arreglo
       opcionActiva =
         opciones.find((o) => o.text === seccionActiva) ||
         opciones.find((o) => o.text === "Inicio") ||
@@ -102,7 +89,6 @@ export default function SidebarMenu({
   // CLICK EN OPCIÓN
   // ============================
   const handleClick = (opcion) => {
-    // Feedback inmediato en el sidebar
     if (activo !== opcion.text) {
       setActivo(opcion.text);
     }
@@ -116,13 +102,13 @@ export default function SidebarMenu({
     }
   };
 
-  // Cerrar sesión
+  // 🔥 CORREGIDO: Usar el logout del contexto
   const handleLogout = () => {
-    localStorage.removeItem("usuario");
-    navigate("/login");
+    console.log("🚪 Cerrando sesión...");
+    logout(); // 🔥 Esto actualiza el estado global de autenticación
+    navigate("/login", { replace: true });
   };
 
-  // Abrir / cerrar sidebar haciendo click fuera de los botones
   const handleSidebarClick = (e) => {
     const clickedButton = e.target.closest("button");
     if (!clickedButton) setAbierto((prev) => !prev);

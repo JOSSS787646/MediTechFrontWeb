@@ -17,6 +17,7 @@ export default function PacientesHome() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [loading, setLoading] = useState(true);
 
   /* ----------------------------- RELOJ ----------------------------- */
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function PacientesHome() {
 
   /* ----------------------------- CARGAR PACIENTES ----------------------------- */
   const fetchPacientes = async () => {
+    setLoading(true);
     try {
       const lista = await getPacientes();
       const activos = (lista || []).filter((p) => p.esActivo);
@@ -54,6 +56,8 @@ export default function PacientesHome() {
       setFilteredData(activos);
     } catch (error) {
       console.error("❌ Error al obtener pacientes:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -134,33 +138,69 @@ export default function PacientesHome() {
         {/* CONTENIDO PRINCIPAL */}
         <div className={styles.scrollContainer}>
           <div className={styles.container}>
+            {/* ENCABEZADO DE SECCIÓN */}
+            <section className={styles.sectionHeader}>
+              <div className={styles.sectionTitle}>
+                <span className="material-icons">people</span>
+                Administrar Pacientes
+              </div>
+              
+              <div className={styles.headerActions}>
+                <div className={styles.appointmentCount}>
+                  <span className="material-icons">person</span>
+                  {loading ? "Cargando..." : `${filteredData.length} Pacientes`}
+                </div>
+
+                <button
+                  className={styles.btnAtender}
+                  onClick={() => setShowRegisterModal(true)}
+                >
+                  <span className="material-icons">person_add</span>
+                  Registrar Paciente
+                </button>
+              </div>
+            </section>
+
             {/* BUSCADOR */}
             <section className={styles.searchSection}>
               <div className={styles.searchBarCompact}>
                 <span className="material-icons">search</span>
                 <input
                   type="text"
-                  placeholder="Buscar paciente..."
+                  placeholder="Buscar paciente por nombre..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  disabled={loading}
                 />
               </div>
             </section>
 
             {/* TABLA SCROLLEABLE */}
             <div className={styles.tableScroll}>
-              <TablaPacientes currentRows={currentRows} />
+              {loading ? (
+                <div className={styles.loadingContainer}>
+                  <div className={styles.spinner}>
+                    <span className="material-icons">refresh</span>
+                  </div>
+                  <p className={styles.loadingText}>Cargando pacientes...</p>
+                  <p className={styles.loadingSubtext}>Por favor espere</p>
+                </div>
+              ) : (
+                <TablaPacientes currentRows={currentRows} />
+              )}
             </div>
 
             {/* PAGINACIÓN */}
-            <Paginacion
-              filteredData={filteredData}
-              rowsPerPage={rowsPerPage}
-              setRowsPerPage={setRowsPerPage}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              totalPages={totalPages}
-            />
+            {!loading && (
+              <Paginacion
+                filteredData={filteredData}
+                rowsPerPage={rowsPerPage}
+                setRowsPerPage={setRowsPerPage}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                totalPages={totalPages}
+              />
+            )}
 
             {/* MODAL REGISTRO */}
             {showRegisterModal && (
@@ -202,12 +242,30 @@ function TablaPacientes({ currentRows }) {
     <table className={styles.citasTable}>
       <thead>
         <tr>
-          <th>Nombre Completo</th>
-          <th>Edad</th>
-          <th>CURP</th>
-          <th>Email</th>
-          <th>Teléfono</th>
-          <th>Género</th>
+          <th>
+
+            Nombre Completo
+          </th>
+          <th>
+         
+            Edad
+          </th>
+          <th>
+        
+            CURP
+          </th>
+          <th>
+       
+            Email
+          </th>
+          <th>
+       
+            Teléfono
+          </th>
+          <th>
+
+            Género
+          </th>
         </tr>
       </thead>
 
@@ -218,7 +276,7 @@ function TablaPacientes({ currentRows }) {
               <div className={styles.emptyState}>
                 <span className="material-icons">search_off</span>
                 <p>No se encontraron pacientes</p>
-                <small>Intenta con otro término</small>
+                <small>Intenta con otro término de búsqueda</small>
               </div>
             </td>
           </tr>
@@ -226,13 +284,59 @@ function TablaPacientes({ currentRows }) {
           currentRows.map((p) => (
             <tr key={p.id} className={styles.tableRow}>
               <td className={styles.patientCell}>
-                {p.nombre} {p.apellidoPaterno} {p.apellidoMaterno}
+                <div className={styles.patientInfo}>
+                  <span className={`material-icons ${styles.patientIcon}`}>person</span>
+                  <div className={styles.patientDetails}>
+                    <div className={styles.patientName}>
+                      {p.nombre} {p.apellidoPaterno} {p.apellidoMaterno}
+                    </div>
+                    <small className={styles.patientSubtext}>
+                      {[p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ')}
+                    </small>
+                  </div>
+                </div>
               </td>
-              <td>{calcularEdad(p.fechaNacimiento)}</td>
-              <td>{p.curp || "No asignada"}</td>
-              <td>{p.email || "No especificado"}</td>
-              <td>{p.telefono || "No especificado"}</td>
-              <td>{formatearGenero(p.genero)}</td>
+              <td>
+                <div className={styles.edadBadge}>
+                 
+                  {calcularEdad(p.fechaNacimiento)}
+                </div>
+              </td>
+              <td>
+                <div className={styles.curpCell}>
+                  {p.curp ? (
+                    <code className={styles.curpCode}>{p.curp}</code>
+                  ) : (
+                    <span className={styles.noData}>No asignada</span>
+                  )}
+                </div>
+              </td>
+              <td>
+                {p.email ? (
+                  <div className={styles.emailCell}>
+                   
+                    {p.email}
+                  </div>
+                ) : (
+                  <span className={styles.noData}>No especificado</span>
+                )}
+              </td>
+              <td>
+                {p.telefono ? (
+                  <div className={styles.phoneCell}>
+                 
+                    {p.telefono}
+                  </div>
+                ) : (
+                  <span className={styles.noData}>No especificado</span>
+                )}
+              </td>
+              <td>
+                <div className={styles.generoCell}>
+             
+                  {formatearGenero(p.genero)}
+                </div>
+              </td>
             </tr>
           ))
         )}
@@ -257,7 +361,7 @@ function Paginacion({
   return (
     <div className={styles.paginationTable}>
       <div className={styles.rowsSelectorTable}>
-        <label>Filas:</label>
+        <label>Filas por página:</label>
         <select
           value={rowsPerPage}
           onChange={(e) => {
@@ -283,7 +387,7 @@ function Paginacion({
         </button>
 
         <span className={styles.pageInfoTable}>
-          {currentPage} / {totalPages}
+          Página {currentPage} de {totalPages}
         </span>
 
         <button

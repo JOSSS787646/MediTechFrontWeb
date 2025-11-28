@@ -6,6 +6,12 @@
   --white: #ffffff;
   --background: #f8fafc;
   --border-light: #e2e8f0;
+  --error-color: #dc2626;
+  --error-bg: #fef2f2;
+  --success-color: #16a34a;
+  --success-bg: #f0fdf4;
+  --warning-color: #ea580c;
+  --warning-bg: #fff7ed;
   --shadow: 0 1px 3px rgba(0,0,0,0.1);
   --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
@@ -21,26 +27,28 @@
   font-family: var(--font);
 }
 
+/* ===== Contenido principal SIN SCROLL ===== */
 .contentArea {
   flex: 1;
   padding: 1.5rem 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
   height: 100vh;
-  overflow: hidden;
+  overflow: hidden; /* Cambiado de auto a hidden */
 }
 
 .container {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  height: 100%;
+  overflow: hidden; /* Evita scroll general */
 }
 
-/* ===== Header compacto ===== */
+/* ===== Header STICKY ===== */
 .header {
   display: flex;
   justify-content: space-between;
@@ -51,6 +59,9 @@
   box-shadow: var(--shadow);
   border: 1px solid var(--border-light);
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .logoBox {
@@ -61,7 +72,7 @@
 .logo {
   width: 200px;
   height: auto;
-  transition: transform 0.3s ease;
+  transition: transform .3s;
 }
 
 .logo:hover {
@@ -110,64 +121,33 @@
   color: var(--text-light);
 }
 
-.icon {
-  opacity: 0.8;
-  font-size: 0.9em;
-}
-
-/* ===== Barra de búsqueda SEPARADA ===== */
+/* ===== Barra de búsqueda ===== */
 .searchSection {
-  background: white;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border-light);
-  /* Se asegura que esté separada del header */
-  margin-top: 0;
+  flex-shrink: 0;
 }
 
 .searchBarWrapper {
-  flex: 1;
   display: flex;
   align-items: center;
-  background: #fafafa;
-  border: 1.5px solid var(--border-light);
-  border-radius: 8px;
+  gap: 0.75rem;
+  background: white;
   padding: 0.75rem 1rem;
-  transition: all 0.3s ease;
-}
-
-.searchBarWrapper:hover {
-  border-color: #cbd5e1;
-  background: white;
-}
-
-.searchBarWrapper:focus-within {
-  border-color: var(--sidebar-color);
-  box-shadow: 0 0 0 3px rgba(99,178,165,0.1);
-  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
 }
 
 .searchBar {
   flex: 1;
-  background: transparent;
   border: none;
   outline: none;
-  color: var(--text-dark);
   font-size: 0.95rem;
-}
-
-.clearBtn {
+  color: var(--text-dark);
   background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  padding: 0 0.3rem;
-  transition: 0.2s;
 }
 
-.clearBtn:hover {
-  color: var(--sidebar-color);
+.searchBar::placeholder {
+  color: var(--text-light);
 }
 
 /* ===== Encabezado de sección ===== */
@@ -180,6 +160,7 @@
   border-radius: 12px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-light);
+  flex-shrink: 0;
 }
 
 .sectionTitle {
@@ -190,11 +171,6 @@
   font-weight: 700;
   color: var(--text-dark);
   margin: 0;
-}
-
-.sectionIcon {
-  opacity: 0.8;
-  font-size: 1.2rem;
 }
 
 .appointmentCount {
@@ -210,27 +186,21 @@
   box-shadow: var(--shadow);
 }
 
-.countIcon {
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-/* ===== CONTENEDOR PRINCIPAL CON ALTURA FIJA Y SCROLL INTERNO ===== */
+/* ===== CONTENEDOR PRINCIPAL CON SCROLL SOLO EN TABLA ===== */
 .scrollContainer {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Contenedor principal sin scroll */
   background: white;
   border-radius: 12px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-light);
-  /* Eliminamos el overflow general */
-  overflow: hidden;
+  margin-bottom: 1.5rem;
+  min-height: 0;
 }
 
-/* ===== TABLA CON SCROLL INTERNO EN EL TBODY ===== */
 .tableWrapper {
-  width: 100%;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -238,225 +208,197 @@
 }
 
 .tableContainer {
-  width: 100%;
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
+/* ===== ESTILOS DE TABLA MEJORADOS CON SCROLL ===== */
 .citasTable {
   width: 100%;
   border-collapse: collapse;
-  font-family: var(--font);
-  min-width: 900px;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  table-layout: fixed;
+  background: white;
 }
 
-.citasTable thead {
-  background: linear-gradient(135deg, var(--sidebar-color), var(--sidebar-hover));
+/* Encabezados de tabla */
+.citasTable thead th {
+  background: var(--sidebar-color);
   color: white;
+  padding: 1rem 0.75rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: left;
+  border-bottom: 2px solid var(--sidebar-hover);
+  white-space: nowrap;
   position: sticky;
   top: 0;
   z-index: 10;
-  flex-shrink: 0;
 }
 
-.citasTable thead tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
+/* Celdas de tabla */
+.citasTable tbody td {
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  vertical-align: middle;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-.citasTable tbody {
+/* Filas hover */
+.citasTable tbody tr:hover {
+  background: #f8fafc;
+  transition: background 0.2s ease;
+}
+
+/* CONTROL DE ANCHOS ESPECÍFICOS POR COLUMNA */
+.citasTable th:nth-child(1),
+.citasTable td:nth-child(1) {
+  width: 18%;
+  min-width: 150px;
+}
+
+.citasTable th:nth-child(2),
+.citasTable td:nth-child(2) {
+  width: 10%;
+  min-width: 80px;
+}
+
+.citasTable th:nth-child(3),
+.citasTable td:nth-child(3) {
+  width: 12%;
+  min-width: 100px;
+}
+
+.citasTable th:nth-child(4),
+.citasTable td:nth-child(4) {
+  width: 10%;
+  min-width: 80px;
+}
+
+.citasTable th:nth-child(5),
+.citasTable td:nth-child(5) {
+  width: 18%;
+  min-width: 120px;
+}
+
+.citasTable th:nth-child(6),
+.citasTable td:nth-child(6) {
+  width: 18%;
+  min-width: 130px;
+}
+
+.citasTable th:nth-child(7),
+.citasTable td:nth-child(7) {
+  width: 14%;
+  min-width: 110px;
+  text-align: center;
+}
+
+/* Contenedor de scroll para tabla */
+.tableScrollContainer {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: block;
-  max-height: calc(100vh - 400px); /* Altura ajustable según necesidad */
+  overflow-x: auto;
+  overflow-y: auto; /* SCROLL SOLO AQUÍ */
+  min-height: 0;
 }
 
-.citasTable tbody tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-/* Scroll personalizado para el tbody */
-.citasTable tbody::-webkit-scrollbar {
+.tableScrollContainer::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
-.citasTable tbody::-webkit-scrollbar-thumb {
+.tableScrollContainer::-webkit-scrollbar-thumb {
   background: var(--sidebar-color);
   border-radius: 4px;
 }
 
-.citasTable tbody::-webkit-scrollbar-track {
+.tableScrollContainer::-webkit-scrollbar-track {
   background: #f1f5f9;
 }
 
-.citasTable th {
-  padding: 1rem 0.75rem;
-  text-align: left;
-  font-weight: 600;
-  font-size: 0.85rem;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-  border-bottom: 2px solid rgba(255,255,255,0.2);
-}
-
-.thIcon {
-  margin-right: 0.4rem;
-  opacity: 0.9;
-  font-size: 0.9rem;
-}
-
-.citasTable td {
-  padding: 0.9rem 0.75rem;
-  border-bottom: 1px solid #f5f5f5;
-  font-size: 0.9rem;
-  color: var(--text-dark);
-  transition: all 0.2s ease;
-}
-
-.tableRow {
-  transition: all 0.3s ease;
-}
-
-.tableRow:hover {
-  background: linear-gradient(90deg, #f0faf8 0%, #ffffff 100%);
-  transform: scale(1.002);
-  box-shadow: 0 2px 12px rgba(99, 178, 165, 0.08);
-}
-
-/* Celdas específicas */
+/* Estilos específicos para la columna del paciente */
 .patientCell {
-  font-weight: 600;
+  padding: 0.75rem !important;
 }
 
 .patientInfo {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.75rem;
+  max-width: 100%;
 }
 
 .patientIcon {
   color: var(--sidebar-color);
+  font-size: 1.8rem;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  font-size: 1.2rem;
-  opacity: 0.8;
-}
-
-.patientDetails {
-  display: flex;
-  flex-direction: column;
 }
 
 .patientName {
   font-weight: 600;
   color: var(--text-dark);
-}
-
-/* Badges y estados */
-.edadBadge, .horaBadge {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.8rem;
   white-space: nowrap;
-}
-
-.edadBadge {
-  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-  color: #1976d2;
-}
-
-.horaBadge {
-  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-  color: #f57c00;
-}
-
-.badgeIcon {
-  font-size: 0.7rem;
-  opacity: 0.8;
-}
-
-.fechaCell {
-  color: #555;
-  font-weight: 500;
-}
-
-.motivoCell {
-  max-width: 200px;
-}
-
-.motivoText {
-  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #666;
-}
-
-.doctorCell {
-  font-weight: 500;
-}
-
-.doctorInfo {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.doctorIcon {
-  opacity: 0.7;
+  max-width: 100%;
   font-size: 0.9rem;
 }
 
-/* Estado vacío */
-.emptyRow {
-  text-align: center;
-  padding: 0 !important;
-}
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 3rem 2rem;
+.curpText {
+  font-size: 0.65rem;
   color: var(--text-light);
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  letter-spacing: 0.3px;
+  margin-top: 0.2rem;
 }
 
-.emptyIcon {
-  font-size: 3rem;
-  opacity: 0.3;
-}
-
-.emptyState p {
-  margin: 0;
-  font-size: 1.1rem;
+/* Badge de edad */
+.edadBadge {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
   font-weight: 600;
-  color: var(--text-dark);
-}
-
-.emptyState small {
   font-size: 0.85rem;
-  color: var(--text-light);
+  white-space: nowrap;
 }
 
-/* Botón atender */
+/* Badge de hora */
+.horaBadge {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* Celda de motivo */
+.motivoCell {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Botón de atender */
 .btnAtender {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   background: var(--sidebar-color);
   color: white;
   border: none;
@@ -467,31 +409,190 @@
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(99, 178, 165, 0.3);
 }
 
-.btnAtender:hover {
+.btnAtender:hover:not(:disabled) {
   background: var(--sidebar-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(99, 178, 165, 0.4);
 }
 
-.btnAtender:active {
-  transform: translateY(0);
+.btnAtender:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.btnIcon {
-  font-size: 0.9rem;
+.btnLoading {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
-.btnText {
-  font-size: 0.8rem;
+/* ===== PAGINACIÓN FIJA EN LA PARTE INFERIOR ===== */
+.paginationTable {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-top: 1px solid var(--border-light);
+  flex-shrink: 0; /* IMPORTANTE: Evita que se reduzca */
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
 }
 
-/* ===== Responsive ===== */
+.rowsSelectorTable {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-dark);
+}
+
+.rowsSelectorTable select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: white;
+}
+
+.pageControlsTable {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.paginationBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sidebar-color);
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: var(--sidebar-hover);
+  transform: translateY(-1px);
+}
+
+.paginationBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pageInfoTable {
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  font-weight: 500;
+  min-width: 100px;
+  text-align: center;
+}
+
+/* ===== ESTADOS DE CARGA ===== */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  color: var(--text-light);
+  text-align: center;
+}
+
+.spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.spinner .material-icons {
+  font-size: 2rem;
+  color: var(--sidebar-color);
+  animation: spin 1s linear infinite;
+}
+
+.loadingText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.loadingSubtext {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+/* ===== ESTADO VACÍO ===== */
+.emptyRow {
+  text-align: center;
+  padding: 3rem 2rem !important;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-light);
+}
+
+.emptyState .material-icons {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.emptyState p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.emptyState small {
+  font-size: 0.85rem;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
   .container {
     max-width: 95%;
+  }
+  
+  .citasTable th:nth-child(1),
+  .citasTable td:nth-child(1) {
+    width: 20%;
+    min-width: 140px;
+  }
+  
+  .citasTable th:nth-child(5),
+  .citasTable td:nth-child(5) {
+    width: 16%;
   }
 }
 
@@ -514,9 +615,19 @@
   .timeInfo {
     align-items: center;
   }
-
-  .citasTable tbody {
-    max-height: calc(100vh - 450px); /* Ajuste para pantallas más pequeñas */
+  
+  .paginationTable {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .tableScrollContainer {
+    overflow-x: scroll;
+  }
+  
+  .citasTable {
+    min-width: 900px;
   }
 }
 
@@ -535,62 +646,43 @@
     font-size: 1.1rem;
   }
   
-  .citasTable {
-    font-size: 0.8rem;
-    min-width: 700px;
+  .citasTable thead th,
+  .citasTable tbody td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
   }
   
-  .citasTable th,
-  .citasTable td {
-    padding: 0.7rem 0.5rem;
+  .patientName {
+    font-size: 0.85rem;
   }
   
-  .patientIcon {
-    font-size: 1rem;
-  }
-  
-  .btnText {
-    display: none;
-  }
-  
-  .btnAtender {
-    padding: 0.5rem;
-    justify-content: center;
+  .curpText {
+    font-size: 0.6rem;
   }
   
   .edadBadge,
   .horaBadge {
+    padding: 0.25rem 0.6rem;
     font-size: 0.75rem;
-    padding: 0.3rem 0.6rem;
   }
   
-  .motivoCell {
-    max-width: 120px;
-  }
-
-  .citasTable tbody {
-    max-height: calc(100vh - 500px);
+  .btnAtender {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
   }
 }
 
 @media (max-width: 480px) {
   .contentArea {
     padding: 0.8rem;
-    gap: 1rem;
   }
   
   .header {
     padding: 1rem;
   }
   
-  .searchSection {
-    padding: 0.8rem 1rem;
-  }
-  
   .sectionHeader {
     padding: 1rem;
-    flex-direction: column;
-    gap: 1rem;
   }
   
   .sectionTitle {
@@ -602,17 +694,17 @@
     padding: 0.4rem 0.8rem;
   }
   
-  .citasTable th {
-    font-size: 0.75rem;
-    padding: 0.6rem 0.3rem;
+  .citasTable {
+    min-width: 800px;
   }
   
-  .citasTable td {
-    font-size: 0.75rem;
-    padding: 0.6rem 0.3rem;
+  .citasTable thead th,
+  .citasTable tbody td {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.8rem;
   }
-
-  .citasTable tbody {
-    max-height: calc(100vh - 350px);
+  
+  .curpText {
+    font-size: 0.55rem;
   }
 }

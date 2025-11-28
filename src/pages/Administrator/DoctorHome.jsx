@@ -17,7 +17,8 @@ const Iconos = {
   edad: "cake",
   motivo: "description",
   doctor: "local_hospital",
-  vacio: "event_busy"
+  vacio: "event_busy",
+  loading: "refresh"
 };
 
 export default function DoctorHome() {
@@ -29,6 +30,12 @@ export default function DoctorHome() {
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [idColaborador, setIdColaborador] = useState(null);
   const [nombreUsuario, setNombreUsuario] = useState("Doctor");
+  const [loading, setLoading] = useState(false);
+  const [loadingCitas, setLoadingCitas] = useState(true);
+  
+  // Estados de paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Cargar usuario al iniciar
   useEffect(() => {
@@ -55,6 +62,7 @@ export default function DoctorHome() {
       setHoraActual(ahora.toLocaleTimeString("es-MX", {
         hour: "2-digit",
         minute: "2-digit",
+        second:"2-digit"
       }));
       setFechaActual(ahora.toLocaleDateString("es-MX", {
         year: "numeric",
@@ -70,6 +78,7 @@ export default function DoctorHome() {
 
   // Función para cargar citas
   const cargarCitas = async () => {
+    setLoadingCitas(true);
     try {
       console.log("📞 Llamando al endpoint de citas...");
       const respuesta = await getCitasDeColaborador(idColaborador);
@@ -77,6 +86,7 @@ export default function DoctorHome() {
 
       if (!Array.isArray(respuesta)) {
         console.error("❌ La respuesta no es un array");
+        setLoadingCitas(false);
         return;
       }
 
@@ -97,7 +107,7 @@ export default function DoctorHome() {
           pacienteApellidoPaterno: cita.pacienteApellidoPaterno || "",
           pacienteApellidoMaterno: cita.pacienteApellidoMaterno || "",
           pacienteEdad: cita.edad || calcularEdad(cita.fechaNacimiento),
-          pacienteCurp: cita.curp, // ESTO ES LO MÁS IMPORTANTE
+          pacienteCurp: cita.curp,
           pacienteTelefono: cita.telefono,
           pacienteFechaNacimiento: cita.fechaNacimiento,
           
@@ -111,6 +121,8 @@ export default function DoctorHome() {
 
     } catch (error) {
       console.error("❌ Error cargando citas:", error);
+    } finally {
+      setLoadingCitas(false);
     }
   };
 
@@ -145,31 +157,47 @@ export default function DoctorHome() {
       });
       setFilteredAppointments(filtradas);
     }
+    setCurrentPage(1); // Resetear a primera página al buscar
   };
 
   // Atender paciente - ENVIAR CURP
-  const handleAtender = (cita) => {
+  const handleAtender = async (cita) => {
+    setLoading(true);
     console.log("🩺 Atendiendo paciente:", cita);
     console.log("🔑 CURP a enviar:", cita.pacienteCurp);
 
     if (!cita.pacienteCurp) {
       alert("❌ Este paciente no tiene CURP registrado");
+      setLoading(false);
       return;
     }
 
-    // Navegar a recetas enviando el CURP
-    navigate("/home-doctor/recetas", {
-      state: {
-        pacienteData: {
-          curp: cita.pacienteCurp, // IDENTIFICADOR ÚNICO
-          nombre: `${cita.pacienteNombre} ${cita.pacienteApellidoPaterno} ${cita.pacienteApellidoMaterno}`,
-          edad: cita.pacienteEdad,
-          fechaNacimiento: cita.pacienteFechaNacimiento,
-          telefono: cita.pacienteTelefono
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      navigate("/home-doctor/recetas", {
+        state: {
+          pacienteData: {
+            curp: cita.pacienteCurp,
+            nombre: `${cita.pacienteNombre} ${cita.pacienteApellidoPaterno} ${cita.pacienteApellidoMaterno}`,
+            edad: cita.pacienteEdad,
+            fechaNacimiento: cita.pacienteFechaNacimiento,
+            telefono: cita.pacienteTelefono
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      console.error("❌ Error al navegar:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Cálculos de paginación
+  const indexOfLast = currentPage * rowsPerPage;
+  const indexOfFirst = indexOfLast - rowsPerPage;
+  const currentRows = filteredAppointments.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.max(1, Math.ceil(filteredAppointments.length / rowsPerPage));
 
   return (
     <div className={styles.mainLayout}>
@@ -209,6 +237,7 @@ export default function DoctorHome() {
                 value={search}
                 onChange={handleSearch}
                 className={styles.searchBar}
+                disabled={loadingCitas}
               />
             </div>
           </div>
@@ -219,91 +248,190 @@ export default function DoctorHome() {
               <span className="material-icons">{Iconos.citas}</span>
               Citas del Día
             </h2>
-            <span className={styles.appointmentCount}>
-              <span className="material-icons">{Iconos.evento}</span>
-              {filteredAppointments.length} {filteredAppointments.length === 1 ? 'cita' : 'citas'}
-            </span>
+            <div className={styles.headerActions}>
+              <span className={styles.appointmentCount}>
+                <span className="material-icons">{Iconos.evento}</span>
+                {loadingCitas ? (
+                  <span className={styles.loadingText}>Cargando...</span>
+                ) : (
+                  `${filteredAppointments.length} ${filteredAppointments.length === 1 ? 'cita' : 'citas'}`
+                )}
+              </span>
+            </div>
           </div>
 
-          {/* TABLA DE CITAS */}
+          {/* TABLA DE CITAS CON SPINNER */}
           <div className={styles.scrollContainer}>
             <div className={styles.tableWrapper}>
               <div className={styles.tableContainer}>
-                <table className={styles.citasTable}>
-                  <thead>
-                    <tr>
-                      <th>Paciente</th>
-                      <th>Edad</th>
-                      <th>Fecha</th>
-                      <th>Hora</th>
-                      <th>Motivo</th>
-                      <th>Doctor</th>
-                      <th>Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAppointments.length > 0 ? (
-                      filteredAppointments.map((cita, index) => (
-                        <tr key={index} className={styles.tableRow}>
-                          <td className={styles.patientCell}>
-                            <div className={styles.patientInfo}>
-                              <span className={styles.patientIcon}>
-                                <span className="material-icons">{Iconos.paciente}</span>
-                              </span>
-                              <div>
-                                <div className={styles.patientName}>
-                                  {cita.pacienteNombre} {cita.pacienteApellidoPaterno} {cita.pacienteApellidoMaterno}
-                                </div>
-                                <div className={styles.curpText}>
-                                  CURP: {cita.pacienteCurp || "No disponible"}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <span className={styles.edadBadge}>
-                              {cita.pacienteEdad} años
-                            </span>
-                          </td>
-                          <td>{cita.fechaCita ? new Date(cita.fechaCita).toLocaleDateString("es-MX") : "N/A"}</td>
-                          <td>
-                            <span className={styles.horaBadge}>
-                              {cita.horaCita || "N/A"}
-                            </span>
-                          </td>
-                          <td className={styles.motivoCell}>
-                            {cita.motivo || "Sin motivo"}
-                          </td>
-                          <td>{cita.medico || "No asignado"}</td>
-                          <td>
-                            <button
-                              className={styles.btnAtender}
-                              onClick={() => handleAtender(cita)}
-                              disabled={!cita.pacienteCurp}
-                            >
-                              <span className="material-icons">{Iconos.atender}</span>
-                              Atender
-                            </button>
-                          </td>
+                {loadingCitas ? (
+                  // SPINNER DE CARGA
+                  <div className={styles.loadingContainer}>
+                    <div className={styles.spinner}>
+                      <span className="material-icons">{Iconos.loading}</span>
+                    </div>
+                    <p className={styles.loadingText}>Cargando citas...</p>
+                    <p className={styles.loadingSubtext}>Por favor espere</p>
+                  </div>
+                ) : (
+                  // TABLA DE CITAS
+                  <>
+                    <table className={styles.citasTable}>
+                      <thead>
+                        <tr>
+                          <th>Paciente</th>
+                          <th>Edad</th>
+                          <th>Fecha</th>
+                          <th>Hora</th>
+                          <th>Motivo</th>
+                          <th>Doctor</th>
+                          <th>Acción</th>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={7} className={styles.emptyRow}>
-                          <div className={styles.emptyState}>
-                            <span className="material-icons">{Iconos.vacio}</span>
-                            <p>No hay citas programadas</p>
-                          </div>
-                        </td>
-                      </tr>
+                      </thead>
+                      <tbody>
+                        {currentRows.length > 0 ? (
+                          currentRows.map((cita, index) => (
+                            <tr key={cita.id || index} className={styles.tableRow}>
+                              <td className={styles.patientCell}>
+                                <div className={styles.patientInfo}>
+                                  <span className={styles.patientIcon}>
+                                    <span className="material-icons">{Iconos.paciente}</span>
+                                  </span>
+                                  <div>
+                                    <div className={styles.patientName}>
+                                      {cita.pacienteNombre} {cita.pacienteApellidoPaterno} {cita.pacienteApellidoMaterno}
+                                    </div>
+                                    <div className={styles.curpText}>
+                                      CURP: {cita.pacienteCurp || "No disponible"}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>
+                                <span className={styles.edadBadge}>
+                                  {cita.pacienteEdad} años
+                                </span>
+                              </td>
+                              <td>{cita.fechaCita ? new Date(cita.fechaCita).toLocaleDateString("es-MX") : "N/A"}</td>
+                              <td>
+                                <span className={styles.horaBadge}>
+                                  {cita.horaCita || "N/A"}
+                                </span>
+                              </td>
+                              <td className={styles.motivoCell}>
+                                {cita.motivo || "Sin motivo"}
+                              </td>
+                              <td>{cita.medico || "No asignado"}</td>
+                              <td>
+                                <button
+                                  className={`${styles.btnAtender} ${loading ? styles.btnLoading : ''}`}
+                                  onClick={() => handleAtender(cita)}
+                                  disabled={!cita.pacienteCurp || loading}
+                                >
+                                  {loading ? (
+                                    <>
+                                      <span className="material-icons spinning">{Iconos.loading}</span>
+                                      Cargando...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="material-icons">{Iconos.atender}</span>
+                                      Atender
+                                    </>
+                                  )}
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={7} className={styles.emptyRow}>
+                              <div className={styles.emptyState}>
+                                <span className="material-icons">{Iconos.vacio}</span>
+                                <p>No hay citas programadas</p>
+                                <small>Las citas aparecerán aquí cuando estén agendadas</small>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+
+                    {/* PAGINACIÓN */}
+                    {filteredAppointments.length > 0 && (
+                      <Paginacion
+                        filteredData={filteredAppointments}
+                        rowsPerPage={rowsPerPage}
+                        setRowsPerPage={setRowsPerPage}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        totalPages={totalPages}
+                      />
                     )}
-                  </tbody>
-                </table>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================
+   COMPONENTE DE PAGINACIÓN
+================================================================ */
+function Paginacion({
+  filteredData,
+  rowsPerPage,
+  setRowsPerPage,
+  currentPage,
+  setCurrentPage,
+  totalPages,
+}) {
+  if (filteredData.length === 0) return null;
+
+  return (
+    <div className={styles.paginationTable}>
+      <div className={styles.rowsSelectorTable}>
+        <label>Filas por página:</label>
+        <select
+          value={rowsPerPage}
+          onChange={(e) => {
+            setRowsPerPage(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+        >
+          {[5, 10, 15, 20].map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className={styles.pageControlsTable}>
+        <button
+          className={styles.paginationBtn}
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((p) => p - 1)}
+        >
+          <span className="material-icons">chevron_left</span>
+        </button>
+
+        <span className={styles.pageInfoTable}>
+          Página {currentPage} de {totalPages}
+        </span>
+
+        <button
+          className={styles.paginationBtn}
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage((p) => p + 1)}
+        >
+          <span className="material-icons">chevron_right</span>
+        </button>
       </div>
     </div>
   );

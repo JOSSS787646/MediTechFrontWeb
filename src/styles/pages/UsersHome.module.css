@@ -29,7 +29,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow-y: auto;   /* ✅ Scroll en la pantalla principal */
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
@@ -87,17 +87,26 @@
   border-radius: 8px;
   font-weight: 600;
   color: var(--text-dark);
+  font-size: 0.9rem;
 }
 
 .timeInfo {
   display: flex;
   flex-direction: column;
   text-align: right;
+  gap: 0.2rem;
+}
+
+.time, .date {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .time {
   color: var(--sidebar-color);
   font-weight: 700;
+  font-size: 1.1rem;
 }
 
 .date {
@@ -105,10 +114,75 @@
   color: var(--text-light);
 }
 
-/* ===== Contenedor de contenido (no hace scroll extra) ===== */
+/* ===== Contenedor de contenido ===== */
 .scrollContainer {
   flex: 1;
   overflow: visible;
+}
+
+/* ===== ENCABEZADO DE SECCIÓN MEJORADO ===== */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 1.2rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.appointmentCount {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--sidebar-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow);
+}
+
+/* ===== BOTÓN REGISTRAR ===== */
+.btnAtender {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--sidebar-color);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(99, 178, 165, 0.3);
+}
+
+.btnAtender:hover {
+  background: var(--sidebar-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 178, 165, 0.4);
 }
 
 /* ===== BUSCADOR COMPACTO ===== */
@@ -129,6 +203,12 @@
   padding: 0.65rem 1rem;
   border-radius: 10px;
   box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+}
+
+.searchBarCompact:focus-within {
+  border-color: var(--sidebar-color);
+  box-shadow: 0 0 0 3px rgba(99,178,165,0.1);
 }
 
 .searchBarCompact span {
@@ -146,30 +226,65 @@
   color: var(--text-dark);
 }
 
-/* ===== Contador de pacientes ===== */
-.sectionHeader {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.7rem 1.2rem 0.2rem 1.2rem;
+.searchBarCompact input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.appointmentCount {
+/* ===== SPINNER DE CARGA ===== */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  min-height: 300px;
+}
+
+.spinner {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
   background: var(--sidebar-color);
-  color: white;
-  padding: 0.4rem 0.9rem;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  box-shadow: var(--shadow);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  animation: spin 1.5s linear infinite;
+  box-shadow: 0 4px 12px rgba(99, 178, 165, 0.3);
 }
 
-/* ===== TABLA SCROLLEABLE (AQUÍ ESTÁ EL SCROLL DE LA TABLA) ===== */
+.spinner .material-icons {
+  color: white;
+  font-size: 1.8rem;
+}
+
+.loadingText {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+
+.loadingSubtext {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin: 0;
+  text-align: center;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== TABLA SCROLLEABLE ===== */
 .tableScroll {
-  max-height: 55vh;      /* ✅ Altura relativa a la pantalla */
-  overflow-y: auto;      /* ✅ Scroll vertical dentro de la tabla */
+  max-height: 55vh;
+  overflow-y: auto;
   overflow-x: auto;
   background: white;
   border: 1px solid var(--border-light);
@@ -189,11 +304,50 @@
   background: #e5edf0;
 }
 
-/* ===== Tabla ===== */
+/* ===== Tabla con anchos fijos ===== */
 .citasTable {
   width: 100%;
-  min-width: 900px;
+  min-width: 1100px;
   border-collapse: collapse;
+  font-family: var(--font);
+  table-layout: fixed;
+}
+
+/* ===== ANCHOS ESPECÍFICOS POR COLUMNA ===== */
+.citasTable th:nth-child(1),
+.citasTable td:nth-child(1) {
+  width: 22%;
+  min-width: 220px;
+}
+
+.citasTable th:nth-child(2),
+.citasTable td:nth-child(2) {
+  width: 10%;
+  min-width: 100px;
+}
+
+.citasTable th:nth-child(3),
+.citasTable td:nth-child(3) {
+  width: 18%;
+  min-width: 180px;
+}
+
+.citasTable th:nth-child(4),
+.citasTable td:nth-child(4) {
+  width: 20%;
+  min-width: 200px;
+}
+
+.citasTable th:nth-child(5),
+.citasTable td:nth-child(5) {
+  width: 15%;
+  min-width: 140px;
+}
+
+.citasTable th:nth-child(6),
+.citasTable td:nth-child(6) {
+  width: 15%;
+  min-width: 120px;
 }
 
 .citasTable thead {
@@ -204,65 +358,184 @@
   z-index: 3;
 }
 
-.citasTable th,
-.citasTable td {
-  padding: 0.85rem 0.75rem;
-  border-bottom: 1px solid #eee;
+.citasTable th {
+  padding: 1rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-bottom: 2px solid rgba(255,255,255,0.2);
+  white-space: nowrap;
+}
+
+.citasTable th .material-icons {
+  margin-right: 0.4rem;
+  opacity: 0.9;
   font-size: 0.9rem;
 }
 
-.citasTable th {
-  font-weight: 600;
+.citasTable td {
+  padding: 0.9rem 0.75rem;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  transition: all 0.2s ease;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  vertical-align: middle;
+}
+
+.tableRow {
+  transition: all 0.3s ease;
 }
 
 .tableRow:hover {
-  background: #f2faf7;
+  background: linear-gradient(90deg, #f0faf8 0%, #ffffff 100%);
+  transform: scale(1.002);
+  box-shadow: 0 2px 12px rgba(99, 178, 165, 0.08);
 }
 
+/* Celdas específicas */
 .patientCell {
   font-weight: 600;
 }
 
+.patientInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: 100%;
+}
+
+.patientIcon {
+  color: var(--sidebar-color);
+  font-size: 1.2rem;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.patientDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.patientName {
+  font-weight: 600;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.patientSubtext {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badges y estados */
+.edadBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  color: #1976d2;
+}
+
+.curpCell {
+  font-family: 'Courier New', monospace;
+  max-width: 100%;
+}
+
+.curpCode {
+  display: block;
+  background: #f8f9fa;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  font-size: 0.75rem;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.emailCell, .phoneCell, .generoCell {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 100%;
+}
+
+.emailCell {
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phoneCell {
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.generoCell {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.noData {
+  color: var(--text-light);
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
 /* ===== Estado vacío ===== */
-.emptyRow td {
+.emptyRow {
   text-align: center;
-  padding: 2rem 0;
+  padding: 0 !important;
 }
 
 .emptyState {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 3rem 2rem;
   color: var(--text-light);
 }
 
+.emptyState .material-icons {
+  font-size: 3rem;
+  opacity: 0.3;
+}
+
 .emptyState p {
-  color: var(--text-dark);
+  margin: 0;
+  font-size: 1.1rem;
   font-weight: 600;
-  margin: 0.3rem 0;
+  color: var(--text-dark);
 }
 
-/* ===== Botón de paginación genérico ===== */
-.paginationBtn {
-  background: var(--sidebar-color);
-  color: white;
-  border: none;
-  padding: 0.45rem;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.emptyState small {
+  font-size: 0.85rem;
+  color: var(--text-light);
 }
 
-.paginationBtn:hover:not(:disabled) {
-  background: var(--sidebar-hover);
-}
-
-.paginationBtn:disabled {
-  background: #cbd5e1;
-  cursor: not-allowed;
-}
-
-/* ===== Paginación tipo "footer" de la tabla ===== */
+/* ===== Paginación ===== */
 .paginationTable {
   margin-top: 0;
   display: flex;
@@ -279,29 +552,78 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-dark);
 }
 
 .rowsSelectorTable select {
   padding: 0.3rem 0.6rem;
   border-radius: 6px;
   border: 1px solid var(--border-light);
+  background: white;
 }
 
 .pageControlsTable {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.8rem;
 }
 
 .pageInfoTable {
   font-weight: 600;
   color: var(--text-dark);
+  font-size: 0.9rem;
+}
+
+.paginationBtn {
+  background: var(--sidebar-color);
+  color: white;
+  border: none;
+  padding: 0.45rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: var(--sidebar-hover);
+  transform: translateY(-1px);
+}
+
+.paginationBtn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
+  .container {
+    max-width: 95%;
+  }
+  
+  .citasTable {
+    min-width: 1000px;
+  }
+}
+
+@media (max-width: 968px) {
   .contentArea {
     padding: 1rem;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .headerActions {
+    flex-direction: column;
+    gap: 0.8rem;
   }
 
   .logo {
@@ -315,13 +637,21 @@
   }
 
   .citasTable {
-    min-width: 700px;
+    min-width: 900px;
+  }
+
+  .tableScroll {
+    max-height: 50vh;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .contentArea {
-    padding: 0.9rem;
+    padding: 0.8rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.1rem;
   }
 
   .appointmentCount {
@@ -330,5 +660,83 @@
 
   .searchBarCompact input {
     font-size: 0.85rem;
+  }
+
+  .citasTable th,
+  .citasTable td {
+    padding: 0.7rem 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .patientName {
+    font-size: 0.85rem;
+  }
+  
+  .patientSubtext {
+    font-size: 0.7rem;
+  }
+  
+  .curpCode {
+    font-size: 0.7rem;
+  }
+  
+  .emailCell,
+  .phoneCell {
+    font-size: 0.8rem;
+  }
+
+  .paginationTable {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .citasTable {
+    min-width: 800px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contentArea {
+    padding: 0.6rem;
+  }
+
+  .headerSticky {
+    padding: 0.8rem;
+  }
+
+  .sectionHeader {
+    padding: 1rem;
+  }
+
+  .userName {
+    font-size: 0.8rem;
+  }
+
+  .time, .date {
+    font-size: 0.8rem;
+  }
+  
+  .citasTable th,
+  .citasTable td {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.8rem;
+  }
+  
+  .patientName {
+    font-size: 0.8rem;
+  }
+  
+  .patientSubtext {
+    font-size: 0.65rem;
+  }
+  
+  .curpCode {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .edadBadge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
   }
 }

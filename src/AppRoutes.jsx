@@ -1,4 +1,3 @@
-// AppRoutes.jsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Splash from "./pages/Splash";
 import Login from "./pages/Login";
@@ -11,12 +10,13 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 import DoctorCitasView from "./pages/Doctor/DoctorCitasView";
 import DoctorRecetaView from "./pages/Doctor/DoctorRecetaView";
 
+// Si tu archivo es .tsx, importa así:
+import { useAuth } from "./context/AuthContext"; // o "./context/AuthContext.tsx"
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* Página inicial */}
         <Route path="/" element={<Splash />} />
 
@@ -62,24 +62,24 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
-  path="/home-doctor/citas"
-  element={
-    <ProtectedRoute rolesPermitidos={["médico", "medico", "1", "administrador", "admin"]}>
-      <DoctorCitasView />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/home-doctor/recetas"
-  element={
-    <ProtectedRoute rolesPermitidos={["médico", "medico", "1", "administrador", "admin"]}>
-      <DoctorRecetaView />
-    </ProtectedRoute>
-  }
-/>
+          path="/home-doctor/citas"
+          element={
+            <ProtectedRoute rolesPermitidos={["médico", "medico", "1", "administrador", "admin"]}>
+              <DoctorCitasView />
+            </ProtectedRoute>
+          }
+        />
 
-
+        <Route
+          path="/home-doctor/recetas"
+          element={
+            <ProtectedRoute rolesPermitidos={["médico", "medico", "1", "administrador", "admin"]}>
+              <DoctorRecetaView />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Vista de pacientes */}
         <Route
