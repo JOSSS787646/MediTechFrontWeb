@@ -32,3 +32,4 @@ export default function DeleteUserModal({ nombre, onConfirm, onClose }) {
     </div>
   );
 }
+//cambios de la toña
