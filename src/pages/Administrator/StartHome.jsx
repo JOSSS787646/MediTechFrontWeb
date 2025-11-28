@@ -1,9 +1,9 @@
-//StartHome
+// StartHome.jsx
 import React, { useEffect, useState } from "react";
 import styles from "../../styles/pages/StartHome.module.css";
-import logo from "../../assets/logo.png";
+import logoLargo from "../../assets/logoLargo.png";
 
-export default function StartHome({ usuario, setSeccion }) {
+export default function StartHome({ usuario }) {
   const [hora, setHora] = useState("");
   const [fecha, setFecha] = useState("");
 
@@ -35,59 +35,57 @@ export default function StartHome({ usuario, setSeccion }) {
     usuario?.nombre || usuario?.nombreUsuario || "Administrador";
 
   return (
-    <div className={styles.dashboardContainer}>
-      {/* 🔹 Barra superior */}
-      <div className={styles.topBar}>
-        <button
-          className={styles.registerButton}
-          onClick={() => setSeccion("Usuarios")}
-        >
-          <span className="material-icons">person_add</span>
-          <span>Registrar Usuarios</span>
-        </button>
+    <div className={styles.wrapper}>
 
-        <div className={styles.userBox}>
-          <span className="material-icons">account_circle</span>
-          <span>{nombreCompleto}</span>
+      {/* 🔥 ENCABEZADO UNIFICADO */}
+      <header className={styles.headerSticky}>
+        <div className={styles.logoBox}>
+          <img src={logoLargo} alt="Logo" className={styles.logo} />
         </div>
-      </div>
 
-      {/* Línea decorativa */}
-      <div className={styles.divider}></div>
+        <div className={styles.userInfo}>
+          <div className={styles.userName}>
+            <span className="material-icons">account_circle</span>
+            {nombreCompleto}
+          </div>
 
-      {/* 🔹 Contenido principal */}
-      <div className={styles.headerSection}>
-        <div className={styles.timeBox}>
-          <h2>{hora}</h2>
-          <p>{fecha}</p>
+          <div className={styles.timeInfo}>
+            <div className={styles.time}>
+              <span className="material-icons">schedule</span>
+              {hora}
+            </div>
+            <div className={styles.date}>
+              <span className="material-icons">calendar_today</span>
+              {fecha}
+            </div>
+          </div>
         </div>
-        <div className={styles.welcomeBox}>
-          <h1>
-            ¡Bienvenido de nuevo,{" "}
-            {usuario?.nombreUsuario || usuario?.nombre || "Administrador"}!
+      </header>
+
+      {/* 🟦 Bienvenida */}
+      <header className={styles.header}>
+        <div>
+          <h1 className={styles.saludo}>
+            Hola, <span>{nombreCompleto}</span>
           </h1>
-          <p>Gestiona usuarios desde este panel.</p>
+          <p className={styles.descripcion}>
+            Bienvenido al panel administrativo — gestione, supervise y mantenga el control
+            de su institución médica.
+          </p>
         </div>
-      </div>
+      </header>
 
-      {/* 🔹 Tarjetas */}
-      <div className={styles.cardsContainer}>
-        {/* Card: Usuarios */}
-        <div
-          className={`${styles.card} ${styles.cardTeal}`}
-          onClick={() => setSeccion("Usuarios")}
-          style={{ cursor: "pointer" }}
-        >
-          <span className="material-icons">group</span>
-          <h3>Usuarios Registrados</h3>
-          <p>Administra fácilmente los colaboradores del sistema.</p>
+      {/* 🟩 Card informativa */}
+      <section className={styles.infoCard}>
+        <img src={logoLargo} alt="MediTech logo" className={styles.logoInfo} />
+        <div>
+          <h2>Centro de Control Administrativo</h2>
+          <p>
+            Optimice procesos, centralice datos y mejore la experiencia del personal
+            médico desde un solo panel.
+          </p>
         </div>
-      </div>
-
-      {/* 🔹 Logo inferior */}
-      <div className={styles.logoSection}>
-        <img src={logo} alt="MediTech logo" />
-      </div>
+      </section>
     </div>
   );
 }

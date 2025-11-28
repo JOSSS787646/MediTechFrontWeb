@@ -1,6 +1,6 @@
 // PacientesHome.jsx
 import React, { useState, useEffect } from "react";
-import styles from "../../styles/pages/UsersHome.module.css";
+import styles from "../../styles/Components/PacientesHome.module.css";
 import SidebarMenu from "../../Components/SidebarMenu";
 import RegisterPacienteModal from "../../Components/modals/RegisterPacienteModal";
 import { getPacientes } from "../../Api/paciente";
@@ -29,17 +29,27 @@ export default function PacientesHome() {
     const userData = localStorage.getItem("usuario");
     if (userData) {
       const parsed = JSON.parse(userData);
-      parsed.tipoColaborador = parsed.tipoColaborador?.toLowerCase();
+
+      // Normalizamos el tipo para comparar más fácil
+      parsed.tipoColaborador = String(parsed.tipoColaborador).toLowerCase();
+
       setUsuario(parsed);
     }
   }, []);
 
+  /* -------------------- SELECCIONAR SIDEBAR POR ROL -------------------- */
   const getOpcionesSidebar = () => {
     if (!usuario) return [];
+
     const tipo = usuario.tipoColaborador;
 
+    // Admin:  "admin", "administrador", "3"
     if (["admin", "administrador", "3"].includes(tipo)) return SidebarAdmin;
+
+    // Nurse: "enfermera", "2"
     if (["enfermera", "2"].includes(tipo)) return SidebarNurse;
+
+    // Doctor (fallback)
     return SidebarDoctor;
   };
 
@@ -72,6 +82,7 @@ export default function PacientesHome() {
     setCurrentPage(1);
   }, [searchTerm, data]);
 
+  /* ----------------------------- FORMATO FECHA ----------------------------- */
   const formatTime = (date) =>
     date.toLocaleTimeString("es-MX", {
       hour: "2-digit",
@@ -95,8 +106,12 @@ export default function PacientesHome() {
 
   return (
     <div className={styles.mainLayout}>
-      {/* Sidebar solo si no es admin */}
-      {usuario && usuario.tipoColaborador !== "3" && (
+      
+      {/* ✔️ IMPORTANTE:
+          Sidebar SOLO para Doctor y Enfermera.
+          Admin NO lo debe ver porque su propio layout ya lo incluye.
+      */}
+      {usuario && !["admin", "administrador", "3"].includes(usuario.tipoColaborador) && (
         <SidebarMenu
           setSeccion={setSeccion}
           seccionActiva="Pacientes"
@@ -106,6 +121,7 @@ export default function PacientesHome() {
       )}
 
       <div className={styles.contentArea}>
+        
         {/* HEADER FIJO */}
         <header className={styles.headerSticky}>
           <div className={styles.logoBox}>
@@ -134,6 +150,7 @@ export default function PacientesHome() {
         {/* CONTENIDO PRINCIPAL */}
         <div className={styles.scrollContainer}>
           <div className={styles.container}>
+            
             {/* BUSCADOR */}
             <section className={styles.searchSection}>
               <div className={styles.searchBarCompact}>
@@ -147,7 +164,7 @@ export default function PacientesHome() {
               </div>
             </section>
 
-            {/* TABLA SCROLLEABLE */}
+            {/* TABLA */}
             <div className={styles.tableScroll}>
               <TablaPacientes currentRows={currentRows} />
             </div>
@@ -162,7 +179,7 @@ export default function PacientesHome() {
               totalPages={totalPages}
             />
 
-            {/* MODAL REGISTRO */}
+            {/* MODAL */}
             {showRegisterModal && (
               <RegisterPacienteModal
                 onClose={() => setShowRegisterModal(false)}
@@ -176,9 +193,9 @@ export default function PacientesHome() {
   );
 }
 
-/* ================================================================
-   TABLA DE PACIENTES
-================================================================ */
+/* ========================================================================
+   TABLA
+======================================================================== */
 function TablaPacientes({ currentRows }) {
   const calcularEdad = (fecha) => {
     if (!fecha) return "N/A";
@@ -241,9 +258,9 @@ function TablaPacientes({ currentRows }) {
   );
 }
 
-/* ================================================================
+/* ========================================================================
    PAGINACIÓN
-================================================================ */
+======================================================================== */
 function Paginacion({
   filteredData,
   rowsPerPage,

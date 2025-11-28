@@ -1,0 +1,334 @@
+/* ===== Variables CSS ===== */
+:root {
+  --sidebar-color: #63b2a5;
+  --sidebar-hover: #4b8e83;
+  --text-dark: #0a2928;
+  --text-light: #64748b;
+  --white: #ffffff;
+  --background: #f8fafc;
+  --border-light: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+  --font: "Segoe UI", sans-serif;
+}
+
+/* ===== Layout general ===== */
+.mainLayout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--background);
+  font-family: var(--font);
+}
+
+/* ===== Contenido principal (CON SCROLL) ===== */
+.contentArea {
+  flex: 1;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;   /* ✅ Scroll en la pantalla principal */
+  overflow-x: hidden;
+}
+
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* ===== Header fijo ===== */
+.headerSticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow);
+  margin-bottom: 0.8rem;
+}
+
+.logoBox {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 180px;
+  transition: 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.04);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1.3rem;
+}
+
+.userName {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.timeInfo {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.time {
+  color: var(--sidebar-color);
+  font-weight: 700;
+}
+
+.date {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+/* ===== Contenedor de contenido (no hace scroll extra) ===== */
+.scrollContainer {
+  flex: 1;
+  overflow: visible;
+}
+
+/* ===== BUSCADOR COMPACTO ===== */
+.searchSection {
+  background: white;
+  padding: 0.9rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow);
+}
+
+.searchBarCompact {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+.searchBarCompact span {
+  font-size: 1.3rem;
+  opacity: 0.7;
+}
+
+.searchBarCompact input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+/* ===== Contador de pacientes ===== */
+.sectionHeader {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.7rem 1.2rem 0.2rem 1.2rem;
+}
+
+.appointmentCount {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--sidebar-color);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow);
+}
+
+/* ===== TABLA SCROLLEABLE (AQUÍ ESTÁ EL SCROLL DE LA TABLA) ===== */
+.tableScroll {
+  max-height: 55vh;      /* ✅ Altura relativa a la pantalla */
+  overflow-y: auto;      /* ✅ Scroll vertical dentro de la tabla */
+  overflow-x: auto;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.tableScroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.tableScroll::-webkit-scrollbar-thumb {
+  background: var(--sidebar-color);
+  border-radius: 4px;
+}
+.tableScroll::-webkit-scrollbar-track {
+  background: #e5edf0;
+}
+
+/* ===== Tabla ===== */
+.citasTable {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.citasTable thead {
+  background: linear-gradient(135deg, var(--sidebar-color), var(--sidebar-hover));
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.citasTable th,
+.citasTable td {
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.citasTable th {
+  font-weight: 600;
+}
+
+.tableRow:hover {
+  background: #f2faf7;
+}
+
+.patientCell {
+  font-weight: 600;
+}
+
+/* ===== Estado vacío ===== */
+.emptyRow td {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.emptyState {
+  text-align: center;
+  color: var(--text-light);
+}
+
+.emptyState p {
+  color: var(--text-dark);
+  font-weight: 600;
+  margin: 0.3rem 0;
+}
+
+/* ===== Botón de paginación genérico ===== */
+.paginationBtn {
+  background: var(--sidebar-color);
+  color: white;
+  border: none;
+  padding: 0.45rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: var(--sidebar-hover);
+}
+
+.paginationBtn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* ===== Paginación tipo "footer" de la tabla ===== */
+.paginationTable {
+  margin-top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border-light);
+  border-top: none;
+  background: white;
+  border-radius: 0 0 12px 12px;
+}
+
+.rowsSelectorTable {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rowsSelectorTable select {
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-light);
+}
+
+.pageControlsTable {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pageInfoTable {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .contentArea {
+    padding: 1rem;
+  }
+
+  .logo {
+    width: 150px;
+  }
+
+  .headerSticky {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.6rem;
+  }
+
+  .citasTable {
+    min-width: 700px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contentArea {
+    padding: 0.9rem;
+  }
+
+  .appointmentCount {
+    font-size: 0.8rem;
+  }
+
+  .searchBarCompact input {
+    font-size: 0.85rem;
+  }
+}

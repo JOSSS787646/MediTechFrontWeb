@@ -1,13 +1,26 @@
-/* UsersHome.jsx - Versión completa, limpia y 100% funcional con botón de ver dirección */
+/* UsersHome.jsx - Versión completa con Header + Sidebar + Layout unificado */
 
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/pages/UsersHome.module.css";
+
 import EditUserModal from "../../Components/modals/EditUserModal";
 import RegisterUserModal from "../../Components/modals/RegisterUserModal";
+
+import SidebarMenu from "../../Components/SidebarMenu";
+import {
+  SidebarAdmin,
+  SidebarNurse,
+  SidebarDoctor,
+} from "../../Config/sidebars";
+
 import { getColaboradores, updateColaborador } from "../../Api/colaborator";
 import Swal from "sweetalert2";
+import logo from "../../assets/logoLargo.png";
 
 export default function UsersHome() {
+  /* ========================================================================
+     ESTADOS ORIGINALES (NO SE TOCAN)
+  ======================================================================== */
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [alert, setAlert] = useState(null);
@@ -17,71 +30,113 @@ export default function UsersHome() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [mostrarInactivos, setMostrarInactivos] = useState(false);
 
-  // 🔥 NECESARIO PARA LA DIRECCIÓN
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const [expandedAddress, setExpandedAddress] = useState(null);
 
-  // ==========================
-  // Obtener colaboradores
-  // ==========================
+  /* ========================================================================
+     ⏱ HORA Y FECHA
+  ======================================================================== */
+  const [currentTime, setCurrentTime] = useState(new Date());
   useEffect(() => {
-    const fetchData = async () => {
+    const t = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const formatTime = (date) =>
+    date.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+  const formatDate = (date) =>
+    date.toLocaleDateString("es-MX", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+  /* ========================================================================
+     👤 USUARIO + SIDEBAR
+  ======================================================================== */
+  const [usuario, setUsuario] = useState(null);
+
+  useEffect(() => {
+    const data = localStorage.getItem("usuario");
+    if (data) {
+      const parsed = JSON.parse(data);
+      parsed.tipoColaborador = String(parsed.tipoColaborador).toLowerCase();
+      setUsuario(parsed);
+    }
+  }, []);
+
+  const getSidebar = () => {
+    if (!usuario) return [];
+
+    const tipo = usuario.tipoColaborador;
+
+    if (["admin", "administrador", "3"].includes(tipo)) return SidebarAdmin;
+    if (["enfermera", "2"].includes(tipo)) return SidebarNurse;
+    return SidebarDoctor;
+  };
+
+  const opcionesSidebar = getSidebar();
+
+  /* ========================================================================
+     🔥 CARGAR COLABORADORES
+  ======================================================================== */
+  useEffect(() => {
+    const cargar = async () => {
       try {
-        const colaboradores = await getColaboradores();
-        setData(colaboradores);
-        setFilteredData(colaboradores.filter((c) => c.esActivo));
+        const lista = await getColaboradores();
+        setData(lista);
+        setFilteredData(lista.filter((c) => c.esActivo));
       } catch (error) {
-        console.error("❌ Error al obtener colaboradores:", error);
+        console.error("❌ Error al cargar colaboradores:", error);
         setAlert({
           type: "danger",
-          message: "Error al cargar colaboradores ❌",
+          message: "No se pudieron obtener los colaboradores ❌",
         });
-        setTimeout(() => setAlert(null), 4000);
+        setTimeout(() => setAlert(null), 3500);
       }
     };
 
-    fetchData();
+    cargar();
   }, []);
 
-  // ==========================
-  // Filtro por nombre y estado
-  // ==========================
+  /* ========================================================================
+     FILTRO (nombre + activos/inactivos)
+  ======================================================================== */
   useEffect(() => {
     const filtered = data.filter((item) => {
-      const coincideNombre = item.nombre
+      const matchName = item.nombre
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
 
-      const coincideEstado = mostrarInactivos ? !item.esActivo : item.esActivo;
+      const matchState = mostrarInactivos ? !item.esActivo : item.esActivo;
 
-      return coincideNombre && coincideEstado;
+      return matchName && matchState;
     });
 
     setFilteredData(filtered);
     setCurrentPage(1);
-  }, [searchTerm, data, mostrarInactivos]);
+  }, [searchTerm, mostrarInactivos, data]);
 
-  // ==========================
-  // Alternar activos / inactivos
-  // ==========================
-  const toggleFiltro = () => {
-    setMostrarInactivos((prev) => !prev);
-  };
+  const toggleFiltro = () => setMostrarInactivos((p) => !p);
 
-  // ==========================
-  // Abrir modal editar
-  // ==========================
+  /* ========================================================================
+     EDITAR / TOGGLE ACTIVAR
+  ======================================================================== */
   const handleEditClick = (user) => {
     setEditTarget(user);
     setShowEditModal(true);
   };
 
-  // ==========================
-  // Guardar edición
-  // ==========================
   const handleEditSave = async (id, updatedData, options = {}) => {
     const { guardarEnBackend = false } = options;
 
@@ -93,80 +148,65 @@ export default function UsersHome() {
       setData(updated);
       setFilteredData(updated);
 
-      setAlert({
-        type: "success",
-        message: "Cambios aplicados localmente 🎉",
-      });
+      setAlert({ type: "success", message: "Cambios aplicados 🎉" });
 
-      if (!guardarEnBackend) return;
-
-      try {
-        await updateColaborador(id, updatedData);
-      } catch (err) {
-        console.warn("⚠ No se pudo actualizar backend:", err);
+      if (guardarEnBackend) {
+        try {
+          await updateColaborador(id, updatedData);
+        } catch {
+          console.warn("⚠ Error actualizando backend");
+        }
       }
-    } catch (error) {
-      console.error("❌ Error al guardar cambios:", error);
-      setAlert({
-        type: "danger",
-        message: "Error al guardar cambios ❌",
-      });
+    } catch {
+      setAlert({ type: "danger", message: "Error al actualizar ❌" });
     } finally {
-      setTimeout(() => setAlert(null), 4000);
+      setTimeout(() => setAlert(null), 3500);
     }
   };
 
-  // ==========================
-  // Activar / desactivar colaborador
-  // ==========================
   const handleToggleActive = async (id, nuevoEstado) => {
+    const colaborador = data.find((c) => c.id === id);
+
+    if (!colaborador) {
+      Swal.fire("Error", "Colaborador no encontrado", "error");
+      return;
+    }
+
+    const updated = data.map((c) =>
+      c.id === id ? { ...c, esActivo: nuevoEstado } : c
+    );
+
+    setData(updated);
+
+    Swal.fire({
+      icon: "success",
+      title: nuevoEstado ? "Activado" : "Desactivado",
+      timer: 1500,
+    });
+
     try {
-      const colaborador = data.find((u) => u.id === id);
-
-      if (!colaborador) {
-        Swal.fire("Error", "No se encontró el colaborador", "error");
-        return;
-      }
-
-      const updated = data.map((d) =>
-        d.id === id ? { ...d, esActivo: nuevoEstado } : d
-      );
-
-      setData(updated);
-
-      Swal.fire({
-        icon: "success",
-        title: nuevoEstado ? "Reactivado ✅" : "Desactivado 🚫",
-        timer: 1500,
-      });
-
-      try {
-        const payload = { ...colaborador, esActivo: nuevoEstado };
-        await updateColaborador(id, payload);
-      } catch (err) {
-        console.warn("⚠ No se actualizó backend:", err);
-      }
-    } catch  {
-      Swal.fire("Error", "No se pudo actualizar el estado ❌", "error");
+      await updateColaborador(id, { ...colaborador, esActivo: nuevoEstado });
+    } catch {
+      console.warn("⚠ No se pudo actualizar backend");
     }
   };
 
-  // ==========================
-  // Registrar colaborador
-  // ==========================
+  /* ========================================================================
+     REGISTRAR
+  ======================================================================== */
   const handleRegisterSave = (nuevo) => {
-    const normalizado = { esActivo: true, ...nuevo };
+    const nuevoFormato = { esActivo: true, ...nuevo };
+    setData((prev) => [nuevoFormato, ...prev]);
 
-    setData((prev) => [normalizado, ...prev]);
-    setShowRegisterModal(false);
-
-    setAlert({ type: "success", message: "Colaborador agregado!" });
+    setAlert({ type: "success", message: "Colaborador registrado!" });
     setTimeout(() => setAlert(null), 3000);
+
+    setShowRegisterModal(false);
   };
 
-  // ==========================
-  // Configuración de tabla
-  // ==========================
+  /* ========================================================================
+     PAGINACIÓN
+  ======================================================================== */
   const ocultarCampos = [
     "id",
     "iD_Cede",
@@ -190,254 +230,284 @@ export default function UsersHome() {
   const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
+  /* ========================================================================
+     RENDER FINAL
+  ======================================================================== */
   return (
-    <div className={styles.usersPageContainer}>
-      {/* ========================== BUSCADOR =========================== */}
-      <div className={styles.usersNav}>
-        <div className={styles.searchBox}>
-          <span className="material-icons">search</span>
+    <div className={styles.mainLayout}>
 
-          <input
-            type="text"
-            placeholder="Buscar por nombre..."
-            className={styles.searchInput}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+      {/** SIDEBAR (Admin no lo usa porque su layout ya lo incluye) */}
+      {usuario &&
+        !["admin", "administrador", "3"].includes(usuario?.tipoColaborador) && (
+          <SidebarMenu
+            opcionesCustom={opcionesSidebar}
+            passObject={true}
+            seccionActiva="Usuarios"
           />
-        </div>
+        )}
 
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <button
-            className={styles.addUserButton}
-            onClick={() => setShowRegisterModal(true)}
-          >
-            <span className="material-icons">person_add</span>
-            Agregar colaborador
-          </button>
+      <div className={styles.contentArea}>
+        {/* ======================= HEADER ======================= */}
+        <header className={styles.headerSticky}>
+          <div className={styles.logoBox}>
+            <img src={logo} alt="Logo" className={styles.logo} />
+          </div>
 
-          <button className={styles.toggleButton} onClick={toggleFiltro}>
-            {mostrarInactivos ? "Activos" : "Inactivos"}
-          </button>
-        </div>
-      </div>
+          <div className={styles.userInfo}>
+            <div className={styles.userName}>
+              <span className="material-icons">account_circle</span>
+              {usuario?.nombreUsuario ?? "Usuario"}
+            </div>
 
-      {/* Alertas */}
-      {alert && (
-        <div className={`alert alert-${alert.type} mt-3`} role="alert">
-          {alert.message}
-        </div>
-      )}
+            <div className={styles.timeInfo}>
+              <div className={styles.time}>
+                <span className="material-icons">schedule</span>
+                {formatTime(currentTime)}
+              </div>
+              <div className={styles.date}>
+                <span className="material-icons">calendar_today</span>
+                {formatDate(currentTime)}
+              </div>
+            </div>
+          </div>
+        </header>
 
-      <h2 className={styles.pageTitle}>
-        {mostrarInactivos ? "Colaboradores inactivos" : "Administrar Usuarios"}
-      </h2>
+        {/* ======================= CONTENIDO ======================= */}
+        <div className={styles.usersPageContainer}>
+          {/* NAV */}
+          <div className={styles.usersNav}>
+            <div className={styles.searchBox}>
+              <span className="material-icons">search</span>
 
-      {/* ========================== TABLA =========================== */}
-      <div className={styles.tableWrapper}>
-        <table className={styles.crudTable}>
-          <thead>
-            <tr>
-              <th style={{ minWidth: "120px" }}>Acciones</th>
+              <input
+                type="text"
+                placeholder="Buscar por nombre..."
+                className={styles.searchInput}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
 
-              {filteredData.length > 0 &&
-                Object.keys(filteredData[0])
-                  .filter((key) => !ocultarCampos.includes(key))
-                  .map((key) => (
-                    <th key={key}>
-                      {key.replace(/([A-Z])/g, " $1").toUpperCase()}
-                    </th>
-                  ))}
-            </tr>
-          </thead>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <button
+                className={styles.addUserButton}
+                onClick={() => setShowRegisterModal(true)}
+              >
+                <span className="material-icons">person_add</span>
+                Agregar
+              </button>
 
-          <tbody>
-            {currentRows.length === 0 ? (
-              <tr>
-                <td colSpan="100%" style={{ textAlign: "center" }}>
-                  {mostrarInactivos
-                    ? "No hay colaboradores inactivos"
-                    : "No se encontraron registros"}
-                </td>
-              </tr>
-            ) : (
-              currentRows.map((item) => (
-                <tr key={item.id}>
-                  <td className={styles.actionCell}>
-                    <button
-                      className={styles.editButton}
-                      onClick={() => handleEditClick(item)}
-                    >
-                      <span className="material-icons">edit</span>
-                    </button>
+              <button className={styles.toggleButton} onClick={toggleFiltro}>
+                {mostrarInactivos ? "Activos" : "Inactivos"}
+              </button>
+            </div>
+          </div>
 
-                    <label className={styles.switch}>
-                      <input
-                        type="checkbox"
-                        checked={!!item.esActivo}
-                        onChange={() =>
-                          handleToggleActive(item.id, !item.esActivo)
-                        }
-                      />
-                      <span className={styles.slider}></span>
-                    </label>
-                  </td>
+          {alert && (
+            <div className={`alert alert-${alert.type}`}>{alert.message}</div>
+          )}
 
-                  {Object.entries(item)
-                    .filter(([key]) => !ocultarCampos.includes(key))
-                    .map(([key, value], idx) => {
-                      // ==========================================
-                      // CAMPO DIRECCIÓN (botón ver más)
-                      // ==========================================
-                      if (key === "direccion") {
-                        const direccionTexto =
-                          value && value.trim() !== ""
-                            ? value
-                            : "Sin dirección";
+          <h2 className={styles.pageTitle}>
+            {mostrarInactivos ? "Colaboradores inactivos" : "Administrar Usuarios"}
+          </h2>
 
-                        const isExpanded = expandedAddress === item.id;
-                        const textoTruncado =
-                          direccionTexto.length > 10
-                            ? direccionTexto.slice(0, 10) + "..."
-                            : direccionTexto;
+          {/* TABLA */}
+          <div className={styles.tableWrapper}>
+            <table className={styles.crudTable}>
+              <thead>
+                <tr>
+                  <th>Acciones</th>
 
-                        const mostrarBoton =
-                          direccionTexto.length > 10;
-
-                        return (
-                          <td key={idx} className={styles.truncateCell}>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "0.4rem",
-                              }}
-                            >
-                              <span>{textoTruncado}</span>
-
-                              {mostrarBoton && (
-                                <button
-                                  className={styles.eyeButton}
-                                  onClick={() =>
-                                    setExpandedAddress(
-                                      isExpanded ? null : item.id
-                                    )
-                                  }
-                                  title="Ver dirección completa"
-                                >
-                                  <span className="material-icons">
-                                    {isExpanded
-                                      ? "visibility_off"
-                                      : "visibility"}
-                                  </span>
-                                </button>
-                              )}
-                            </div>
-
-                            {isExpanded && (
-                              <div
-                                className={styles.cardOverlay}
-                                onClick={() => setExpandedAddress(null)}
-                              >
-                                <div
-                                  className={styles.infoCard}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <h3>📍 Dirección completa</h3>
-
-                                  <p>
-                                    <strong>Colaborador:</strong>{" "}
-                                    {item.nombre} {item.apellidoPaterno}{" "}
-                                    {item.apellidoMaterno}
-                                  </p>
-
-                                  <p>
-                                    <strong>Dirección:</strong>{" "}
-                                    {direccionTexto}
-                                  </p>
-
-                                  <button
-                                    className={styles.closeCardButton}
-                                    onClick={() =>
-                                      setExpandedAddress(null)
-                                    }
-                                  >
-                                    Cerrar
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </td>
-                        );
-                      }
-
-                      // Campos normales
-                      return <td key={idx}>{value?.toString()}</td>;
-                    })}
+                  {filteredData.length > 0 &&
+                    Object.keys(filteredData[0])
+                      .filter((key) => !ocultarCampos.includes(key))
+                      .map((key) => (
+                        <th key={key}>
+                          {key.replace(/([A-Z])/g, " $1").toUpperCase()}
+                        </th>
+                      ))}
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
 
-      {/* ========================== PAGINACIÓN =========================== */}
-      {filteredData.length > 0 && (
-        <div className={styles.paginationContainer}>
-          <div className={styles.rowsSelector}>
-            <label>Filas por página:</label>
+              <tbody>
+                {currentRows.length === 0 ? (
+                  <tr>
+                    <td colSpan="100%" style={{ textAlign: "center" }}>
+                      {mostrarInactivos
+                        ? "No hay colaboradores inactivos"
+                        : "No se encontraron registros"}
+                    </td>
+                  </tr>
+                ) : (
+                  currentRows.map((item) => (
+                    <tr key={item.id}>
+                      {/* ACCIONES */}
+                      <td className={styles.actionCell}>
+                        <button
+                          className={styles.editButton}
+                          onClick={() => handleEditClick(item)}
+                        >
+                          <span className="material-icons">edit</span>
+                        </button>
 
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
-              {[5, 10, 20, 50].map((num) => (
-                <option key={num} value={num}>
-                  {num}
-                </option>
-              ))}
-            </select>
+                        <label className={styles.switch}>
+                          <input
+                            type="checkbox"
+                            checked={!!item.esActivo}
+                            onChange={() =>
+                              handleToggleActive(item.id, !item.esActivo)
+                            }
+                          />
+                          <span className={styles.slider}></span>
+                        </label>
+                      </td>
+
+                      {/* CAMPOS */}
+                      {Object.entries(item)
+                        .filter(([k]) => !ocultarCampos.includes(k))
+                        .map(([key, value], idx) => {
+                          if (key === "direccion") {
+                            const dir = value || "Sin dirección";
+                            const expandido = expandedAddress === item.id;
+
+                            return (
+                              <td key={idx} className={styles.truncateCell}>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: ".4rem",
+                                  }}
+                                >
+                                  <span>
+                                    {dir.length > 10
+                                      ? dir.slice(0, 10) + "..."
+                                      : dir}
+                                  </span>
+
+                                  {dir.length > 10 && (
+                                    <button
+                                      className={styles.eyeButton}
+                                      onClick={() =>
+                                        setExpandedAddress(
+                                          expandido ? null : item.id
+                                        )
+                                      }
+                                    >
+                                      <span className="material-icons">
+                                        {expandido
+                                          ? "visibility_off"
+                                          : "visibility"}
+                                      </span>
+                                    </button>
+                                  )}
+                                </div>
+
+                                {expandido && (
+                                  <div
+                                    className={styles.cardOverlay}
+                                    onClick={() => setExpandedAddress(null)}
+                                  >
+                                    <div
+                                      className={styles.infoCard}
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <h3>📍 Dirección completa</h3>
+
+                                      <p>
+                                        <strong>Colaborador:</strong>{" "}
+                                        {item.nombre} {item.apellidoPaterno}{" "}
+                                        {item.apellidoMaterno}
+                                      </p>
+
+                                      <p>
+                                        <strong>Dirección:</strong> {dir}
+                                      </p>
+
+                                      <button
+                                        className={styles.closeCardButton}
+                                        onClick={() =>
+                                          setExpandedAddress(null)
+                                        }
+                                      >
+                                        Cerrar
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </td>
+                            );
+                          }
+
+                          return <td key={idx}>{value?.toString()}</td>;
+                        })}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
 
-          <div className={styles.pageControls}>
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-            >
-              <span className="material-icons">chevron_left</span>
-            </button>
+          {/* PAGINACIÓN */}
+          {filteredData.length > 0 && (
+            <div className={styles.paginationContainer}>
+              <div className={styles.rowsSelector}>
+                <label>Filas:</label>
 
-            <span>
-              Página {currentPage} de {totalPages || 1}
-            </span>
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => {
+                    setRowsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  {[5, 10, 20, 50].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <button
-              disabled={currentPage === totalPages || totalPages === 0}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
-              <span className="material-icons">chevron_right</span>
-            </button>
-          </div>
+              <div className={styles.pageControls}>
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                >
+                  <span className="material-icons">chevron_left</span>
+                </button>
+
+                <span>
+                  Página {currentPage} de {totalPages || 1}
+                </span>
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                >
+                  <span className="material-icons">chevron_right</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* MODALES */}
+          {showEditModal && editTarget && (
+            <EditUserModal
+              user={editTarget}
+              onClose={() => setShowEditModal(false)}
+              onSave={handleEditSave}
+            />
+          )}
+
+          {showRegisterModal && (
+            <RegisterUserModal
+              onClose={() => setShowRegisterModal(false)}
+              onSave={handleRegisterSave}
+            />
+          )}
         </div>
-      )}
-
-      {/* ========================== MODALES =========================== */}
-      {showEditModal && editTarget && (
-        <EditUserModal
-          user={editTarget}
-          onClose={() => setShowEditModal(false)}
-          onSave={handleEditSave}
-        />
-      )}
-
-      {showRegisterModal && (
-        <RegisterUserModal
-          onClose={() => setShowRegisterModal(false)}
-          onSave={handleRegisterSave}
-        />
-      )}
+      </div>
     </div>
   );
 }

@@ -96,10 +96,6 @@ export const enableColaborador = async (id: number) => {
   }
 };
 
-// =========================================================
-// 🔹 Obtener citas de un colaborador (RUTA REAL QUE USAS)
-// GET https://localhost:44389/api/Colaborador/citas-colaborador/{id}
-// =========================================================
 export const getCitasDeColaborador = async (idColaborador: number) => {
     try {
         const response = await api.get(`/Colaborador/citas-colaborador/${idColaborador}`);

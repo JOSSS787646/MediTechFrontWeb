@@ -5,12 +5,11 @@ import styles from "../../styles/pages/NurseHome.module.css";
 import SidebarMenu from "../../Components/SidebarMenu";
 import logo from "../../assets/logoLargo.png";
 
-import {
-  getCitasPacienteByCurpOrEmail,
-  getAllCitasPacientes,
-} from "../../Api/colaborator";
+import { getCitasPacienteByCurpOrEmail } from "../../Api/colaborator";
+import { getAllCitas } from "../../Api/cita";
 
 import { SidebarNurse } from "../../Config/sidebars";
+import SignosVitalesModal from "../../Components/modals/SignosVitalesModal";
 
 export default function NurseHome() {
   const [usuario, setUsuario] = useState(null);
@@ -19,20 +18,20 @@ export default function NurseHome() {
 
   const [horaActual, setHoraActual] = useState("");
   const [fechaActual, setFechaActual] = useState("");
+  const [modalPaciente, setModalPaciente] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const navigate = useNavigate();
 
-  // ============================
-  // CARGAR USUARIO
-  // ============================
+  // ---------------------- Cargar enfermera ----------------------
   useEffect(() => {
     const userData = localStorage.getItem("usuario");
     if (userData) setUsuario(JSON.parse(userData));
   }, []);
 
-  // ============================
-  // RELOJ EN VIVO
-  // ============================
+  // ---------------------- Reloj ----------------------
   useEffect(() => {
     const updateClock = () => {
       setHoraActual(
@@ -41,44 +40,40 @@ export default function NurseHome() {
           minute: "2-digit",
         })
       );
+
       let f = new Date().toLocaleDateString("es-MX", {
+        weekday: "long",
         year: "numeric",
         month: "long",
         day: "numeric",
       });
+
       setFechaActual(f.charAt(0).toUpperCase() + f.slice(1));
     };
 
     updateClock();
     const interval = setInterval(updateClock, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
-  // ============================
-  // CARGAR TODAS LAS CITAS
-  // ============================
+  // ---------------------- Cargar citas ----------------------
   useEffect(() => {
     cargarTodasLasCitas();
   }, []);
 
   const cargarTodasLasCitas = async () => {
     try {
-      const citas = await getAllCitasPacientes();
+      const citas = await getAllCitas();
       setCitasPaciente(citas);
+      setCurrentPage(1);
     } catch {
-      alert("Error cargando todas las citas.");
+      alert("Error cargando las citas.");
     }
   };
 
-  // ============================
-  // BUSCAR POR CURP
-  // ============================
+  // ---------------------- Búsqueda ----------------------
   const buscarCitasPorCurp = async () => {
-    if (!curpBusqueda.trim()) {
-      cargarTodasLasCitas();
-      return;
-    }
+    if (!curpBusqueda.trim()) return cargarTodasLasCitas();
 
     try {
       const citas = await getCitasPacienteByCurpOrEmail(curpBusqueda);
@@ -90,12 +85,30 @@ export default function NurseHome() {
       }
 
       setCitasPaciente(citas);
+      setCurrentPage(1);
     } catch {
-      alert("No se encontró información para ese CURP.");
+      alert("No se encontró información para ese CURP/correo.");
       setCitasPaciente([]);
     }
   };
 
+  // ---------------------- Ordenar citas: las atendidas al final ----------------------
+  const citasOrdenadas = [...citasPaciente].sort((a, b) => {
+    const aAt = a.atendida ? 1 : 0;
+    const bAt = b.atendida ? 1 : 0;
+    return aAt - bAt; // 0 antes que 1
+  });
+
+  // ---------------------- Paginación ----------------------
+  const indexOfLast = currentPage * rowsPerPage;
+  const indexOfFirst = indexOfLast - rowsPerPage;
+  const currentRows = citasOrdenadas.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(citasOrdenadas.length / rowsPerPage)
+  );
+
+  // ---------------------- Render ----------------------
   return (
     <div className={styles.mainLayout}>
       <SidebarMenu opcionesCustom={SidebarNurse} />
@@ -103,47 +116,47 @@ export default function NurseHome() {
       <div className={styles.contentArea}>
         <div className={styles.container}>
 
-          {/* ===========================
-              HEADER
-          ============================ */}
+          {/* HEADER */}
           <header className={styles.header}>
             <div className={styles.logoBox}>
               <img src={logo} alt="Logo" className={styles.logo} />
             </div>
 
             <div className={styles.userInfo}>
-              <span className={styles.userName}>
+              <div className={styles.userName}>
+                <span className="material-icons-outlined">account_circle</span>
                 {usuario?.nombreUsuario || "Enfermería"}
-              </span>
+              </div>
+
               <div className={styles.timeInfo}>
-                <span className={styles.time}>{horaActual}</span>
-                <span className={styles.date}>{fechaActual}</span>
+                <div className={styles.time}>
+                  <span className="material-icons-outlined">schedule</span>
+                  {horaActual}
+                </div>
+
+                <div className={styles.date}>
+                  <span className="material-icons-outlined">calendar_today</span>
+                  {fechaActual}
+                </div>
               </div>
             </div>
           </header>
 
-          {/* ===========================
-              BUSCADOR
-          ============================ */}
+          {/* BUSCADOR */}
           <div className={styles.searchSection}>
             <div className={styles.searchBarWrapper}>
-              <span className="material-icons" style={{ fontSize: 22, color: "#999" }}>
-                search
-              </span>
+              <span className="material-icons-outlined">search</span>
 
               <input
                 type="text"
-                placeholder="Buscar paciente por CURP o correo..."
+                placeholder="Buscar por CURP o correo..."
                 value={curpBusqueda}
                 onChange={(e) => setCurpBusqueda(e.target.value)}
                 className={styles.searchBar}
               />
 
-              <button
-                className={styles.searchBtn}
-                onClick={buscarCitasPorCurp}
-              >
-                <span className="material-icons">manage_search</span>
+              <button className={styles.searchBtn} onClick={buscarCitasPorCurp}>
+                <span className="material-icons-outlined">manage_search</span>
               </button>
             </div>
 
@@ -151,74 +164,147 @@ export default function NurseHome() {
               className={styles.agendarBtn}
               onClick={() => navigate("/home-nurse/citas")}
             >
-              <span className="material-icons">event</span>
+              <span className="material-icons-outlined">event</span>
               Agendar cita
             </button>
           </div>
 
-          {/* ===========================
-              TITULO Y CONTADOR
-          ============================ */}
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Citas registradas</h2>
-
-            <span className={styles.citaCount}>
-              {citasPaciente.length} registros
-            </span>
-          </div>
-
-          {/* ===========================
-              TABLA
-          ============================ */}
+          {/* TABLA */}
           <div className={styles.scrollContainer}>
-            <div className={styles.tableWrapper}>
-              <table className={styles.citasTable}>
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Apellido paterno</th>
-                    <th>Apellido materno</th>
-                    <th>CURP</th>
-                    <th>Fecha y hora</th>
-                    <th>Doctor</th>
-                  </tr>
-                </thead>
+            <table className={styles.citasTable}>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Apellido paterno</th>
+                  <th>Apellido materno</th>
+                  <th>CURP</th>
+                  <th>Fecha y hora</th>
+                  <th>Doctor</th>
+                  <th className={styles.centerCol}>Atender</th>
+                </tr>
+              </thead>
 
-                <tbody>
-                  {citasPaciente.length > 0 ? (
-                    citasPaciente.map((cita, i) => (
-                      <tr key={i}>
-                        <td>{cita.nombre}</td>
-                        <td>{cita.apellidoPaterno}</td>
-                        <td>{cita.apellidoMaterno}</td>
-                        <td>{cita.curp}</td>
-                        <td>
-                          {cita.fechaCita?.split("T")[0]}{" "}
-                          {cita.horaCita && ` - ${cita.horaCita}`}
-                        </td>
-                        <td>{cita.medico}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className={styles.emptyRow}>
-                        <div className={styles.emptyState}>
-                          <span className="material-icons" style={{ fontSize: 40 }}>
-                            hourglass_empty
-                          </span>
-                          <p>No hay citas para mostrar</p>
-                          <small>Realiza una búsqueda para ver resultados</small>
-                        </div>
+              <tbody>
+                {currentRows.length > 0 ? (
+                  currentRows.map((cita, i) => (
+                    <tr
+                      key={i}
+                      className={`${styles.tableRow} ${
+                        cita.atendida ? styles.rowAtendida : ""
+                      }`}
+                    >
+                      <td>{cita.pacienteNombre}</td>
+                      <td>{cita.pacienteApellidoPaterno}</td>
+                      <td>{cita.pacienteApellidoMaterno}</td>
+                      <td>{cita.curp}</td>
+                      <td>
+                        {cita.fechaCita?.split("T")[0]}{" "}
+                        {cita.horaCita ? `- ${cita.horaCita}` : ""}
+                      </td>
+                      <td>{cita.medico}</td>
+
+                      <td className={styles.centerCol}>
+                        <button
+                          className={styles.vitalsBtn}
+                          disabled={cita.atendida}
+                          onClick={() =>
+                            setModalPaciente({
+                              ...cita, // enviamos la cita completa
+                              nombreCompleto: `${cita.pacienteNombre} ${cita.pacienteApellidoPaterno} ${cita.pacienteApellidoMaterno}`,
+                            })
+                          }
+                        >
+                          <span className="material-icons-outlined">monitor_heart</span>
+                          Signos Vitales
+                        </button>
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className={styles.emptyRow}>
+                      <div className={styles.emptyState}>
+                        <span
+                          className="material-icons-outlined"
+                          style={{ fontSize: 40 }}
+                        >
+                          hourglass_empty
+                        </span>
+                        <p>No hay citas para mostrar</p>
+                        <small>Realiza una búsqueda o registra una cita</small>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
 
+            {/* PAGINACIÓN */}
+            {citasOrdenadas.length > 0 && (
+              <div className={styles.paginationTable}>
+                <div className={styles.rowsSelectorTable}>
+                  <label>Filas:</label>
+                  <select
+                    value={rowsPerPage}
+                    onChange={(e) => {
+                      setRowsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    {[5, 10, 20, 50].map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className={styles.pageControlsTable}>
+                  <button
+                    className={styles.paginationBtn}
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                  >
+                    <span className="material-icons-outlined">chevron_left</span>
+                  </button>
+
+                  <span className={styles.pageInfoTable}>
+                    {currentPage} / {totalPages}
+                  </span>
+
+                  <button
+                    className={styles.paginationBtn}
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                  >
+                    <span className="material-icons-outlined">chevron_right</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* MODAL SIGNOS VITALES */}
+      {modalPaciente && (
+        <SignosVitalesModal
+          paciente={modalPaciente}
+          onClose={() => setModalPaciente(null)}
+          onSave={() => {
+            // 🔥 Marcar SOLO esta cita con fecha y hora exactas
+            setCitasPaciente((prev) =>
+              prev.map((c) =>
+                c.curp === modalPaciente.curp &&
+                c.fechaCita === modalPaciente.fechaCita &&
+                c.horaCita === modalPaciente.horaCita
+                  ? { ...c, atendida: true }
+                  : c
+              )
+            );
+          }}
+        />
+      )}
     </div>
   );
 }
