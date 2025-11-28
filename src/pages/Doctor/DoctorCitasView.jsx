@@ -8,7 +8,7 @@ import { SidebarDoctor } from "../../Config/sidebars";
 import { getEspecialidades } from "../../Api/especialidad";
 import { getColaboradoresByEspecialidad } from "../../Api/colaborator";
 import { getCedes } from "../../Api/cede";
-import { createCita } from "../../Api/cita";
+
 
 export default function DoctorCitasView() {
   const [usuario, setUsuario] = useState(null);
@@ -149,9 +149,9 @@ export default function DoctorCitasView() {
 
       console.log("📤 Enviando cita:", citaData);
 
-      const resultado = await createCita(citaData);
 
-      alert(`✅ Cita registrada correctamente con ID: ${resultado.id || resultado.ID}`);
+
+
 
       // Limpiar formulario
       setFormData({

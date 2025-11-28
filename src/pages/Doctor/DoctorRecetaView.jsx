@@ -1,14 +1,16 @@
-// DoctorRecetaView.jsx
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import SidebarMenu from "../../Components/SidebarMenu";
 import { SidebarDoctor } from "../../Config/sidebars";
 import styles from "../../styles/pages/DoctorRecetaView.module.css";
 import logo from "../../assets/logoLargo.png";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import "material-icons/iconfont/material-icons.css";
+import { getPacienteByCurp } from "../../Api/paciente";
+import { getColaboradorById } from "../../Api/colaborator";
+// CORREGIR LA IMPORTACIÓN - agregar descargarRecetaPDF
+import { generarRecetaPDFSimple, descargarRecetaPDF } from "../../utils/PdfGenerator";
+import ModalEnvioCorreo from "../../Components/modals/SendGmailModal";
 
-// Iconos de Material Icons
 const Iconos = {
   medico: "medical_services",
   paciente: "person",
@@ -17,17 +19,20 @@ const Iconos = {
   guardar: "picture_as_pdf",
   usuario: "account_circle",
   reloj: "schedule",
-  calendario: "calendar_today",
-  buscar: "search",
-  cerrar: "close",
-  descargar: "download",
-  vista: "visibility"
+  calendario: "calendar_today"
 };
 
 export default function DoctorRecetaView() {
+  const location = useLocation();
   const [horaActual, setHoraActual] = useState("");
   const [fechaActual, setFechaActual] = useState("");
   const [usuario, setUsuario] = useState(null);
+  const [cargando, setCargando] = useState(false);
+  const [mensaje, setMensaje] = useState("");
+  const [mostrarModalCorreo, setMostrarModalCorreo] = useState(false);
+  const [emailPaciente, setEmailPaciente] = useState("");
+  const [pdfBlob, setPdfBlob] = useState(null);
+  const [pdfUrl, setPdfUrl] = useState("");
 
   const [formData, setFormData] = useState({
     doctorNombre: "",
@@ -45,254 +50,233 @@ export default function DoctorRecetaView() {
     tratamiento: "",
   });
 
-  const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
-  const [mostrarPreview, setMostrarPreview] = useState(false);
-
-  // ===========================
-  // CARGAR USUARIO ACTUAL
-  // ===========================
+  // Cargar datos al montar el componente
   useEffect(() => {
-    const u = JSON.parse(localStorage.getItem("usuario"));
-    if (u) {
-      setUsuario(u);
-      setFormData((prev) => ({
-        ...prev,
-        doctorNombre: `${u.nombre} ${u.apellidoPaterno || ""}`,
-        doctorCedula: u.cedula || "",
-        doctorTelefono: u.telefono || "",
-        doctorEmail: u.email || "",
-      }));
+    console.log("🚀 DoctorRecetaView iniciado");
+    
+    // Cargar datos del doctor automáticamente
+    cargarDatosDoctor();
+    
+    // Cargar datos del paciente si se enviaron
+    if (location.state?.pacienteData) {
+      console.log("📦 Datos del paciente recibidos:", location.state.pacienteData);
+      cargarDatosPaciente(location.state.pacienteData);
+    } else {
+      setMensaje("No se recibieron datos del paciente");
+      console.warn("⚠️ No hay datos del paciente");
     }
-  }, []);
+  }, [location]);
 
-  // ===========================
-  // RELOJ
-  // ===========================
+  // Función para cargar datos del doctor desde la API
+  const cargarDatosDoctor = async () => {
+    try {
+      console.log("🔄 Cargando datos del doctor...");
+      
+      // Obtener usuario del localStorage
+      const usuarioData = JSON.parse(localStorage.getItem("usuario"));
+      if (!usuarioData || !usuarioData.id) {
+        console.error("❌ No se encontró ID de usuario en localStorage");
+        setMensaje("Error: No se pudo identificar al doctor");
+        return;
+      }
+
+      console.log("👤 ID del doctor encontrado:", usuarioData.id);
+      setUsuario(usuarioData);
+
+      // Llamar a la API para obtener datos completos del doctor
+      console.log("📞 Llamando a getColaboradorById...");
+      const doctorCompleto = await getColaboradorById(usuarioData.id);
+      console.log("✅ Datos completos del doctor recibidos:", doctorCompleto);
+
+      // Actualizar formulario con datos del doctor
+      setFormData(prev => ({
+        ...prev,
+        doctorNombre: `${doctorCompleto.nombre} ${doctorCompleto.apellidoPaterno || ""} ${doctorCompleto.apellidoMaterno || ""}`.trim(),
+        doctorCedula: doctorCompleto.matriculaProfesional || "", 
+        doctorTelefono: doctorCompleto.telefono || "",
+        doctorEmail: doctorCompleto.email || "",
+      }));
+
+      console.log("✅ Datos del doctor cargados correctamente");
+
+    } catch (error) {
+      console.error("❌ Error cargando datos del doctor:", error);
+      setMensaje("❌ Error al cargar datos del doctor");
+      
+      // Usar datos básicos del localStorage si falla la API
+      const usuarioData = JSON.parse(localStorage.getItem("usuario"));
+      if (usuarioData) {
+        setFormData(prev => ({
+          ...prev,
+          doctorNombre: usuarioData.nombreUsuario || "Doctor",
+        }));
+        console.log("🔄 Usando datos básicos del localStorage");
+      }
+    }
+  };
+
+  // Función para formatear fecha para input type="date"
+  const formatearFechaParaInput = (fechaString) => {
+    if (!fechaString) return "";
+    
+    console.log("📅 Fecha original:", fechaString);
+    
+    try {
+      const fecha = new Date(fechaString);
+      
+      if (isNaN(fecha.getTime())) {
+        console.error("❌ Fecha inválida:", fechaString);
+        return "";
+      }
+      
+      const año = fecha.getFullYear();
+      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+      const dia = String(fecha.getDate()).padStart(2, '0');
+      
+      const fechaFormateada = `${año}-${mes}-${dia}`;
+      console.log("✅ Fecha formateada:", fechaFormateada);
+      
+      return fechaFormateada;
+      
+    } catch (error) {
+      console.error("❌ Error formateando fecha:", error);
+      return "";
+    }
+  };
+
+  // Función para cargar datos del paciente por CURP
+  const cargarDatosPaciente = async (pacienteData) => {
+    console.log("🔄 Iniciando carga de datos del paciente...");
+    
+    if (!pacienteData.curp) {
+      console.error("❌ No hay CURP proporcionado");
+      setMensaje("Error: No se proporcionó CURP del paciente");
+      return;
+    }
+
+    setCargando(true);
+    setMensaje(`Buscando paciente con CURP: ${pacienteData.curp}`);
+
+    try {
+      console.log("📞 Llamando a getPacienteByCurp...");
+      const pacienteCompleto = await getPacienteByCurp(pacienteData.curp);
+      console.log("✅ Datos COMPLETOS del paciente recibidos:", pacienteCompleto);
+
+      const fechaNacimientoFormateada = formatearFechaParaInput(pacienteCompleto.fechaNacimiento);
+      console.log("📅 Fecha de nacimiento formateada:", fechaNacimientoFormateada);
+
+      setFormData(prev => ({
+        ...prev,
+        pacienteNombre: `${pacienteCompleto.nombre} ${pacienteCompleto.apellidoPaterno} ${pacienteCompleto.apellidoMaterno}`,
+        pacienteEdad: pacienteCompleto.edad || pacienteData.edad,
+        pacienteNacimiento: fechaNacimientoFormateada,
+        pacienteTelefono: pacienteCompleto.telefono || pacienteData.telefono,
+        pacienteAlergias: "Ninguna alergia registrada"
+      }));
+
+      setMensaje("✅ Datos del paciente cargados correctamente");
+      console.log("🎉 Formulario actualizado con datos del paciente");
+
+    } catch (error) {
+      console.error("❌ Error cargando datos del paciente:", error);
+      setMensaje("❌ Error al cargar datos del paciente");
+      
+      const fechaBasicaFormateada = formatearFechaParaInput(pacienteData.fechaNacimiento);
+      
+      setFormData(prev => ({
+        ...prev,
+        pacienteNombre: pacienteData.nombre || "",
+        pacienteEdad: pacienteData.edad || "",
+        pacienteNacimiento: fechaBasicaFormateada,
+        pacienteTelefono: pacienteData.telefono || "",
+        pacienteAlergias: "No se pudieron cargar las alergias"
+      }));
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // Reloj en tiempo real
   useEffect(() => {
-    const int = setInterval(() => {
-      const now = new Date();
-
-      setHoraActual(
-        now.toLocaleTimeString("es-MX", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
-
-      const f = now.toLocaleDateString("es-MX", {
+    const actualizarReloj = () => {
+      const ahora = new Date();
+      setHoraActual(ahora.toLocaleTimeString("es-MX", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }));
+      setFechaActual(ahora.toLocaleDateString("es-MX", {
         year: "numeric",
         month: "long",
         day: "numeric",
-      });
+      }));
+    };
 
-      setFechaActual(f.charAt(0).toUpperCase() + f.slice(1));
-    }, 1000);
-
-    return () => clearInterval(int);
+    actualizarReloj();
+    const intervalo = setInterval(actualizarReloj, 1000);
+    return () => clearInterval(intervalo);
   }, []);
 
-  // ===========================
-  // HANDLER DE INPUTS
-  // ===========================
+  // Manejar cambios en los inputs
   const handleInput = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    console.log(`📝 Campo ${name} cambiado:`, value);
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  // ===========================
-  // FUNCIONES PARA PDF
-  // ===========================
-  const safe = (str) => {
-    return str ? String(str) : "";
+  // Generar PDF - función actualizada
+  const generarPDF = async () => {
+    console.log("🔄 Iniciando generación de PDF...");
+    setCargando(true);
+
+    try {
+      await descargarRecetaPDF(formData); // ← Ahora esta función está importada
+      setMensaje("✅ PDF generado correctamente");
+      console.log("✅ PDF generado exitosamente");
+
+    } catch (error) {
+      console.error("❌ Error generando PDF:", error);
+      setMensaje("❌ Error al generar PDF");
+    } finally {
+      setCargando(false);
+    }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("es-MX", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    });
-  };
+  // En la función abrirModalCorreo, cambia a:
+const abrirModalCorreo = async () => {
+  console.log("📧 Abriendo modal de correo");
+  setCargando(true);
 
-  // ===========================
-  // GENERAR VISTA PREVIA PDF
-  // ===========================
-  const generarVistaPreviaPDF = async () => {
-    const html = `
-    <!doctype html>
-    <html>
-      <head>
-        <meta charset="utf-8"/>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            padding: 30px;
-            color: #333;
-            line-height: 1.4;
-          }
-          .header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 4px solid #63b2a5;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-          }
-          .logo {
-            width: 70px;
-            height: 70px;
-            object-fit: contain;
-          }
-          .doctor-info h1 {
-            font-size: 22px;
-            color: #63b2a5;
-            margin: 0;
-          }
-          .section-title {
-            font-size: 18px;
-            margin-top: 25px;
-            color: #63b2a5;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 5px;
-          }
-          .data-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px 20px;
-            margin-top: 10px;
-          }
-          .field {
-            width: 45%;
-          }
-          .rx-symbol {
-            font-size: 70px;
-            color: #63b2a5;
-            margin: 25px 0;
-            text-align: center;
-            opacity: 0.7;
-          }
-          .box {
-            background: #F8FAFC;
-            padding: 20px;
-            border-left: 4px solid #63b2a5;
-            margin-top: 10px;
-            white-space: pre-wrap;
-            border-radius: 0 8px 8px 0;
-            line-height: 1.6;
-          }
-          .footer {
-            margin-top: 40px;
-            padding: 15px;
-            background: #63b2a5;
-            color: white;
-            text-align: center;
-            border-radius: 6px;
-            font-size: 14px;
-          }
-          .field strong {
-            color: #555;
-          }
-        </style>
-      </head>
+  try {
+    // Usar la versión simple que es más confiable
+    const pdfBlobGenerado = await generarRecetaPDFSimple(formData, 'blob');
+    const pdfUrlGenerada = await generarRecetaPDFSimple(formData, 'url');
+    
+    setPdfBlob(pdfBlobGenerado);
+    setPdfUrl(pdfUrlGenerada);
+    setMostrarModalCorreo(true);
+    
+    console.log("✅ PDF generado para modal de correo");
 
-      <body>
-
-        <!-- Encabezado con logo + info médico -->
-        <div class="header">
-          <div style="display: flex; align-items: center; gap: 15px;">
-            <div style="width: 70px; height: 70px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-              <span style="font-size: 24px;">🏥</span>
-            </div>
-            <div class="doctor-info">
-              <h1>${safe(formData.doctorNombre)}</h1>
-              <div>Médico General</div>
-              <div>Cédula: ${safe(formData.doctorCedula)}</div>
-            </div>
-          </div>
-
-          <div style="text-align: right; font-size: 13px;">
-            Tel: ${safe(formData.doctorTelefono)}<br>
-            Email: ${safe(formData.doctorEmail)}
-          </div>
-        </div>
-
-        <!-- Datos del Paciente -->
-        <div class="section-title">Datos del Paciente</div>
-        <div class="data-grid">
-          <div class="field"><strong>Paciente:</strong> ${safe(formData.pacienteNombre)}</div>
-          <div class="field"><strong>Edad:</strong> ${safe(formData.pacienteEdad)} años</div>
-          <div class="field"><strong>Fecha Nac.:</strong> ${formatDate(formData.pacienteNacimiento)}</div>
-          <div class="field"><strong>Teléfono:</strong> ${safe(formData.pacienteTelefono)}</div>
-          <div class="field"><strong>Alergias:</strong> ${safe(formData.pacienteAlergias) || "Ninguna registrada"}</div>
-          <div class="field"><strong>Fecha de Receta:</strong> ${formatDate(new Date().toISOString())}</div>
-        </div>
-
-        <!-- Signos Vitales -->
-        <div class="section-title">Signos Vitales</div>
-        <div class="data-grid">
-          <div class="field"><strong>Temperatura:</strong> ${safe(formData.temperatura) || "N/A"}°C</div>
-          <div class="field"><strong>Presión:</strong> ${safe(formData.presion) || "N/A"}</div>
-          <div class="field"><strong>Estatura:</strong> ${safe(formData.estatura) || "N/A"} cm</div>
-        </div>
-
-        <!-- RX -->
-        <div class="rx-symbol">℞</div>
-
-        <!-- Tratamiento -->
-        <div class="section-title">Tratamiento</div>
-        <div class="box">${safe(formData.tratamiento) || "No se ha especificado tratamiento."}</div>
-
-        <!-- Footer -->
-        <div class="footer">
-          <div><strong>${safe(formData.doctorNombre)}</strong> - Médico General</div>
-          <div>Cédula: ${safe(formData.doctorCedula)} | Tel: ${safe(formData.doctorTelefono)} | Email: ${safe(formData.doctorEmail)}</div>
-        </div>
-
-      </body>
-    </html>
-    `;
-
-    // Crear blob del HTML
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    setPdfPreviewUrl(url);
-    setMostrarPreview(true);
-  };
-
-  // ===========================
-  // GENERAR PDF DESCARGABLE
-  // ===========================
-  const generarPDFDescargable = async () => {
-    const element = document.createElement("div");
-    element.innerHTML = `
-      <div style="font-family: Arial, sans-serif; padding: 30px; color: #333; line-height: 1.4;">
-        <!-- Contenido del PDF igual al preview -->
-        ${document.querySelector('.pdfPreviewContent')?.innerHTML || ''}
-      </div>
-    `;
-
-    const canvas = await html2canvas(element, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
-
-    const pdf = new jsPDF("p", "mm", "letter");
-    const pdfWidth = 210;
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`receta-${formData.pacienteNombre || 'paciente'}-${new Date().toISOString().split('T')[0]}.pdf`);
-  };
-
+  } catch (error) {
+    console.error("❌ Error generando PDF para correo:", error);
+    setMensaje("❌ Error al preparar el envío de correo");
+  } finally {
+    setCargando(false);
+  }
+};
   return (
     <div className={styles.mainLayout}>
       <SidebarMenu opcionesCustom={SidebarDoctor} />
 
       <div className={styles.contentArea}>
-        {/* ======= HEADER COMPACTO ======= */}
+        {/* HEADER */}
         <header className={styles.header}>
           <div className={styles.logoBox}>
             <img src={logo} alt="Logo" className={styles.logo} />
           </div>
-
           <div className={styles.userInfo}>
             <span className={styles.userName}>
               <span className="material-icons">{Iconos.usuario}</span>
@@ -311,75 +295,144 @@ export default function DoctorRecetaView() {
           </div>
         </header>
 
-        {/* ======= CONTENIDO PRINCIPAL CON SCROLL ======= */}
+        {/* CONTENIDO PRINCIPAL */}
         <div className={styles.scrollContainer}>
           <div className={styles.mainContent}>
-            
-            {/* ======= FORMULARIO COMPACTO ======= */}
+
+            {/* MENSAJES DE ESTADO */}
+            {(cargando || mensaje) && (
+              <div className={styles.estadoContainer}>
+                <div className={cargando ? styles.cargando : styles.mensaje}>
+                  {cargando ? (
+                    <>
+                      <span className="material-icons">hourglass_empty</span>
+                      <span>{mensaje}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className={`material-icons ${mensaje.includes('✅') ? styles.exito : styles.error}`}>
+                        {mensaje.includes('✅') ? 'check_circle' : 'error'}
+                      </span>
+                      <span>{mensaje}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* FORMULARIO */}
             <form className={styles.compactForm}>
               
-              {/* SECCIÓN MÉDICO Y PACIENTE EN GRID */}
-              <div className={styles.doubleSection}>
-                {/* MÉDICO */}
-                <div className={styles.formSection}>
-                  <h2 className={styles.sectionTitle}>
-                    <span className="material-icons">{Iconos.medico}</span>
-                    Datos del Médico
-                  </h2>
-                  <div className={styles.gridForm}>
-                    <div className={styles.inputGroup}>
-                      <label>Nombre Completo</label>
-                      <input type="text" name="doctorNombre" value={formData.doctorNombre} onChange={handleInput} />
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                      <label>Cédula Profesional</label>
-                      <input type="text" name="doctorCedula" value={formData.doctorCedula} onChange={handleInput} />
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                      <label>Teléfono</label>
-                      <input type="text" name="doctorTelefono" value={formData.doctorTelefono} onChange={handleInput} />
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                      <label>Email</label>
-                      <input type="email" name="doctorEmail" value={formData.doctorEmail} onChange={handleInput} />
-                    </div>
+              {/* DATOS DEL MÉDICO */}
+              <div className={styles.formSection}>
+                <h2 className={styles.sectionTitle}>
+                  <span className="material-icons">{Iconos.medico}</span>
+                  Datos del Médico
+                </h2>
+                <div className={styles.gridForm}>
+                  <div className={styles.inputGroup}>
+                    <label>Nombre Completo</label>
+                    <input 
+                      type="text" 
+                      name="doctorNombre" 
+                      value={formData.doctorNombre} 
+                      onChange={handleInput}
+                      placeholder="Cargando datos del doctor..."
+                    />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Cédula Profesional</label>
+                    <input 
+                      type="text" 
+                      name="doctorCedula" 
+                      value={formData.doctorCedula} 
+                      onChange={handleInput}
+                      placeholder="Cédula profesional"
+                    />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Teléfono</label>
+                    <input 
+                      type="text" 
+                      name="doctorTelefono" 
+                      value={formData.doctorTelefono} 
+                      onChange={handleInput}
+                      placeholder="Teléfono del doctor"
+                    />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Email</label>
+                    <input 
+                      type="email" 
+                      name="doctorEmail" 
+                      value={formData.doctorEmail} 
+                      onChange={handleInput}
+                      placeholder="Email del doctor"
+                    />
                   </div>
                 </div>
+              </div>
 
-                {/* PACIENTE */}
-                <div className={styles.formSection}>
-                  <h2 className={styles.sectionTitle}>
-                    <span className="material-icons">{Iconos.paciente}</span>
-                    Datos del Paciente
-                  </h2>
-                  <div className={styles.gridForm}>
-                    <div className={styles.inputGroup}>
-                      <label>Nombre Completo</label>
-                      <input type="text" name="pacienteNombre" value={formData.pacienteNombre} onChange={handleInput} />
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                      <label>Edad</label>
-                      <input type="number" name="pacienteEdad" value={formData.pacienteEdad} onChange={handleInput} />
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                      <label>Fecha Nacimiento</label>
-                      <input type="date" name="pacienteNacimiento" value={formData.pacienteNacimiento} onChange={handleInput} />
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                      <label>Teléfono</label>
-                      <input type="text" name="pacienteTelefono" value={formData.pacienteTelefono} onChange={handleInput} />
-                    </div>
-
-                    <div className={styles.inputGroupFull}>
-                      <label>Alergias Conocidas</label>
-                      <input type="text" name="pacienteAlergias" value={formData.pacienteAlergias} onChange={handleInput} placeholder="Lista de alergias o condiciones relevantes" />
-                    </div>
+              {/* DATOS DEL PACIENTE */}
+              <div className={styles.formSection}>
+                <h2 className={styles.sectionTitle}>
+                  <span className="material-icons">{Iconos.paciente}</span>
+                  Datos del Paciente
+                </h2>
+                <div className={styles.gridForm}>
+                  <div className={styles.inputGroup}>
+                    <label>Nombre Completo</label>
+                    <input 
+                      type="text" 
+                      name="pacienteNombre" 
+                      value={formData.pacienteNombre} 
+                      onChange={handleInput}
+                      placeholder="Cargando datos del paciente..."
+                    />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Edad</label>
+                    <input 
+                      type="number" 
+                      name="pacienteEdad" 
+                      value={formData.pacienteEdad} 
+                      onChange={handleInput}
+                      placeholder="Edad del paciente"
+                    />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Fecha Nacimiento</label>
+                    <input 
+                      type="date" 
+                      name="pacienteNacimiento" 
+                      value={formData.pacienteNacimiento} 
+                      onChange={handleInput} 
+                    />
+                    {formData.pacienteNacimiento && (
+                      <small className={styles.fechaInfo}>
+                        Fecha cargada: {formData.pacienteNacimiento}
+                      </small>
+                    )}
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Teléfono</label>
+                    <input 
+                      type="text" 
+                      name="pacienteTelefono" 
+                      value={formData.pacienteTelefono} 
+                      onChange={handleInput}
+                      placeholder="Teléfono del paciente"
+                    />
+                  </div>
+                  <div className={styles.inputGroupFull}>
+                    <label>Alergias Conocidas</label>
+                    <input 
+                      type="text" 
+                      name="pacienteAlergias" 
+                      value={formData.pacienteAlergias} 
+                      onChange={handleInput}
+                      placeholder="Alergias del paciente"
+                    />
                   </div>
                 </div>
               </div>
@@ -393,17 +446,33 @@ export default function DoctorRecetaView() {
                 <div className={styles.vitalsGrid}>
                   <div className={styles.inputGroup}>
                     <label>Temperatura (°C)</label>
-                    <input type="text" name="temperatura" value={formData.temperatura} onChange={handleInput} placeholder="Ej: 36.5" />
+                    <input 
+                      type="text" 
+                      name="temperatura" 
+                      value={formData.temperatura} 
+                      onChange={handleInput}
+                      placeholder="Ej: 36.5"
+                    />
                   </div>
-
                   <div className={styles.inputGroup}>
                     <label>Presión Arterial</label>
-                    <input type="text" name="presion" value={formData.presion} onChange={handleInput} placeholder="Ej: 120/80" />
+                    <input 
+                      type="text" 
+                      name="presion" 
+                      value={formData.presion} 
+                      onChange={handleInput}
+                      placeholder="Ej: 120/80"
+                    />
                   </div>
-
                   <div className={styles.inputGroup}>
                     <label>Estatura (cm)</label>
-                    <input type="text" name="estatura" value={formData.estatura} onChange={handleInput} placeholder="Ej: 170" />
+                    <input 
+                      type="text" 
+                      name="estatura" 
+                      value={formData.estatura} 
+                      onChange={handleInput}
+                      placeholder="Ej: 170"
+                    />
                   </div>
                 </div>
               </div>
@@ -420,72 +489,51 @@ export default function DoctorRecetaView() {
                     name="tratamiento"
                     value={formData.tratamiento}
                     onChange={handleInput}
-                    placeholder="Describa el tratamiento completo, incluyendo medicamentos, dosis, frecuencia, duración, recomendaciones, etc."
                     rows="6"
+                    placeholder="Describa el tratamiento completo, medicamentos, dosis, frecuencia, duración, recomendaciones, etc."
                   ></textarea>
                 </div>
               </div>
 
             </form>
 
-            {/* ======= BOTONES DE ACCIÓN ======= */}
+            {/* BOTONES DE ACCIÓN ACTUALIZADOS */}
             <div className={styles.actionBar}>
               <button 
-                className={styles.previewBtn} 
-                onClick={generarVistaPreviaPDF}
-                disabled={!formData.pacienteNombre}
-              >
-                <span className="material-icons">{Iconos.vista}</span>
-                Vista Previa PDF
-              </button>
-              
-              <button 
-                className={styles.saveBtn} 
-                onClick={generarPDFDescargable}
-                disabled={!formData.pacienteNombre}
+                className={styles.saveBtn}
+                onClick={generarPDF}
+                disabled={cargando || !formData.pacienteNombre}
               >
                 <span className="material-icons">{Iconos.guardar}</span>
                 Descargar Receta
               </button>
+
+              <button 
+                className={styles.emailBtn}
+                onClick={abrirModalCorreo}
+                disabled={cargando || !formData.pacienteNombre}
+              >
+                <span className="material-icons">{Iconos.correo}</span>
+                Enviar por Correo
+              </button>
             </div>
 
-            {/* ======= VISTA PREVIA PDF ======= */}
-            {mostrarPreview && pdfPreviewUrl && (
-              <div className={styles.pdfPreview}>
-                <div className={styles.previewHeader}>
-                  <h2 className={styles.previewTitle}>
-                    <span className="material-icons">{Iconos.vista}</span>
-                    Vista Previa de la Receta
-                  </h2>
-                  <button 
-                    className={styles.closePreview} 
-                    onClick={() => setMostrarPreview(false)}
-                  >
-                    <span className="material-icons">{Iconos.cerrar}</span>
-                  </button>
-                </div>
-                
-                <div className={styles.previewContainer}>
-                  <iframe
-                    src={pdfPreviewUrl}
-                    width="100%"
-                    height="600px"
-                    className={styles.previewFrame}
-                    title="Vista previa de la receta médica"
-                  />
-                </div>
-                
-                <div className={styles.previewActions}>
-                  <button 
-                    className={styles.downloadBtn}
-                    onClick={generarPDFDescargable}
-                  >
-                    <span className="material-icons">{Iconos.descargar}</span>
-                    Descargar PDF
-                  </button>
-                </div>
-              </div>
+            {/* MODAL DE CORREO */}
+            {mostrarModalCorreo && (
+              <ModalEnvioCorreo
+                formData={formData}
+                onClose={() => {
+                  setMostrarModalCorreo(false);
+                  setPdfBlob(null);
+                  setPdfUrl("");
+                }}
+                emailPaciente={emailPaciente}
+                setEmailPaciente={setEmailPaciente}
+                pdfBlob={pdfBlob}
+                pdfUrl={pdfUrl}
+              />
             )}
+
           </div>
         </div>
       </div>

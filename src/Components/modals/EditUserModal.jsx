@@ -285,7 +285,7 @@ export default function EditUserModal({ user, onClose, onSave }) {
 
         <div className={styles.actions}>
           <button className={styles.saveButton} onClick={handleSave}>
-            Guardar cambios
+            Guardar cambios 
           </button>
           <button className={styles.cancelButton} onClick={onClose}>
             Cancelar

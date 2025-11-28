@@ -1,69 +1,59 @@
 // PacientesHome.jsx
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/pages/UsersHome.module.css";
-import Swal from "sweetalert2";
 import SidebarMenu from "../../Components/SidebarMenu";
 import RegisterPacienteModal from "../../Components/modals/RegisterPacienteModal";
 import { getPacientes } from "../../Api/paciente";
-
-// 🔹 Sidebars
 import { SidebarAdmin, SidebarNurse, SidebarDoctor } from "../../Config/sidebars";
-
-// 🔹 Logo
 import logo from "../../assets/logoLargo.png";
 
 export default function PacientesHome() {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [alert, setAlert] = useState(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [, setSeccion] = useState("Pacientes");
   const [usuario, setUsuario] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // === Cargar usuario ===
+  /* ----------------------------- RELOJ ----------------------------- */
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  /* ----------------------------- USUARIO ----------------------------- */
   useEffect(() => {
     const userData = localStorage.getItem("usuario");
     if (userData) {
       const parsed = JSON.parse(userData);
-      parsed.tipoColaborador = parsed.tipoColaborador?.toString().trim().toLowerCase();
+      parsed.tipoColaborador = parsed.tipoColaborador?.toLowerCase();
       setUsuario(parsed);
     }
   }, []);
 
-  // === Sidebar según rol ===
   const getOpcionesSidebar = () => {
     if (!usuario) return [];
-
     const tipo = usuario.tipoColaborador;
 
-    if (tipo.includes("admin") || tipo.includes("administrador") || tipo === "3")
-      return SidebarAdmin;
-
-    if (tipo.includes("enfermera") || tipo === "2")
-      return SidebarNurse;
-
-    if (tipo.includes("medico") || tipo.includes("médico") || tipo === "1")
-      return SidebarDoctor;
-
+    if (["admin", "administrador", "3"].includes(tipo)) return SidebarAdmin;
+    if (["enfermera", "2"].includes(tipo)) return SidebarNurse;
     return SidebarDoctor;
   };
 
   const opcionesSidebar = getOpcionesSidebar();
 
-  // === Cargar pacientes ===
+  /* ----------------------------- CARGAR PACIENTES ----------------------------- */
   const fetchPacientes = async () => {
     try {
       const lista = await getPacientes();
-      const activos = (Array.isArray(lista) ? lista : []).filter((p) => p.esActivo);
+      const activos = (lista || []).filter((p) => p.esActivo);
       setData(activos);
       setFilteredData(activos);
     } catch (error) {
       console.error("❌ Error al obtener pacientes:", error);
-      setAlert({ type: "danger", message: "Error al cargar pacientes ❌" });
-      setTimeout(() => setAlert(null), 3000);
     }
   };
 
@@ -71,13 +61,10 @@ export default function PacientesHome() {
     fetchPacientes();
   }, []);
 
-  // === Filtro ===
+  /* ----------------------------- FILTRO ----------------------------- */
   useEffect(() => {
     const filtered = data.filter((p) => {
-      const nombre = [p.nombre, p.apellidoPaterno, p.apellidoMaterno]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+      const nombre = `${p.nombre} ${p.apellidoPaterno} ${p.apellidoMaterno}`.toLowerCase();
       return nombre.includes(searchTerm.toLowerCase());
     });
 
@@ -85,150 +72,172 @@ export default function PacientesHome() {
     setCurrentPage(1);
   }, [searchTerm, data]);
 
-  // === Campos ocultos ===
-  const ocultarCampos = ["id", "fechaCreacion", "esActivo", "fechaNacimiento"];
+  const formatTime = (date) =>
+    date.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
 
-  const humanizarCampo = (campo) =>
-    campo.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+  const formatDate = (date) =>
+    date.toLocaleDateString("es-MX", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
 
-  // === Paginación ===
+  /* ----------------------------- PAGINACIÓN ----------------------------- */
   const indexOfLast = currentPage * rowsPerPage;
   const indexOfFirst = indexOfLast - rowsPerPage;
   const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
 
   return (
     <div className={styles.mainLayout}>
-
-      {/* ❗ Sidebar solo si NO es Admin */}
-      {usuario &&
-        !(usuario.tipoColaborador.includes("admin") ||
-          usuario.tipoColaborador.includes("administrador") ||
-          usuario.tipoColaborador === "3") && (
-          <SidebarMenu
-            setSeccion={setSeccion}
-            seccionActiva="Pacientes"
-            opcionesCustom={opcionesSidebar}
-            passObject={true}
-          />
+      {/* Sidebar solo si no es admin */}
+      {usuario && usuario.tipoColaborador !== "3" && (
+        <SidebarMenu
+          setSeccion={setSeccion}
+          seccionActiva="Pacientes"
+          opcionesCustom={opcionesSidebar}
+          passObject={true}
+        />
       )}
 
-      <div className={styles.usersPageContainer}>
-        
-        {/* ===================================================== */}
-        {/* HEADER */}
-        {/* ===================================================== */}
-        <header className={styles.header}>
-          <img src={logo} alt="Logo" className={styles.logo} />
+      <div className={styles.contentArea}>
+        {/* HEADER FIJO */}
+        <header className={styles.headerSticky}>
+          <div className={styles.logoBox}>
+            <img src={logo} alt="Logo" className={styles.logo} />
+          </div>
 
-          <div className={styles.userBox}>
-            <span className="material-icons">account_circle</span>
-            {usuario?.nombreUsuario || "Usuario"}
+          <div className={styles.userInfo}>
+            <div className={styles.userName}>
+              <span className="material-icons">account_circle</span>
+              {usuario?.nombreUsuario || "Usuario"}
+            </div>
+
+            <div className={styles.timeInfo}>
+              <div className={styles.time}>
+                <span className="material-icons">schedule</span>
+                {formatTime(currentTime)}
+              </div>
+              <div className={styles.date}>
+                <span className="material-icons">calendar_today</span>
+                {formatDate(currentTime)}
+              </div>
+            </div>
           </div>
         </header>
 
-        <hr className={styles.divider} />
+        {/* CONTENIDO PRINCIPAL */}
+        <div className={styles.scrollContainer}>
+          <div className={styles.container}>
+            {/* BUSCADOR */}
+            <section className={styles.searchSection}>
+              <div className={styles.searchBarCompact}>
+                <span className="material-icons">search</span>
+                <input
+                  type="text"
+                  placeholder="Buscar paciente..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </section>
 
-        {/* ===================================================== */}
-        {/* BARRA BUSQUEDA + BOTON REGISTRAR */}
-        {/* ===================================================== */}
-        <div className={styles.usersNav}>
-          <div className={styles.searchBox}>
-            <span className="material-icons">search</span>
-            <input
-              type="text"
-              placeholder="Buscar paciente..."
-              className={styles.searchInput}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+            {/* TABLA SCROLLEABLE */}
+            <div className={styles.tableScroll}>
+              <TablaPacientes currentRows={currentRows} />
+            </div>
+
+            {/* PAGINACIÓN */}
+            <Paginacion
+              filteredData={filteredData}
+              rowsPerPage={rowsPerPage}
+              setRowsPerPage={setRowsPerPage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
             />
+
+            {/* MODAL REGISTRO */}
+            {showRegisterModal && (
+              <RegisterPacienteModal
+                onClose={() => setShowRegisterModal(false)}
+                onSave={fetchPacientes}
+              />
+            )}
           </div>
-
-          <button
-            className={styles.toggleButton}
-            onClick={() => setShowRegisterModal(true)}
-          >
-            <span className="material-icons">person_add</span>
-            Registrar Paciente
-          </button>
         </div>
-
-        {alert && (
-          <div className={`alert alert-${alert.type} mt-3`}>{alert.message}</div>
-        )}
-
-        <h2 className={styles.pageTitle}>Administrar Pacientes</h2>
-
-        {/* ===================================================== */}
-        {/* TABLA */}
-        {/* ===================================================== */}
-        <TablaPacientes
-          filteredData={filteredData}
-          currentRows={currentRows}
-          ocultarCampos={ocultarCampos}
-          humanizarCampo={humanizarCampo}
-        />
-
-        {/* ===================================================== */}
-        {/* PAGINACIÓN */}
-        {/* ===================================================== */}
-        <Paginacion
-          filteredData={filteredData}
-          rowsPerPage={rowsPerPage}
-          setRowsPerPage={setRowsPerPage}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          totalPages={totalPages}
-        />
-
-        {showRegisterModal && (
-          <RegisterPacienteModal
-            onClose={() => setShowRegisterModal(false)}
-            onSave={fetchPacientes}
-          />
-        )}
       </div>
     </div>
   );
 }
 
 /* ================================================================
-   TABLA PACIENTES
+   TABLA DE PACIENTES
 ================================================================ */
-function TablaPacientes({ filteredData, currentRows, ocultarCampos, humanizarCampo }) {
-  return (
-    <div className={styles.tableWrapper}>
-      <table className={styles.crudTable}>
-        <thead>
-          <tr>
-            {filteredData.length > 0 &&
-              Object.keys(filteredData[0])
-                .filter((key) => !ocultarCampos.includes(key))
-                .map((key) => <th key={key}>{humanizarCampo(key)}</th>)}
-          </tr>
-        </thead>
+function TablaPacientes({ currentRows }) {
+  const calcularEdad = (fecha) => {
+    if (!fecha) return "N/A";
+    const n = new Date(fecha);
+    const h = new Date();
+    let edad = h.getFullYear() - n.getFullYear();
+    const m = h.getMonth() - n.getMonth();
+    if (m < 0 || (m === 0 && h.getDate() < n.getDate())) edad--;
+    return `${edad} años`;
+  };
 
-        <tbody>
-          {currentRows.length === 0 ? (
-            <tr>
-              <td colSpan="100%" style={{ textAlign: "center", padding: "1rem" }}>
-                No se encontraron registros
+  const formatearGenero = (genero) => {
+    if (!genero) return "No especificado";
+    const g = genero.toLowerCase();
+    if (g.startsWith("m")) return "Masculino";
+    if (g.startsWith("f")) return "Femenino";
+    return genero;
+  };
+
+  return (
+    <table className={styles.citasTable}>
+      <thead>
+        <tr>
+          <th>Nombre Completo</th>
+          <th>Edad</th>
+          <th>CURP</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Género</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {currentRows.length === 0 ? (
+          <tr className={styles.emptyRow}>
+            <td colSpan="6">
+              <div className={styles.emptyState}>
+                <span className="material-icons">search_off</span>
+                <p>No se encontraron pacientes</p>
+                <small>Intenta con otro término</small>
+              </div>
+            </td>
+          </tr>
+        ) : (
+          currentRows.map((p) => (
+            <tr key={p.id} className={styles.tableRow}>
+              <td className={styles.patientCell}>
+                {p.nombre} {p.apellidoPaterno} {p.apellidoMaterno}
               </td>
+              <td>{calcularEdad(p.fechaNacimiento)}</td>
+              <td>{p.curp || "No asignada"}</td>
+              <td>{p.email || "No especificado"}</td>
+              <td>{p.telefono || "No especificado"}</td>
+              <td>{formatearGenero(p.genero)}</td>
             </tr>
-          ) : (
-            currentRows.map((paciente) => (
-              <tr key={paciente.id}>
-                {Object.entries(paciente)
-                  .filter(([key]) => !ocultarCampos.includes(key))
-                  .map(([key, value]) => (
-                    <td key={key}>{String(value ?? "")}</td>
-                  ))}
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        )}
+      </tbody>
+    </table>
   );
 }
 
@@ -243,46 +252,48 @@ function Paginacion({
   setCurrentPage,
   totalPages,
 }) {
+  if (filteredData.length === 0) return null;
+
   return (
-    <>
-      {filteredData.length > 0 && (
-        <div className={styles.paginationContainer}>
-          <div className={styles.rowsSelector}>
-            <label>Filas por página:</label>
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
-              {[5, 10, 20, 50].map((num) => (
-                <option key={num} value={num}>
-                  {num}
-                </option>
-              ))}
-            </select>
-          </div>
+    <div className={styles.paginationTable}>
+      <div className={styles.rowsSelectorTable}>
+        <label>Filas:</label>
+        <select
+          value={rowsPerPage}
+          onChange={(e) => {
+            setRowsPerPage(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+        >
+          {[5, 10, 20, 50].map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+      </div>
 
-          <div className={styles.pageControls}>
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
-              <span className="material-icons">chevron_left</span>
-            </button>
+      <div className={styles.pageControlsTable}>
+        <button
+          className={styles.paginationBtn}
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((p) => p - 1)}
+        >
+          <span className="material-icons">chevron_left</span>
+        </button>
 
-            <span>
-              Página {currentPage} de {totalPages || 1}
-            </span>
+        <span className={styles.pageInfoTable}>
+          {currentPage} / {totalPages}
+        </span>
 
-            <button
-              disabled={currentPage === totalPages || totalPages === 0}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
-              <span className="material-icons">chevron_right</span>
-            </button>
-          </div>
-        </div>
-      )}
-    </>
+        <button
+          className={styles.paginationBtn}
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage((p) => p + 1)}
+        >
+          <span className="material-icons">chevron_right</span>
+        </button>
+      </div>
+    </div>
   );
 }
-//.
