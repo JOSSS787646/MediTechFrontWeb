@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import SidebarMenu from "../../Components/SidebarMenu";
-import styles from "../../styles/pages/CitasView.module.css"; // 👈 MISMO CSS
+import styles from "../../styles/pages/DoctorCitasView.module.css"; // 👈 MISMO DISEÑO
 import logo from "../../assets/logoLargo.png";
 import { SidebarNurse } from "../../Config/sidebars";
 
@@ -27,124 +27,195 @@ export default function CitasView() {
 
   return (
     <div className={styles.mainLayout}>
+      {/* === SIDEBAR === */}
       <SidebarMenu opcionesCustom={SidebarNurse} passObject={true} />
 
-      <main className={styles.contentArea}>
+      <div className={styles.contentArea}>
         <div className={styles.container}>
 
-          {/* HEADER */}
+          {/* ===== HEADER PRINCIPAL — FIJO ===== */}
           <header className={styles.header}>
-            <img src={logo} alt="Logo" className={styles.logo} />
+            <div className={styles.logoBox}>
+              <img src={logo} alt="Logo" className={styles.logo} />
+            </div>
 
-            <div className={styles.userBox}>
-              <span className="material-icons">account_circle</span>
-              {usuario?.nombreUsuario || "Enfermera"}
+            <div className={styles.userInfo}>
+              <div className={styles.userName}>
+                <span className="material-icons">account_circle</span>
+                {usuario?.nombreUsuario || "Enfermera"}
+              </div>
             </div>
           </header>
 
-          <div className={styles.titleSection}>
-            <span className="material-icons" style={{ fontSize: "2.5rem", color: "var(--sidebar-color)" }}>
-              event_note
-            </span>
-            <h2 className={styles.title}>Registrar nueva cita</h2>
+          {/* ===== ENCABEZADO DE SECCIÓN — FIJO ===== */}
+          <section className={styles.sectionHeader}>
+            <div className={styles.sectionTitle}>
+              <span className="material-icons">event_note</span>
+              Registrar Nueva Cita
+            </div>
+
+            <div className={styles.appointmentCount}>
+              <span className="material-icons">add</span>
+              Nueva Cita
+            </div>
+          </section>
+
+          {/* ===== FORMULARIO EN CONTENEDOR SCROLL ===== */}
+          <div className={styles.scrollContainer}>
+            <div className={styles.formContent}>
+
+              {/* ===================== BUSCAR PACIENTE ===================== */}
+              <div className={styles.formSection}>
+                <h3 className={styles.sectionSubtitle}>
+                  <span className="material-icons">fingerprint</span>
+                  Buscar Paciente
+                </h3>
+
+                <div className={styles.formGrid}>
+                  <div className={styles.inputGroupFull}>
+                    <label>
+                      <span className="material-icons">badge</span>
+                      CURP del paciente
+                    </label>
+
+                    <input
+                      type="text"
+                      name="curp"
+                      placeholder="Ingresa CURP del paciente"
+                      value={formData.curp}
+                      onChange={handleChange}
+                      className={styles.formInput}
+                      maxLength="18"
+                      style={{ textTransform: "uppercase" }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ===================== INFORMACIÓN DE LA CITA ===================== */}
+              <div className={styles.formSection}>
+                <h3 className={styles.sectionSubtitle}>
+                  <span className="material-icons">medical_services</span>
+                  Información de la Cita
+                </h3>
+
+                <div className={styles.formGrid}>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      <span className="material-icons">local_hospital</span>
+                      Especialidad
+                    </label>
+                    <select
+                      name="especialidad"
+                      value={formData.especialidad}
+                      onChange={handleChange}
+                      className={styles.formSelect}
+                    >
+                      <option value="">Seleccione</option>
+                      <option>Cardiología</option>
+                      <option>Medicina General</option>
+                      <option>Ginecología</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      <span className="material-icons">person</span>
+                      Médico
+                    </label>
+                    <select
+                      name="medico"
+                      value={formData.medico}
+                      onChange={handleChange}
+                      className={styles.formSelect}
+                    >
+                      <option value="">Seleccione</option>
+                      <option>Dr. Juan Pérez</option>
+                      <option>Dra. Sonia García</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      <span className="material-icons">location_on</span>
+                      Sede
+                    </label>
+                    <select
+                      name="sede"
+                      value={formData.sede}
+                      onChange={handleChange}
+                      className={styles.formSelect}
+                    >
+                      <option value="">Seleccione</option>
+                      <option>Unidad Norte</option>
+                      <option>Unidad Sur</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      <span className="material-icons">calendar_today</span>
+                      Fecha de Cita
+                    </label>
+                    <input
+                      type="date"
+                      name="fecha"
+                      value={formData.fecha}
+                      onChange={handleChange}
+                      className={styles.formInput}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroupFull}>
+                    <label>
+                      <span className="material-icons">access_time</span>
+                      Hora
+                    </label>
+                    <select
+                      name="hora"
+                      value={formData.hora}
+                      onChange={handleChange}
+                      className={styles.formSelect}
+                    >
+                      <option value="">Seleccione</option>
+                      <option>08:00</option>
+                      <option>09:00</option>
+                      <option>10:00</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.inputGroupFull}>
+                    <label>
+                      <span className="material-icons">notes</span>
+                      Motivo
+                    </label>
+                    <textarea
+                      name="motivo"
+                      rows="4"
+                      placeholder="Motivo de consulta"
+                      value={formData.motivo}
+                      onChange={handleChange}
+                      className={styles.formTextarea}
+                    ></textarea>
+                  </div>
+
+                </div>
+
+                {/* ======= BOTÓN GUARDAR ======= */}
+                <div className={styles.formActions}>
+                  <button className={styles.saveButton} type="button">
+                    <span className="material-icons">check_circle</span>
+                    Registrar Cita
+                  </button>
+                </div>
+              </div>
+
+            </div>
           </div>
 
-          {/* FORMULARIO */}
-          <form className={styles.fullForm}>
-
-            {/* CURP */}
-            <div className={styles.formSection}>
-              <h3 className={styles.sectionTitle}>
-                <span className="material-icons">fingerprint</span>
-                Buscar paciente
-              </h3>
-
-              <div className={styles.inputGroupFull}>
-                <label>CURP del paciente</label>
-                <input
-                  type="text"
-                  name="curp"
-                  placeholder="Ingresa CURP del paciente"
-                  value={formData.curp}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            {/* DATOS DE CITA */}
-            <div className={styles.formSection}>
-              <h3 className={styles.sectionTitle}>
-                <span className="material-icons">medical_services</span>
-                Información de la cita
-              </h3>
-
-              <div className={styles.twoCols}>
-                <div className={styles.inputGroup}>
-                  <label>Especialidad</label>
-                  <select name="especialidad" value={formData.especialidad} onChange={handleChange}>
-                    <option value="">Seleccione</option>
-                    <option>Cardiología</option>
-                    <option>Medicina General</option>
-                    <option>Ginecología</option>
-                  </select>
-                </div>
-
-                <div className={styles.inputGroup}>
-                  <label>Médico</label>
-                  <select name="medico" value={formData.medico} onChange={handleChange}>
-                    <option value="">Seleccione</option>
-                    <option>Dr. Juan Pérez</option>
-                    <option>Dra. Sonia García</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className={styles.twoCols}>
-                <div className={styles.inputGroup}>
-                  <label>Sede</label>
-                  <select name="sede" value={formData.sede} onChange={handleChange}>
-                    <option value="">Seleccione</option>
-                    <option>Unidad Norte</option>
-                    <option>Unidad Sur</option>
-                  </select>
-                </div>
-
-                <div className={styles.inputGroup}>
-                  <label>Fecha de cita</label>
-                  <input type="date" name="fecha" value={formData.fecha} onChange={handleChange} />
-                </div>
-              </div>
-
-              <div className={styles.inputGroupFull}>
-                <label>Hora</label>
-                <select name="hora" value={formData.hora} onChange={handleChange}>
-                  <option value="">Seleccione</option>
-                  <option>08:00</option>
-                  <option>09:00</option>
-                  <option>10:00</option>
-                </select>
-              </div>
-
-              <div className={styles.inputGroupFull}>
-                <label>Motivo</label>
-                <textarea
-                  name="motivo"
-                  value={formData.motivo}
-                  onChange={handleChange}
-                  placeholder="Motivo de consulta"
-                  rows="5"
-                />
-              </div>
-            </div>
-          </form>
-
-          {/* BOTÓN FLOTANTE */}
-          <button className={styles.fixedSaveBtn}>
-            <span className="material-icons">check_circle</span>
-            Registrar cita
-          </button>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
