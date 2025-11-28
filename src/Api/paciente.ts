@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://localhost:44389/api/Paciente";
+const API_URL = "http://localhost:5000/api/Paciente";
 
 // ✅ Obtener todos los pacientes
 export const getPacientes = async () => {
@@ -20,6 +20,17 @@ export const getPacienteById = async (id: number) => {
     return response.data;
   } catch (error: any) {
     console.error("❌ Error al obtener el paciente:", error);
+    throw new Error("Error al obtener el paciente");
+  }
+};
+
+// ✅ Obtener un paciente por CURP
+export const getPacienteByCurp = async (curp: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/curp/${curp}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("❌ Error al obtener el paciente por CURP:", error);
     throw new Error("Error al obtener el paciente");
   }
 };

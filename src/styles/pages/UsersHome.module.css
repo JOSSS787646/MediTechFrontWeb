@@ -1,481 +1,334 @@
-/* ================================
-   UsersHome.module.css (Header + Estilos completos)
-   ================================ */
-
-/* === Variables globales / paleta === */
+/* ===== Variables CSS ===== */
 :root {
   --sidebar-color: #63b2a5;
   --sidebar-hover: #4b8e83;
-  --accent-dark: #1e5e5c;
   --text-dark: #0a2928;
-  --muted: #4b5563;
+  --text-light: #64748b;
   --white: #ffffff;
-  --border: #d1d5db;
-  --font: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --background: #f8fafc;
+  --border-light: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+  --font: "Segoe UI", sans-serif;
 }
 
-/* === Layout general === */
+/* ===== Layout general ===== */
 .mainLayout {
   display: flex;
   width: 100%;
   min-height: 100vh;
-  background-color: #ffffff;
+  background: var(--background);
+  font-family: var(--font);
 }
 
-.usersPageContainer {
+/* ===== Contenido principal (CON SCROLL) ===== */
+.contentArea {
   flex: 1;
-  width: 100%;
-  padding: 2rem;
-  overflow-y: auto;
+  padding: 1.5rem 2rem;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
-  color: var(--muted);
-  font-family: var(--font);
-  background: transparent;
+  height: 100vh;
+  overflow-y: auto;   /* ✅ Scroll en la pantalla principal */
+  overflow-x: hidden;
 }
 
-/* ===========================
-   HEADER (LOGO + USUARIO)
-   =========================== */
-.header {
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* ===== Header fijo ===== */
+.headerSticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
-  gap: 1rem;
-  margin-bottom: 0.6rem;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow);
+  margin-bottom: 0.8rem;
+}
+
+.logoBox {
+  display: flex;
+  align-items: center;
 }
 
 .logo {
-  width: 260px;
-  height: auto;
-  object-fit: contain;
+  width: 180px;
+  transition: 0.3s ease;
 }
 
-.userBox {
+.logo:hover {
+  transform: scale(1.04);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1.3rem;
+}
+
+.userName {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.timeInfo {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.time {
+  color: var(--sidebar-color);
+  font-weight: 700;
+}
+
+.date {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+/* ===== Contenedor de contenido (no hace scroll extra) ===== */
+.scrollContainer {
+  flex: 1;
+  overflow: visible;
+}
+
+/* ===== BUSCADOR COMPACTO ===== */
+.searchSection {
+  background: white;
+  padding: 0.9rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow);
+}
+
+.searchBarCompact {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  color: var(--text-dark);
-  font-weight: 600;
-  background: rgba(0,0,0,0.00);
-  padding: 0.1rem 0.3rem;
-  border-radius: 6px;
-}
-
-.divider {
-  width: 100%;
-  border: none;
-  border-bottom: 1px solid var(--border);
-  margin: 0.8rem 0 1.4rem;
-}
-
-/* ===========================
-   NAV SUPERIOR (BUSCADOR + ACCIONES)
-   =========================== */
-.usersNav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-}
-
-/* ============================================================
-   🔥 NUEVO BUSCADOR (con estilo moderno del segundo archivo)
-   ============================================================ */
-
-.searchBox {
-  display: flex;
-  align-items: center;
-  background: #f1f5f5;
-  border: 2px solid var(--accent-dark);
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  padding: 0.65rem 1rem;
   border-radius: 10px;
-  padding: 0.4rem 0.8rem;
-  max-width: 420px;
-  width: 100%;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(30, 94, 92, 0.1);
+  box-shadow: var(--shadow);
 }
 
-.searchBox:hover {
-  border-color: #0b4240;
-  box-shadow: 0 3px 6px rgba(30, 94, 92, 0.15);
+.searchBarCompact span {
+  font-size: 1.3rem;
+  opacity: 0.7;
 }
 
-.searchBox:focus-within {
-  border-color: #0d4745;
-  box-shadow: 0 4px 10px rgba(30, 94, 92, 0.25);
-  background: #bbdbda;
-}
-
-.searchBox span {
-  color: #0a5350;
-  font-size: 1.4rem;
-  margin-right: 0.5rem;
-  transition: color 0.3s ease;
-}
-
-.searchInput {
+.searchBarCompact input {
+  flex: 1;
   border: none;
   outline: none;
   background: transparent;
-  flex: 1;
-  font-size: 1rem;
-  color: #374151;
-}
-
-.searchInput::placeholder {
-  color: var(--accent-dark);
-  font-style: italic;
-}
-
-.searchInput:focus {
-  color: var(--accent-dark);
-}
-
-/* ===========================
-   BOTONES
-   =========================== */
-.addUserButton,
-.toggleButton,
-.scheduleButtonLarge {
-  background-color: var(--sidebar-color);
-  color: var(--white);
-  border: none;
-  border-radius: 10px;
-  padding: 0.65rem 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  transition: background 0.2s ease, transform 0.12s ease, box-shadow 0.15s ease;
-  white-space: nowrap;
-  box-shadow: 0 6px 18px rgba(99, 178, 165, 0.06);
-}
-
-.addUserButton:hover,
-.toggleButton:hover,
-.scheduleButtonLarge:hover {
-  background-color: var(--sidebar-hover);
-  transform: translateY(-1px);
-}
-
-.scheduleButtonLarge {
-  padding: 0.8rem 1.2rem;
-  border-radius: 10px;
-  height: 46px;
-}
-
-.toggleButton.inactiveMode {
-  background-color: #a63232;
-  box-shadow: 0 6px 18px rgba(166, 50, 50, 0.12);
-}
-
-/* ===========================
-   TITULO
-   =========================== */
-.pageTitle {
-  margin-top: 0.6rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--accent-dark);
-}
-
-/* ===========================
-   TABLA
-   =========================== */
-.tableWrapper {
-  flex-grow: 1;
-  overflow: auto;
-  margin-top: 1rem;
-  width: 100%;
-}
-
-.crudTable {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--white);
-  border-radius: 8px;
-  min-width: 780px;
-  overflow: hidden;
-  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.03);
-}
-
-.crudTable th {
-  background-color: var(--accent-dark);
-  color: var(--white);
-  font-weight: 700;
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  text-align: left;
-}
-
-.crudTable td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #eef2f2;
+  font-size: 0.95rem;
+  font-weight: 500;
   color: var(--text-dark);
-  vertical-align: middle;
 }
 
-.crudTable tr:hover td {
-  background-color: #f7faf9;
-}
-
-.crudTable th:first-child,
-.crudTable td:first-child {
-  text-align: center;
-  width: 110px;
-}
-
-/* ===========================
-   BOTONES ACCION
-   =========================== */
-.actionCell {
-  display: flex;
-  justify-content: center;
-  gap: 0.35rem;
-  align-items: center;
-}
-
-.actionCell button {
-  width: 34px;
-  height: 34px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  transition: background 0.18s ease, transform 0.14s ease;
-}
-
-.actionCell button span {
-  font-size: 20px;
-}
-
-.editButton span { color: var(--sidebar-color); }
-.deleteButton span { color: #d9372e; }
-
-.editButton:hover { background: rgba(99,178,165,0.1); transform: scale(1.06); }
-.deleteButton:hover { background: rgba(217,55,46,0.08); transform: scale(1.06); }
-
-/* ===========================
-   ELLIPSIS
-   =========================== */
-.truncateCell {
-  max-width: 150px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: pointer;
-  color: var(--sidebar-color);
-  text-decoration: underline;
-}
-
-/* ===========================
-   ESTADO
-   =========================== */
-.statusDot {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-.active { background-color: #28a745; }
-.inactive { background-color: #e74c3c; }
-
-/* ===========================
-   SIN RESULTADOS
-   =========================== */
-.noResults {
-  text-align: center;
-  color: #6b7280;
-  margin-top: 1rem;
-  font-size: 1rem;
-}
-
-/* ===========================
-   PAGINACIÓN
-   =========================== */
-.paginationContainer {
-  margin-top: 1.2rem;
+/* ===== Contador de pacientes ===== */
+.sectionHeader {
   display: flex;
   justify-content: flex-end;
+  padding: 0.7rem 1.2rem 0.2rem 1.2rem;
+}
+
+.appointmentCount {
+  display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: 0.4rem;
+  background: var(--sidebar-color);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow);
 }
 
-.rowsSelector select {
-  margin-left: 0.5rem;
-  padding: 0.28rem 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
+/* ===== TABLA SCROLLEABLE (AQUÍ ESTÁ EL SCROLL DE LA TABLA) ===== */
+.tableScroll {
+  max-height: 55vh;      /* ✅ Altura relativa a la pantalla */
+  overflow-y: auto;      /* ✅ Scroll vertical dentro de la tabla */
+  overflow-x: auto;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
 }
 
-.pageControls button {
+.tableScroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.tableScroll::-webkit-scrollbar-thumb {
+  background: var(--sidebar-color);
+  border-radius: 4px;
+}
+.tableScroll::-webkit-scrollbar-track {
+  background: #e5edf0;
+}
+
+/* ===== Tabla ===== */
+.citasTable {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.citasTable thead {
+  background: linear-gradient(135deg, var(--sidebar-color), var(--sidebar-hover));
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.citasTable th,
+.citasTable td {
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.citasTable th {
+  font-weight: 600;
+}
+
+.tableRow:hover {
+  background: #f2faf7;
+}
+
+.patientCell {
+  font-weight: 600;
+}
+
+/* ===== Estado vacío ===== */
+.emptyRow td {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.emptyState {
+  text-align: center;
+  color: var(--text-light);
+}
+
+.emptyState p {
+  color: var(--text-dark);
+  font-weight: 600;
+  margin: 0.3rem 0;
+}
+
+/* ===== Botón de paginación genérico ===== */
+.paginationBtn {
+  background: var(--sidebar-color);
+  color: white;
   border: none;
-  background: var(--accent-dark);
-  color: var(--white);
-  border-radius: 50%;
-  padding: 0.3rem;
-  margin: 0 0.25rem;
+  padding: 0.45rem;
+  border-radius: 6px;
   cursor: pointer;
-  width: 36px;
-  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.pageControls button:hover:not(:disabled) {
-  background: #184e4c;
+.paginationBtn:hover:not(:disabled) {
+  background: var(--sidebar-hover);
 }
 
-.pageControls button:disabled {
-  opacity: 0.45;
+.paginationBtn:disabled {
+  background: #cbd5e1;
   cursor: not-allowed;
 }
 
-.pageControls span { font-weight: 700; color: var(--text-dark); }
-
-/* ===========================
-   SWITCH
-   =========================== */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 26px;
-}
-
-.switch input { opacity: 0; width: 0; height: 0; }
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
-  background-color: #e74c3c;
-  border-radius: 34px;
-  transition: all 0.35s ease;
-  box-shadow: 0 0 4px rgba(0,0,0,0.06);
-}
-
-.slider:before {
-  content: "";
-  position: absolute;
-  height: 20px;
-  width: 20px;
-  left: 3px;
-  bottom: 3px;
-  background: #fff;
-  border-radius: 50%;
-  transition: transform 0.35s ease;
-}
-
-input:checked + .slider { background-color: #28a745; }
-input:checked + .slider:before { transform: translateX(24px); }
-
-.switch:hover .slider { transform: scale(1.03); box-shadow: 0 0 8px rgba(0,0,0,0.08); }
-
-/* ===========================
-   VER DIRECCIÓN
-   =========================== */
-.eyeButton {
-  background-color: var(--accent-dark);
-  border: none;
-  color: #fff;
-  border-radius: 6px;
-  padding: 4px 8px;
-  margin-left: 6px;
-  cursor: pointer;
-  display: inline-flex;
+/* ===== Paginación tipo "footer" de la tabla ===== */
+.paginationTable {
+  margin-top: 0;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  transition: transform 0.12s ease, background 0.15s ease;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border-light);
+  border-top: none;
+  background: white;
+  border-radius: 0 0 12px 12px;
 }
 
-.eyeButton:hover { background: #184e4c; transform: translateY(-2px); }
-
-.eyeButton span { font-size: 18px; }
-
-/* ===========================
-   CARD OVERLAY
-   =========================== */
-.cardOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
+.rowsSelectorTable {
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 1200;
-  animation: fadeInCard 0.22s ease;
+  gap: 0.5rem;
 }
 
-.infoCard {
-  background: var(--white);
-  border-radius: 12px;
-  box-shadow: 0 18px 48px rgba(2,6,23,0.12);
-  width: 92%;
-  max-width: 540px;
-  padding: 1.6rem;
-  text-align: left;
-  line-height: 1.6;
+.rowsSelectorTable select {
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-light);
 }
 
-.infoCard h3 {
-  margin: 0 0 0.8rem 0;
-  color: var(--accent-dark);
-  text-align: center;
-  font-weight: 700;
+.pageControlsTable {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-.infoCard p { color: #374151; margin: 0.4rem 0; }
-
-.closeCardButton {
-  display: block;
-  margin: 1.25rem auto 0;
-  padding: 0.6rem 1rem;
-  background: var(--accent-dark);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+.pageInfoTable {
   font-weight: 600;
+  color: var(--text-dark);
 }
 
-.closeCardButton:hover { background: #184e4c; transform: translateY(-2px); }
-
-@keyframes fadeInCard {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ===========================
-   RESPONSIVE
-   =========================== */
-
-@media (max-width: 1024px) {
-  .logo { width: 220px; }
-  .searchBox { max-width: 360px; }
-}
-
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
-  .mainLayout { display: block; }
-  .usersPageContainer { padding: 1.25rem; }
-  .header { margin-bottom: 0.4rem; flex-direction: column; align-items: flex-start; gap: 0.6rem; }
-  .searchBox { width: 100%; max-width: 100%; }
-  .crudTable { min-width: 680px; font-size: 0.95rem; }
+  .contentArea {
+    padding: 1rem;
+  }
+
+  .logo {
+    width: 150px;
+  }
+
+  .headerSticky {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.6rem;
+  }
+
+  .citasTable {
+    min-width: 700px;
+  }
 }
 
 @media (max-width: 480px) {
-  .crudTable { min-width: 520px; font-size: 0.85rem; }
-  .pageTitle { font-size: 1.2rem; }
-  .logo { width: 180px; }
+  .contentArea {
+    padding: 0.9rem;
+  }
+
+  .appointmentCount {
+    font-size: 0.8rem;
+  }
+
+  .searchBarCompact input {
+    font-size: 0.85rem;
+  }
 }

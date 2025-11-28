@@ -1,8 +1,8 @@
 // NurseHome.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import SidebarMenu from "../../Components/SidebarMenu";
 import styles from "../../styles/pages/NurseHome.module.css";
+import SidebarMenu from "../../Components/SidebarMenu";
 import logo from "../../assets/logoLargo.png";
 
 import {
@@ -22,17 +22,17 @@ export default function NurseHome() {
 
   const navigate = useNavigate();
 
-  // =========================
+  // ============================
   // CARGAR USUARIO
-  // =========================
+  // ============================
   useEffect(() => {
     const userData = localStorage.getItem("usuario");
     if (userData) setUsuario(JSON.parse(userData));
   }, []);
 
-  // =========================
-  // RELOJ EN VIVO ⏰
-  // =========================
+  // ============================
+  // RELOJ EN VIVO
+  // ============================
   useEffect(() => {
     const updateClock = () => {
       setHoraActual(
@@ -41,13 +41,12 @@ export default function NurseHome() {
           minute: "2-digit",
         })
       );
-      setFechaActual(
-        new Date().toLocaleDateString("es-MX", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      );
+      let f = new Date().toLocaleDateString("es-MX", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      setFechaActual(f.charAt(0).toUpperCase() + f.slice(1));
     };
 
     updateClock();
@@ -56,9 +55,9 @@ export default function NurseHome() {
     return () => clearInterval(interval);
   }, []);
 
-  // =========================
+  // ============================
   // CARGAR TODAS LAS CITAS
-  // =========================
+  // ============================
   useEffect(() => {
     cargarTodasLasCitas();
   }, []);
@@ -72,9 +71,9 @@ export default function NurseHome() {
     }
   };
 
-  // =========================
-  // BUSCAR CITAS POR CURP
-  // =========================
+  // ============================
+  // BUSCAR POR CURP
+  // ============================
   const buscarCitasPorCurp = async () => {
     if (!curpBusqueda.trim()) {
       cargarTodasLasCitas();
@@ -97,118 +96,129 @@ export default function NurseHome() {
     }
   };
 
-  const fechaHoy = new Date().toLocaleDateString("es-MX");
-
   return (
     <div className={styles.mainLayout}>
-      <SidebarMenu opcionesCustom={SidebarNurse} passObject={true} />
+      <SidebarMenu opcionesCustom={SidebarNurse} />
 
-      <main className={styles.contentArea}>
+      <div className={styles.contentArea}>
         <div className={styles.container}>
 
-          {/* HEADER */}
+          {/* ===========================
+              HEADER
+          ============================ */}
           <header className={styles.header}>
-            <img src={logo} alt="Logo" className={styles.logo} />
+            <div className={styles.logoBox}>
+              <img src={logo} alt="Logo" className={styles.logo} />
+            </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              
-              {/* Usuario */}
-              <div className={styles.userBox}>
-                <span className="material-icons">account_circle</span>
-                {usuario?.nombreUsuario || "Enfermera"}
-              </div>
-
-              {/* Reloj */}
-              <div className={styles.clockBox}>
-                <div className={styles.clockRow}>
-                  <span className="material-icons">schedule</span>
-                  <span className={styles.time}>{horaActual}</span>
-                </div>
+            <div className={styles.userInfo}>
+              <span className={styles.userName}>
+                {usuario?.nombreUsuario || "Enfermería"}
+              </span>
+              <div className={styles.timeInfo}>
+                <span className={styles.time}>{horaActual}</span>
                 <span className={styles.date}>{fechaActual}</span>
               </div>
-
             </div>
           </header>
 
-          <hr className={styles.divider} />
+          {/* ===========================
+              BUSCADOR
+          ============================ */}
+          <div className={styles.searchSection}>
+            <div className={styles.searchBarWrapper}>
+              <span className="material-icons" style={{ fontSize: 22, color: "#999" }}>
+                search
+              </span>
 
-          {/* FILA: BUSCADOR + AGENDAR */}
-          <div className={styles.actionRow}>
+              <input
+                type="text"
+                placeholder="Buscar paciente por CURP o correo..."
+                value={curpBusqueda}
+                onChange={(e) => setCurpBusqueda(e.target.value)}
+                className={styles.searchBar}
+              />
 
-            <div className={styles.searchSection}>
-              <div className={styles.searchBarWrapper}>
-                <input
-                  type="text"
-                  placeholder="Buscar paciente por CURP"
-                  value={curpBusqueda}
-                  onChange={(e) => setCurpBusqueda(e.target.value)}
-                  className={styles.searchBar}
-                />
-                <button
-                  className={styles.searchIconBtn}
-                  onClick={buscarCitasPorCurp}
-                >
-                  <span className="material-icons">search</span>
-                </button>
-              </div>
+              <button
+                className={styles.searchBtn}
+                onClick={buscarCitasPorCurp}
+              >
+                <span className="material-icons">manage_search</span>
+              </button>
             </div>
 
             <button
-              className={styles.scheduleButtonLarge}
+              className={styles.agendarBtn}
               onClick={() => navigate("/home-nurse/citas")}
             >
               <span className="material-icons">event</span>
               Agendar cita
             </button>
-
           </div>
 
-          {/* Texto de fecha */}
-          <p style={{ fontWeight: 600, marginTop: "0.8rem" }}>
-            Citas de hoy: <span>{fechaHoy}</span>
-          </p>
+          {/* ===========================
+              TITULO Y CONTADOR
+          ============================ */}
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Citas registradas</h2>
 
-          {/* TABLA */}
-          <div className={styles.tableContainer}>
-            <table className={styles.citasTable}>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Apellido Paterno</th>
-                  <th>Apellido Materno</th>
-                  <th>CURP</th>
-                  <th>Fecha y hora</th>
-                  <th>Doctor</th>
-                </tr>
-              </thead>
+            <span className={styles.citaCount}>
+              {citasPaciente.length} registros
+            </span>
+          </div>
 
-              <tbody>
-                {citasPaciente.length > 0 ? (
-                  citasPaciente.map((cita) => (
-                    <tr key={cita.id}>
-                      <td>{cita.nombre}</td>
-                      <td>{cita.apellidoPaterno}</td>
-                      <td>{cita.apellidoMaterno}</td>
-                      <td>{cita.curp}</td>
-                      <td>
-                        {cita.fechaCita?.split("T")[0]}{" "}
-                        {cita.horaCita && ` - ${cita.horaCita}`}
+          {/* ===========================
+              TABLA
+          ============================ */}
+          <div className={styles.scrollContainer}>
+            <div className={styles.tableWrapper}>
+              <table className={styles.citasTable}>
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Apellido paterno</th>
+                    <th>Apellido materno</th>
+                    <th>CURP</th>
+                    <th>Fecha y hora</th>
+                    <th>Doctor</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {citasPaciente.length > 0 ? (
+                    citasPaciente.map((cita, i) => (
+                      <tr key={i}>
+                        <td>{cita.nombre}</td>
+                        <td>{cita.apellidoPaterno}</td>
+                        <td>{cita.apellidoMaterno}</td>
+                        <td>{cita.curp}</td>
+                        <td>
+                          {cita.fechaCita?.split("T")[0]}{" "}
+                          {cita.horaCita && ` - ${cita.horaCita}`}
+                        </td>
+                        <td>{cita.medico}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className={styles.emptyRow}>
+                        <div className={styles.emptyState}>
+                          <span className="material-icons" style={{ fontSize: 40 }}>
+                            hourglass_empty
+                          </span>
+                          <p>No hay citas para mostrar</p>
+                          <small>Realiza una búsqueda para ver resultados</small>
+                        </div>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} style={{ textAlign: "center", padding: "1rem" }}>
-                      No hay resultados.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>
-      </main>
+      </div>
     </div>
   );
 }

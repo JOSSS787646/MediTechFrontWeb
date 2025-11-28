@@ -1,7 +1,8 @@
-// Api/colaborator.ts
 import api from "./index";
 
-// Obtener todos los colaboradores
+// =========================================================
+// 🔹 Obtener todos los colaboradores
+// =========================================================
 export const getColaboradores = async () => {
   try {
     const response = await api.get("/Colaborador");
@@ -11,7 +12,9 @@ export const getColaboradores = async () => {
   }
 };
 
-// Obtener colaborador por ID
+// =========================================================
+// 🔹 Obtener colaborador por ID
+// =========================================================
 export const getColaboradorById = async (id: number) => {
   try {
     const response = await api.get(`/Colaborador/id/${id}`);
@@ -21,17 +24,21 @@ export const getColaboradorById = async (id: number) => {
   }
 };
 
-// Obtener colaborador por CURP
+// =========================================================
+// 🔹 Obtener colaborador por CURP
+// =========================================================
 export const getColaboradorByCurp = async (curp: string) => {
   try {
     const response = await api.get(`/Colaborador/curp/${curp}`);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.mensaje || `Error al obtener el colaborador con CURP ${curp}`);
+    throw new Error(error.response?.data?.mensaje || `Error al obtener colaborador con CURP ${curp}`);
   }
 };
 
-// Obtener colaboradores por especialidad
+// =========================================================
+// 🔹 Obtener colaboradores por especialidad
+// =========================================================
 export const getColaboradoresByEspecialidad = async (idEspecialidad: number) => {
   try {
     const response = await api.get(`/Colaborador/especialidad/${idEspecialidad}`);
@@ -41,57 +48,75 @@ export const getColaboradoresByEspecialidad = async (idEspecialidad: number) => 
   }
 };
 
-// Crear nuevo colaborador
+// =========================================================
+// 🔹 Crear colaborador
+// =========================================================
 export const createColaborador = async (colaborador: any) => {
   try {
     const response = await api.post("/Colaborador", colaborador);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.mensaje || "Error al crear el colaborador");
+    throw new Error(error.response?.data?.mensaje || "Error al crear colaborador");
   }
 };
 
-// Actualizar colaborador
+// =========================================================
+// 🔹 Actualizar colaborador
+// =========================================================
 export const updateColaborador = async (id: number, colaborador: any) => {
   try {
     const response = await api.put(`/Colaborador/${id}`, colaborador);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.mensaje || `Error al actualizar el colaborador con ID ${id}`);
+    throw new Error(error.response?.data?.mensaje || `Error al actualizar colaborador con ID ${id}`);
   }
 };
 
-// Eliminar colaborador
+// =========================================================
+// 🔹 Eliminar colaborador
+// =========================================================
 export const deleteColaborador = async (id: number) => {
   try {
     const response = await api.delete(`/Colaborador/${id}`);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.mensaje || `Error al eliminar el colaborador con ID ${id}`);
+    throw new Error(error.response?.data?.mensaje || `Error al eliminar colaborador con ID ${id}`);
   }
 };
 
-// Reactivar colaborador
+// =========================================================
+// 🔹 Reactivar colaborador
+// =========================================================
 export const enableColaborador = async (id: number) => {
   try {
     const response = await api.put(`/Colaborador/reactivar/${id}`);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.mensaje || `Error al reactivar el colaborador con ID ${id}`);
+    throw new Error(error.response?.data?.mensaje || `Error al reactivar colaborador con ID ${id}`);
   }
 };
 
-// Obtener citas de un colaborador
+// =========================================================
+// 🔹 Obtener citas de un colaborador (RUTA REAL QUE USAS)
+// GET https://localhost:44389/api/Colaborador/citas-colaborador/{id}
+// =========================================================
 export const getCitasDeColaborador = async (idColaborador: number) => {
-  try {
-    const response = await api.get(`/Colaborador/citas-colaborador/${idColaborador}`);
-    return response.data;
-  } catch (error: any) {
-    throw new Error(error.response?.data?.mensaje || "Error al obtener citas del colaborador");
-  }
+    try {
+        const response = await api.get(`/Colaborador/citas-colaborador/${idColaborador}`);
+        return response.data;
+    } catch (error) {
+        console.error("❌ Error:", error);
+        throw error;
+    }
 };
 
-// Obtener citas de un paciente por CURP o email
+
+
+
+
+// =========================================================
+// 🔹 Obtener citas de un paciente por CURP o email
+// =========================================================
 export const getCitasPacienteByCurpOrEmail = async (identificador: string) => {
   try {
     const response = await api.get(`/Colaborador/citas-paciente/${identificador}`);
@@ -101,7 +126,9 @@ export const getCitasPacienteByCurpOrEmail = async (identificador: string) => {
   }
 };
 
+// =========================================================
 // 🔹 Obtener TODAS las citas de pacientes
+// =========================================================
 export const getAllCitasPacientes = async () => {
   try {
     const response = await api.get("/Colaborador/todas-las-citas-de-pacientes");
