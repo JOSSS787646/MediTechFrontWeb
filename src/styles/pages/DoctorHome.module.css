@@ -7,392 +7,236 @@
   --background: #f8fafc;
   --border-light: #e2e8f0;
   --shadow: 0 1px 3px rgba(0,0,0,0.1);
-  --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
   --font: "Segoe UI", sans-serif;
 }
 
-/* ===== Layout general mejorado ===== */
+/* ===== LAYOUT ===== */
 .mainLayout {
   display: flex;
-  width: 100%;
   min-height: 100vh;
   background: var(--background);
-  font-family: var(--font);
 }
 
 .contentArea {
   flex: 1;
   padding: 1.5rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  height: 100vh;
-  overflow: hidden;
 }
 
 .container {
   width: 100%;
   max-width: 1400px;
-  margin: 0 auto;
+  margin: auto;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-/* ===== Header compacto ===== */
+/* ===== HEADER (sticky) ===== */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   background: white;
   padding: 1rem 1.5rem;
   border-radius: 12px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-light);
-  flex-shrink: 0;
-}
-
-.logoBox {
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .logo {
   width: 200px;
-  height: auto;
-  transition: transform 0.3s ease;
-}
-
-.logo:hover {
-  transform: scale(1.05);
 }
 
 .userInfo {
   display: flex;
+  gap: 1rem;
   align-items: center;
-  gap: 1.5rem;
 }
 
 .userName {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  color: var(--text-dark);
-  background: #f1f5f9;
+  background: #eef4f3;
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  font-size: 0.9rem;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-weight: 600;
 }
 
 .timeInfo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.2rem;
-}
-
-.time, .date {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  text-align: right;
 }
 
 .time {
-  font-weight: 700;
-  color: var(--sidebar-color);
   font-size: 1.1rem;
+  color: var(--sidebar-color);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .date {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
-.icon {
-  opacity: 0.8;
-  font-size: 0.9em;
-}
-
-/* ===== Barra de búsqueda SEPARADA ===== */
+/* ===== BUSCADOR ===== */
 .searchSection {
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
+}
+
+.searchBarWrapper {
+  display: flex;
+  align-items: center;
+  background: #f0f5f5;
+  border-radius: 10px;
+  border: 1.5px solid #d6e4e3;
+  padding: 0.8rem 1rem;
+  gap: 0.6rem;
+}
+
+.searchBar {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+  font-size: 1rem;
+}
+
+/* ===== ENCABEZADO DE SECCIÓN ===== */
+.sectionHeader {
   background: white;
   padding: 1rem 1.5rem;
   border-radius: 12px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-light);
-  /* Se asegura que esté separada del header */
-  margin-top: 0;
-}
-
-.searchBarWrapper {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  background: #fafafa;
-  border: 1.5px solid var(--border-light);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  transition: all 0.3s ease;
-}
-
-.searchBarWrapper:hover {
-  border-color: #cbd5e1;
-  background: white;
-}
-
-.searchBarWrapper:focus-within {
-  border-color: var(--sidebar-color);
-  box-shadow: 0 0 0 3px rgba(99,178,165,0.1);
-  background: white;
-}
-
-.searchBar {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text-dark);
-  font-size: 0.95rem;
-}
-
-.clearBtn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  padding: 0 0.3rem;
-  transition: 0.2s;
-}
-
-.clearBtn:hover {
-  color: var(--sidebar-color);
-}
-
-/* ===== Encabezado de sección ===== */
-.sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
-  padding: 1.2rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border-light);
 }
 
 .sectionTitle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--text-dark);
-  margin: 0;
-}
-
-.sectionIcon {
-  opacity: 0.8;
-  font-size: 1.2rem;
 }
 
 .appointmentCount {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   background: var(--sidebar-color);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-weight: 600;
-  font-size: 0.9rem;
-  box-shadow: var(--shadow);
-}
-
-.countIcon {
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-/* ===== CONTENEDOR PRINCIPAL CON ALTURA FIJA Y SCROLL INTERNO ===== */
-.scrollContainer {
-  flex: 1;
   display: flex;
-  flex-direction: column;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+/* ===== TABLA ===== */
+.scrollContainer {
   background: white;
   border-radius: 12px;
-  box-shadow: var(--shadow);
   border: 1px solid var(--border-light);
-  /* Eliminamos el overflow general */
   overflow: hidden;
-}
-
-/* ===== TABLA CON SCROLL INTERNO EN EL TBODY ===== */
-.tableWrapper {
-  width: 100%;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.tableContainer {
-  width: 100%;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  height: calc(100vh - 320px);
 }
 
 .citasTable {
   width: 100%;
+  min-width: 1100px;
   border-collapse: collapse;
-  font-family: var(--font);
-  min-width: 900px;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
 }
 
 .citasTable thead {
   background: linear-gradient(135deg, var(--sidebar-color), var(--sidebar-hover));
   color: white;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  flex-shrink: 0;
-}
-
-.citasTable thead tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-.citasTable tbody {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: block;
-  max-height: calc(100vh - 400px); /* Altura ajustable según necesidad */
-}
-
-.citasTable tbody tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-/* Scroll personalizado para el tbody */
-.citasTable tbody::-webkit-scrollbar {
-  width: 8px;
-}
-
-.citasTable tbody::-webkit-scrollbar-thumb {
-  background: var(--sidebar-color);
-  border-radius: 4px;
-}
-
-.citasTable tbody::-webkit-scrollbar-track {
-  background: #f1f5f9;
 }
 
 .citasTable th {
-  padding: 1rem 0.75rem;
+  padding: 1rem;
   text-align: left;
-  font-weight: 600;
   font-size: 0.85rem;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-  border-bottom: 2px solid rgba(255,255,255,0.2);
-}
-
-.thIcon {
-  margin-right: 0.4rem;
-  opacity: 0.9;
-  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .citasTable td {
-  padding: 0.9rem 0.75rem;
-  border-bottom: 1px solid #f5f5f5;
-  font-size: 0.9rem;
-  color: var(--text-dark);
-  transition: all 0.2s ease;
+  padding: 1rem;
+  border-bottom: 1px solid #eef2f3;
+  vertical-align: middle;
 }
 
-.tableRow {
-  transition: all 0.3s ease;
+/* Zebra rows */
+.citasTable tbody tr:nth-child(even) {
+  background: #f7fbfb;
 }
 
-.tableRow:hover {
-  background: linear-gradient(90deg, #f0faf8 0%, #ffffff 100%);
-  transform: scale(1.002);
-  box-shadow: 0 2px 12px rgba(99, 178, 165, 0.08);
+.citasTable tbody tr:hover {
+  background: #eaf5f4;
+  transition: 0.2s ease;
 }
 
-/* Celdas específicas */
-.patientCell {
-  font-weight: 600;
-}
-
+/* ===== PACIENTE ===== */
 .patientInfo {
   display: flex;
+  gap: 0.6rem;
   align-items: center;
-  gap: 0.7rem;
 }
 
 .patientIcon {
+  background: #dff2ee;
+  padding: 8px;
+  border-radius: 50%;
   color: var(--sidebar-color);
   display: flex;
-  align-items: center;
-  font-size: 1.2rem;
-  opacity: 0.8;
-}
-
-.patientDetails {
-  display: flex;
-  flex-direction: column;
 }
 
 .patientName {
   font-weight: 600;
-  color: var(--text-dark);
 }
 
-/* Badges y estados */
-.edadBadge, .horaBadge {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-weight: 600;
+/* ===== CURP ===== */
+.curpTag {
+  background: #e4f3f0;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
   font-size: 0.8rem;
-  white-space: nowrap;
+  font-weight: 600;
+  color: #0a4f4b;
 }
 
+/* ===== BADGES ===== */
 .edadBadge {
-  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-  color: #1976d2;
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 0.4rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .horaBadge {
-  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-  color: #f57c00;
+  background: #ffedd5;
+  color: #c2410c;
+  padding: 0.4rem 0.7rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.8rem;
 }
 
-.badgeIcon {
-  font-size: 0.7rem;
-  opacity: 0.8;
-}
-
-.fechaCell {
-  color: #555;
-  font-weight: 500;
-}
-
+/* ===== MOTIVO ===== */
 .motivoCell {
   max-width: 200px;
 }
@@ -402,121 +246,47 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #666;
+  color: #333;
 }
 
-.doctorCell {
-  font-weight: 500;
-}
-
-.doctorInfo {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.doctorIcon {
-  opacity: 0.7;
-  font-size: 0.9rem;
-}
-
-/* Estado vacío */
+/* ===== ESTADO VACÍO ===== */
 .emptyRow {
   text-align: center;
-  padding: 0 !important;
+  padding: 3rem !important;
 }
 
 .emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 3rem 2rem;
   color: var(--text-light);
-}
-
-.emptyIcon {
-  font-size: 3rem;
-  opacity: 0.3;
 }
 
 .emptyState p {
-  margin: 0;
-  font-size: 1.1rem;
+  margin: 0.5rem 0 0;
   font-weight: 600;
-  color: var(--text-dark);
 }
 
-.emptyState small {
-  font-size: 0.85rem;
-  color: var(--text-light);
-}
-
-/* Botón atender */
+/* ===== BOTÓN ATENDER ===== */
 .btnAtender {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   background: var(--sidebar-color);
   color: white;
-  border: none;
-  padding: 0.6rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.85rem;
+  border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(99, 178, 165, 0.3);
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  font-weight: 600;
+  transition: 0.2s;
 }
 
 .btnAtender:hover {
   background: var(--sidebar-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 178, 165, 0.4);
 }
 
-.btnAtender:active {
-  transform: translateY(0);
-}
-
-.btnIcon {
-  font-size: 0.9rem;
-}
-
-.btnText {
-  font-size: 0.8rem;
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 1200px) {
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
   .container {
-    max-width: 95%;
-  }
-}
-
-@media (max-width: 968px) {
-  .contentArea {
-    padding: 1rem;
-  }
-  
-  .sectionHeader {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  
-  .userInfo {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-  
-  .timeInfo {
-    align-items: center;
-  }
-
-  .citasTable tbody {
-    max-height: calc(100vh - 450px); /* Ajuste para pantallas más pequeñas */
+    max-width: 100%;
   }
 }
 
@@ -526,93 +296,17 @@
     gap: 1rem;
     text-align: center;
   }
-  
   .logo {
     width: 160px;
   }
-  
-  .sectionTitle {
-    font-size: 1.1rem;
-  }
-  
-  .citasTable {
-    font-size: 0.8rem;
-    min-width: 700px;
-  }
-  
-  .citasTable th,
-  .citasTable td {
-    padding: 0.7rem 0.5rem;
-  }
-  
-  .patientIcon {
-    font-size: 1rem;
-  }
-  
-  .btnText {
-    display: none;
-  }
-  
-  .btnAtender {
-    padding: 0.5rem;
-    justify-content: center;
-  }
-  
-  .edadBadge,
-  .horaBadge {
-    font-size: 0.75rem;
-    padding: 0.3rem 0.6rem;
-  }
-  
-  .motivoCell {
-    max-width: 120px;
-  }
-
-  .citasTable tbody {
-    max-height: calc(100vh - 500px);
-  }
-}
-
-@media (max-width: 480px) {
-  .contentArea {
-    padding: 0.8rem;
-    gap: 1rem;
-  }
-  
-  .header {
-    padding: 1rem;
-  }
-  
-  .searchSection {
-    padding: 0.8rem 1rem;
-  }
-  
   .sectionHeader {
-    padding: 1rem;
     flex-direction: column;
     gap: 1rem;
   }
-  
-  .sectionTitle {
-    font-size: 1rem;
-  }
-  
-  .appointmentCount {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.8rem;
-  }
-  
-  .citasTable th {
-    font-size: 0.75rem;
-    padding: 0.6rem 0.3rem;
-  }
-  
-  .citasTable td {
-    font-size: 0.75rem;
-    padding: 0.6rem 0.3rem;
-  }
-
-  .citasTable tbody {
-    max-height: calc(100vh - 350px);
-  }
+}
+/* Mantener misma fuente elegante en toda la tabla */
+.citasTable,
+.citasTable th,
+.citasTable td {
+  font-family: var(--font) !important;
 }

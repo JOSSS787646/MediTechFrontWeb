@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "../../styles/pages/DoctorHome.module.css";
 import logo from "../../assets/logoLargo.png";
 import { useNavigate } from "react-router-dom";
-import { getCitasDeColaborador } from "../../Api/colaborator";
+
+import { verificarRolUsuario } from "../../Api/rol";
+import { getColaboradorByCurp, getCitasDeColaborador } from "../../Api/colaborator";
+
 import "material-icons/iconfont/material-icons.css";
 
 const Iconos = {
@@ -14,160 +17,154 @@ const Iconos = {
   evento: "event_available",
   paciente: "person",
   atender: "medical_services",
-  edad: "cake",
-  motivo: "description",
-  doctor: "local_hospital",
-  vacio: "event_busy"
+  vacio: "event_busy",
 };
 
 export default function DoctorHome() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
-  const [horaActual, setHoraActual] = useState("");
-  const [fechaActual, setFechaActual] = useState("");
+
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
-  const [idColaborador, setIdColaborador] = useState(null);
+
+  const [idColaboradorReal, setIdColaboradorReal] = useState(null);
   const [nombreUsuario, setNombreUsuario] = useState("Doctor");
+  const [search, setSearch] = useState("");
 
-  // Cargar usuario al iniciar
-  useEffect(() => {
-    const usuario = JSON.parse(localStorage.getItem("usuario"));
-    if (usuario) {
-      setIdColaborador(usuario.id);
-      setNombreUsuario(usuario.nombreUsuario || "Doctor");
-      console.log("✅ Usuario cargado:", usuario);
-    }
-  }, []);
+  const [horaActual, setHoraActual] = useState("");
+  const [fechaActual, setFechaActual] = useState("");
 
-  // Cargar citas cuando tengamos el ID del colaborador
+  // ===========================================
+  // OBTENER EL ID REAL DEL COLABORADOR
+  // ===========================================
   useEffect(() => {
-    if (idColaborador) {
-      console.log("🔄 Cargando citas para colaborador:", idColaborador);
-      cargarCitas();
-    }
-  }, [idColaborador]);
+    const cargarDatosIniciales = async () => {
+      try {
+        const usuarioLS = JSON.parse(localStorage.getItem("usuario"));
 
-  // Reloj en tiempo real
-  useEffect(() => {
-    const actualizarReloj = () => {
-      const ahora = new Date();
-      setHoraActual(ahora.toLocaleTimeString("es-MX", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }));
-      setFechaActual(ahora.toLocaleDateString("es-MX", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }));
+        if (!usuarioLS || !usuarioLS.id) {
+          console.error("❌ No hay usuario en localStorage");
+          return;
+        }
+
+        const usuarioId = usuarioLS.id; // ← ESTE ES ID DEL USUARIO
+
+        // 1️⃣ TRAER ROL Y CURP DEL COLABORADOR
+        const rolData = await verificarRolUsuario(usuarioId);
+
+        if (!rolData || !rolData.colaborador) {
+          console.error("❌ No se encontró colaborador en rolData");
+          return;
+        }
+
+        const { nombre, apellidoPaterno, curp } = rolData.colaborador;
+
+        setNombreUsuario(`${nombre} ${apellidoPaterno}`);
+
+        // 2️⃣ TRAER ID REAL DEL COLABORADOR USANDO CURP
+        const colaboradorReal = await getColaboradorByCurp(curp);
+
+        if (!colaboradorReal || !colaboradorReal.id) {
+          console.error("❌ No se pudo obtener el ID del colaborador real");
+          return;
+        }
+
+        setIdColaboradorReal(colaboradorReal.id);
+
+      } catch (error) {
+        console.error("❌ Error obteniendo datos del colaborador", error);
+      }
     };
 
-    actualizarReloj();
-    const intervalo = setInterval(actualizarReloj, 1000);
-    return () => clearInterval(intervalo);
+    cargarDatosIniciales();
   }, []);
 
-  // Función para cargar citas
-  const cargarCitas = async () => {
-    try {
-      console.log("📞 Llamando al endpoint de citas...");
-      const respuesta = await getCitasDeColaborador(idColaborador);
-      console.log("📋 Respuesta recibida:", respuesta);
-
-      if (!Array.isArray(respuesta)) {
-        console.error("❌ La respuesta no es un array");
-        return;
-      }
-
-      // Procesar cada cita
-      const citasProcesadas = respuesta.map((cita, index) => {
-        console.log(`📝 Procesando cita ${index}:`, cita);
-
-        return {
-          // Información de la cita
-          id: cita.id || `cita-${index}`,
-          fechaCita: cita.fechaCita,
-          horaCita: cita.horaCita,
-          motivo: cita.motivo,
-          medico: cita.medico,
-          
-          // Información del paciente (DE LA CITA)
-          pacienteNombre: cita.pacienteNombre || "Paciente",
-          pacienteApellidoPaterno: cita.pacienteApellidoPaterno || "",
-          pacienteApellidoMaterno: cita.pacienteApellidoMaterno || "",
-          pacienteEdad: cita.edad || calcularEdad(cita.fechaNacimiento),
-          pacienteCurp: cita.curp, // ESTO ES LO MÁS IMPORTANTE
-          pacienteTelefono: cita.telefono,
-          pacienteFechaNacimiento: cita.fechaNacimiento,
-          
-          datosOriginales: cita
-        };
-      });
-
-      console.log("✅ Citas procesadas:", citasProcesadas);
-      setAppointments(citasProcesadas);
-      setFilteredAppointments(citasProcesadas);
-
-    } catch (error) {
-      console.error("❌ Error cargando citas:", error);
-    }
-  };
-
-  // Calcular edad
+  // ===========================================
+  // CALCULAR EDAD
+  // ===========================================
   const calcularEdad = (fechaNacimiento) => {
     if (!fechaNacimiento) return "N/A";
+    const f = new Date(fechaNacimiento);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - f.getFullYear();
+    if (hoy < new Date(f.setFullYear(hoy.getFullYear()))) edad--;
+    return edad;
+  };
+
+  // ===========================================
+  // CARGAR CITAS
+  // ===========================================
+  const cargarCitas = useCallback(async () => {
+    if (!idColaboradorReal) return;
     try {
-      const nacimiento = new Date(fechaNacimiento);
-      const hoy = new Date();
-      let edad = hoy.getFullYear() - nacimiento.getFullYear();
-      const mes = hoy.getMonth() - nacimiento.getMonth();
-      if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-        edad--;
-      }
-      return edad;
-    } catch  {
-      return "N/A";
-    }
-  };
+      const data = await getCitasDeColaborador(idColaboradorReal);
 
-  // Buscar pacientes
+      if (!Array.isArray(data)) return;
+
+      const citas = data.map((cita, i) => ({
+        id: cita.id || i,
+        fechaCita: cita.fechaCita,
+        horaCita: cita.horaCita,
+        motivo: cita.motivo,
+        medico: cita.medico,
+        pacienteNombre: cita.pacienteNombre,
+        pacienteApellidoPaterno: cita.pacienteApellidoPaterno,
+        pacienteApellidoMaterno: cita.pacienteApellidoMaterno,
+        pacienteCurp: cita.curp,
+        pacienteTelefono: cita.telefono,
+        pacienteFechaNacimiento: cita.fechaNacimiento,
+        pacienteEdad: calcularEdad(cita.fechaNacimiento),
+      }));
+
+      setAppointments(citas);
+      setFilteredAppointments(citas);
+
+    } catch (e) {
+      console.error("❌ Error cargando citas:", e);
+    }
+  }, [idColaboradorReal]);
+
+  useEffect(() => {
+    if (idColaboradorReal) cargarCitas();
+  }, [idColaboradorReal, cargarCitas]);
+
+  // ===========================================
+  // BUSCADOR
+  // ===========================================
   const handleSearch = (e) => {
-    const valor = e.target.value;
-    setSearch(valor);
+    const term = e.target.value.toLowerCase();
+    setSearch(term);
 
-    if (valor.trim() === "") {
-      setFilteredAppointments(appointments);
-    } else {
-      const filtradas = appointments.filter(cita => {
-        const nombreCompleto = `${cita.pacienteNombre} ${cita.pacienteApellidoPaterno} ${cita.pacienteApellidoMaterno}`.toLowerCase();
-        return nombreCompleto.includes(valor.toLowerCase());
-      });
-      setFilteredAppointments(filtradas);
-    }
+    setFilteredAppointments(
+      appointments.filter((cita) =>
+        `${cita.pacienteNombre} ${cita.pacienteApellidoPaterno} ${cita.pacienteApellidoMaterno}`
+          .toLowerCase()
+          .includes(term)
+      )
+    );
   };
 
-  // Atender paciente - ENVIAR CURP
+  // ===========================================
+  // RELOJ
+  // ===========================================
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      setHoraActual(
+        now.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })
+      );
+      setFechaActual(
+        now.toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })
+      );
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ===========================================
+  // ATENDER PACIENTE
+  // ===========================================
   const handleAtender = (cita) => {
-    console.log("🩺 Atendiendo paciente:", cita);
-    console.log("🔑 CURP a enviar:", cita.pacienteCurp);
-
-    if (!cita.pacienteCurp) {
-      alert("❌ Este paciente no tiene CURP registrado");
-      return;
-    }
-
-    // Navegar a recetas enviando el CURP
     navigate("/home-doctor/recetas", {
-      state: {
-        pacienteData: {
-          curp: cita.pacienteCurp, // IDENTIFICADOR ÚNICO
-          nombre: `${cita.pacienteNombre} ${cita.pacienteApellidoPaterno} ${cita.pacienteApellidoMaterno}`,
-          edad: cita.pacienteEdad,
-          fechaNacimiento: cita.pacienteFechaNacimiento,
-          telefono: cita.pacienteTelefono
-        }
-      }
+      state: { pacienteData: cita },
     });
   };
 
@@ -178,42 +175,41 @@ export default function DoctorHome() {
 
           {/* HEADER */}
           <header className={styles.header}>
-            <div className={styles.logoBox}>
-              <img src={logo} alt="Logo" className={styles.logo} />
-            </div>
+            <img src={logo} className={styles.logo} alt="Logo" />
+
             <div className={styles.userInfo}>
               <span className={styles.userName}>
                 <span className="material-icons">{Iconos.usuario}</span>
                 {nombreUsuario}
               </span>
+
               <div className={styles.timeInfo}>
                 <span className={styles.time}>
-                  <span className="material-icons">{Iconos.reloj}</span>
-                  {horaActual}
+                  <span className="material-icons">{Iconos.reloj}</span> {horaActual}
                 </span>
+
                 <span className={styles.date}>
-                  <span className="material-icons">{Iconos.calendario}</span>
-                  {fechaActual}
+                  <span className="material-icons">{Iconos.calendario}</span> {fechaActual}
                 </span>
               </div>
             </div>
           </header>
 
-          {/* BARRA DE BÚSQUEDA */}
+          {/* BUSCADOR */}
           <div className={styles.searchSection}>
             <div className={styles.searchBarWrapper}>
               <span className="material-icons">{Iconos.buscar}</span>
               <input
+                className={styles.searchBar}
                 type="text"
-                placeholder="Buscar paciente por nombre..."
+                placeholder="Buscar paciente..."
                 value={search}
                 onChange={handleSearch}
-                className={styles.searchBar}
               />
             </div>
           </div>
 
-          {/* ENCABEZADO */}
+          {/* TITULO */}
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>
               <span className="material-icons">{Iconos.citas}</span>
@@ -221,86 +217,55 @@ export default function DoctorHome() {
             </h2>
             <span className={styles.appointmentCount}>
               <span className="material-icons">{Iconos.evento}</span>
-              {filteredAppointments.length} {filteredAppointments.length === 1 ? 'cita' : 'citas'}
+              {filteredAppointments.length} citas
             </span>
           </div>
 
-          {/* TABLA DE CITAS */}
+          {/* TABLA */}
           <div className={styles.scrollContainer}>
-            <div className={styles.tableWrapper}>
-              <div className={styles.tableContainer}>
-                <table className={styles.citasTable}>
-                  <thead>
-                    <tr>
-                      <th>Paciente</th>
-                      <th>Edad</th>
-                      <th>Fecha</th>
-                      <th>Hora</th>
-                      <th>Motivo</th>
-                      <th>Doctor</th>
-                      <th>Acción</th>
+            <table className={styles.citasTable}>
+              <thead>
+                <tr>
+                  <th>Paciente</th>
+                  <th>CURP</th>
+                  <th>Edad</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Motivo</th>
+                  <th>Doctor</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredAppointments.length > 0 ? (
+                  filteredAppointments.map((cita, i) => (
+                    <tr key={i}>
+                      <td>{cita.pacienteNombre} {cita.pacienteApellidoPaterno}</td>
+                      <td>{cita.pacienteCurp}</td>
+                      <td>{cita.pacienteEdad}</td>
+                      <td>{new Date(cita.fechaCita).toLocaleDateString("es-MX")}</td>
+                      <td>{cita.horaCita}</td>
+                      <td>{cita.motivo}</td>
+                      <td>{cita.medico}</td>
+                      <td>
+                        <button
+                          className={styles.btnAtender}
+                          onClick={() => handleAtender(cita)}
+                        >
+                          <span className="material-icons">{Iconos.atender}</span>
+                          Atender
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAppointments.length > 0 ? (
-                      filteredAppointments.map((cita, index) => (
-                        <tr key={index} className={styles.tableRow}>
-                          <td className={styles.patientCell}>
-                            <div className={styles.patientInfo}>
-                              <span className={styles.patientIcon}>
-                                <span className="material-icons">{Iconos.paciente}</span>
-                              </span>
-                              <div>
-                                <div className={styles.patientName}>
-                                  {cita.pacienteNombre} {cita.pacienteApellidoPaterno} {cita.pacienteApellidoMaterno}
-                                </div>
-                                <div className={styles.curpText}>
-                                  CURP: {cita.pacienteCurp || "No disponible"}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <span className={styles.edadBadge}>
-                              {cita.pacienteEdad} años
-                            </span>
-                          </td>
-                          <td>{cita.fechaCita ? new Date(cita.fechaCita).toLocaleDateString("es-MX") : "N/A"}</td>
-                          <td>
-                            <span className={styles.horaBadge}>
-                              {cita.horaCita || "N/A"}
-                            </span>
-                          </td>
-                          <td className={styles.motivoCell}>
-                            {cita.motivo || "Sin motivo"}
-                          </td>
-                          <td>{cita.medico || "No asignado"}</td>
-                          <td>
-                            <button
-                              className={styles.btnAtender}
-                              onClick={() => handleAtender(cita)}
-                              disabled={!cita.pacienteCurp}
-                            >
-                              <span className="material-icons">{Iconos.atender}</span>
-                              Atender
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={7} className={styles.emptyRow}>
-                          <div className={styles.emptyState}>
-                            <span className="material-icons">{Iconos.vacio}</span>
-                            <p>No hay citas programadas</p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8" className={styles.emptyRow}>No hay citas.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
 
         </div>
