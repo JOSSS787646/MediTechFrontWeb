@@ -1,73 +1,107 @@
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/Components/SendGmailModal.module.css";
-import { enviarRecetaPorCorreo } from "../../Api/recetas";
+import { enviarRecetaPorCorreo, createReceta } from "../../Api/recetas";
+import Swal from "sweetalert2";
 
-const ModalEnvioCorreo = ({ 
-  formData, 
-  onClose, 
-  emailPaciente, 
+const ModalEnvioCorreo = ({
+  formData,
+  onClose,
+  emailPaciente,
   setEmailPaciente,
   pdfBlob,
-  pdfUrl 
+  pdfUrl,
 }) => {
   const [enviando, setEnviando] = useState(false);
-  const [mensaje, setMensaje] = useState("");
   const [vistaPreviaCargada, setVistaPreviaCargada] = useState(false);
 
-  // Cargar vista previa del PDF cuando el modal se abre
   useEffect(() => {
-    if (pdfUrl) {
-      setVistaPreviaCargada(true);
-      console.log("✅ Vista previa del PDF cargada");
-    }
+    if (pdfUrl) setVistaPreviaCargada(true);
   }, [pdfUrl]);
 
   const handleEnviarCorreo = async () => {
-    if (!emailPaciente) {
-      setMensaje("❌ Por favor ingresa un email válido");
+    console.log("📌 formData recibido en ModalEnvioCorreo:", formData);
+
+    // Validar correo
+    if (!emailPaciente || !emailPaciente.includes("@")) {
+      Swal.fire("Correo inválido", "Ingresa un correo válido.", "error");
       return;
     }
 
+    // Validar PDF
     if (!pdfBlob) {
-      setMensaje("❌ No se pudo generar el PDF para enviar");
+      Swal.fire("Error", "No hay PDF para enviar.", "error");
       return;
     }
 
-    console.log("📧 Enviando receta por correo a:", emailPaciente);
-    setEnviando(true);
-    setMensaje("");
-
-    try {
-      const resultado = await enviarRecetaPorCorreo({
-        email: emailPaciente,
-        datosReceta: formData,
-        pdfBlob: pdfBlob
+    // Validar IDs necesarios
+    if (!formData.pacienteId || !formData.doctorId || !formData.idSignosVitales) {
+      console.error("❌ Faltan IDs requeridos:", {
+        pacienteId: formData.pacienteId,
+        doctorId: formData.doctorId,
+        idSignosVitales: formData.idSignosVitales,
       });
 
-      console.log("✅ Correo enviado exitosamente:", resultado);
-      setMensaje("✅ Receta enviada por correo exitosamente");
-      
-      // Cerrar modal después de 2 segundos
-      setTimeout(() => {
-        onClose();
-      }, 2000);
+      Swal.fire(
+        "Error",
+        "Faltan datos para guardar la receta (Paciente, Doctor o Signos Vitales).",
+        "error"
+      );
+      return;
+    }
 
+    // 🔥 IMPORTANTE: usar los nombres EXACTOS del DTO CreateRecetaDto
+    const payload = {
+      ID_Paciente: formData.pacienteId,
+      ID_Doctor: formData.doctorId,
+      Tratamientos: formData.tratamiento,
+      ID_SignosVitales: formData.idSignosVitales,
+    };
+
+    console.log("📤 Payload que se enviará a createReceta:", payload);
+
+    try {
+      setEnviando(true);
+
+      // 1️⃣ Guardar receta en BD
+      console.log("💾 Llamando a createReceta...");
+      const resReceta = await createReceta(payload);
+      console.log("✅ Respuesta de createReceta:", resReceta);
+
+      // 2️⃣ Enviar por correo
+      console.log("📧 Llamando a enviarRecetaPorCorreo...");
+      const resCorreo = await enviarRecetaPorCorreo({
+        email: emailPaciente,
+        pdfBlob,
+      });
+      console.log("✅ Respuesta de enviarRecetaPorCorreo:", resCorreo);
+
+      // 3️⃣ Cerrar modal
+      onClose();
+
+      // 4️⃣ Notificación al usuario
+      setTimeout(() => {
+        Swal.fire({
+          icon: "success",
+          title: "Receta enviada",
+          text: "La receta se guardó correctamente y se envió al correo del paciente.",
+          timer: 2200,
+          showConfirmButton: false,
+        });
+      }, 200);
     } catch (error) {
-      console.error("❌ Error enviando correo:", error);
-      setMensaje("❌ Error al enviar la receta por correo");
+      console.error("❌ ERROR en guardar/enviar receta:", error);
+
+      onClose();
+
+      setTimeout(() => {
+        Swal.fire(
+          "Error",
+          "No se pudo guardar o enviar la receta. Revisa la consola para más detalles.",
+          "error"
+        );
+      }, 200);
     } finally {
       setEnviando(false);
-    }
-  };
-
-  const descargarPDF = () => {
-    if (pdfBlob) {
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `receta_${formData.pacienteNombre.replace(/\s+/g, '_')}.pdf`;
-      link.click();
-      URL.revokeObjectURL(url);
     }
   };
 
@@ -77,7 +111,7 @@ const ModalEnvioCorreo = ({
         <div className={styles.modalHeader}>
           <h2>
             <span className="material-icons">email</span>
-            Enviar Receta por Correo
+            Enviar Receta
           </h2>
           <button className={styles.closeButton} onClick={onClose}>
             <span className="material-icons">close</span>
@@ -85,85 +119,37 @@ const ModalEnvioCorreo = ({
         </div>
 
         <div className={styles.modalBody}>
-          {/* VISTA PREVIA DEL PDF */}
           <div className={styles.previewSection}>
-            <div className={styles.previewHeader}>
-              <h3>Vista Previa del PDF</h3>
-              <button 
-                className={styles.downloadBtn}
-                onClick={descargarPDF}
-                disabled={!pdfBlob}
-              >
-                <span className="material-icons">download</span>
-                Descargar
-              </button>
-            </div>
-            
+            <h3>Vista Previa</h3>
             {vistaPreviaCargada ? (
-              <div className={styles.pdfPreview}>
-                <iframe
-                  src={pdfUrl}
-                  title="Vista previa de la receta"
-                  className={styles.pdfIframe}
-                />
-                <div className={styles.pdfInfo}>
-                  <span className="material-icons">picture_as_pdf</span>
-                  PDF generado automáticamente - {formData.pacienteNombre}
-                </div>
-              </div>
+              <iframe className={styles.pdfIframe} src={pdfUrl} />
             ) : (
-              <div className={styles.pdfCargando}>
-                <span className="material-icons">hourglass_empty</span>
-                <p>Generando vista previa del PDF...</p>
-              </div>
+              <p>Cargando PDF...</p>
             )}
           </div>
 
-          {/* FORMULARIO DE CORREO */}
           <div className={styles.emailSection}>
-            <label htmlFor="emailPaciente">Correo del Paciente:</label>
+            <label>Correo del paciente</label>
             <input
-              id="emailPaciente"
               type="email"
               value={emailPaciente}
               onChange={(e) => setEmailPaciente(e.target.value)}
               placeholder="ejemplo@correo.com"
-              className={styles.emailInput}
             />
-            <small>Se enviará el PDF que ves arriba como archivo adjunto</small>
           </div>
-
-          {mensaje && (
-            <div className={`${styles.mensaje} ${mensaje.includes('✅') ? styles.exito : styles.error}`}>
-              {mensaje}
-            </div>
-          )}
         </div>
 
         <div className={styles.modalFooter}>
-          <button 
-            className={styles.cancelButton}
-            onClick={onClose}
-            disabled={enviando}
-          >
+          <button onClick={onClose} className={styles.cancelButton}>
             Cancelar
           </button>
-          <button 
+
+          <button
             className={styles.sendButton}
             onClick={handleEnviarCorreo}
-            disabled={enviando || !emailPaciente || !pdfBlob}
+            disabled={enviando}
           >
-            {enviando ? (
-              <>
-                <span className="material-icons">hourglass_empty</span>
-                Enviando...
-              </>
-            ) : (
-              <>
-                <span className="material-icons">send</span>
-                Enviar Receta por Correo
-              </>
-            )}
+            {enviando ? "Enviando..." : "Enviar"}
           </button>
         </div>
       </div>

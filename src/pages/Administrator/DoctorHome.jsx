@@ -40,33 +40,21 @@ export default function DoctorHome() {
     const cargarDatosIniciales = async () => {
       try {
         const usuarioLS = JSON.parse(localStorage.getItem("usuario"));
+        if (!usuarioLS || !usuarioLS.id) return;
 
-        if (!usuarioLS || !usuarioLS.id) {
-          console.error("❌ No hay usuario en localStorage");
-          return;
-        }
+        const usuarioId = usuarioLS.id;
 
-        const usuarioId = usuarioLS.id; // ← ESTE ES ID DEL USUARIO
-
-        // 1️⃣ TRAER ROL Y CURP DEL COLABORADOR
+        // 1️⃣ Traer rol y curp
         const rolData = await verificarRolUsuario(usuarioId);
-
-        if (!rolData || !rolData.colaborador) {
-          console.error("❌ No se encontró colaborador en rolData");
-          return;
-        }
+        if (!rolData || !rolData.colaborador) return;
 
         const { nombre, apellidoPaterno, curp } = rolData.colaborador;
 
         setNombreUsuario(`${nombre} ${apellidoPaterno}`);
 
-        // 2️⃣ TRAER ID REAL DEL COLABORADOR USANDO CURP
+        // 2️⃣ Obtener colaborador real
         const colaboradorReal = await getColaboradorByCurp(curp);
-
-        if (!colaboradorReal || !colaboradorReal.id) {
-          console.error("❌ No se pudo obtener el ID del colaborador real");
-          return;
-        }
+        if (!colaboradorReal || !colaboradorReal.id) return;
 
         setIdColaboradorReal(colaboradorReal.id);
 
@@ -97,7 +85,6 @@ export default function DoctorHome() {
     if (!idColaboradorReal) return;
     try {
       const data = await getCitasDeColaborador(idColaboradorReal);
-
       if (!Array.isArray(data)) return;
 
       const citas = data.map((cita, i) => ({
@@ -106,9 +93,11 @@ export default function DoctorHome() {
         horaCita: cita.horaCita,
         motivo: cita.motivo,
         medico: cita.medico,
+
         pacienteNombre: cita.pacienteNombre,
         pacienteApellidoPaterno: cita.pacienteApellidoPaterno,
         pacienteApellidoMaterno: cita.pacienteApellidoMaterno,
+
         pacienteCurp: cita.curp,
         pacienteTelefono: cita.telefono,
         pacienteFechaNacimiento: cita.fechaNacimiento,
@@ -160,11 +149,34 @@ export default function DoctorHome() {
   }, []);
 
   // ===========================================
-  // ATENDER PACIENTE
+  // ATENDER PACIENTE — OBJETO UNIFICADO Y PERFECTO
   // ===========================================
   const handleAtender = (cita) => {
+
+    const pacienteData = {
+      // Nombres
+      nombre: cita.pacienteNombre,
+      apellidoPaterno: cita.pacienteApellidoPaterno,
+      apellidoMaterno: cita.pacienteApellidoMaterno,
+      nombreCompleto: `${cita.pacienteNombre} ${cita.pacienteApellidoPaterno} ${cita.pacienteApellidoMaterno}`,
+
+      // Identidad
+      curp: cita.pacienteCurp,
+      telefono: cita.pacienteTelefono,
+      fechaNacimiento: cita.pacienteFechaNacimiento,
+      edad: cita.pacienteEdad,
+
+      // Cita
+      motivo: cita.motivo,
+      fechaCita: cita.fechaCita,
+      horaCita: cita.horaCita,
+
+      // Médico
+      medico: cita.medico
+    };
+
     navigate("/home-doctor/recetas", {
-      state: { pacienteData: cita },
+      state: { pacienteData },
     });
   };
 

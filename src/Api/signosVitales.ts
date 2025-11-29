@@ -60,7 +60,9 @@ export const updateSignosVitales = async (
     const response = await api.put("/SignosVitales", dto);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data || "Error al actualizar signos vitales");
+    throw new Error(
+      error.response?.data || "Error al actualizar signos vitales"
+    );
   }
 };
 
@@ -71,6 +73,11 @@ export const getSignosVitalesByPacienteId = async (
     const response = await api.get(`/SignosVitales/paciente/${pacienteId}`);
     return response.data;
   } catch (error: any) {
+    // 👇 Si el backend responde 404, devolvemos lista vacía (no es error grave)
+    if (error.response?.status === 404) {
+      return [];
+    }
+
     throw new Error(
       error.response?.data || "Error al obtener signos vitales del paciente"
     );
@@ -80,7 +87,7 @@ export const getSignosVitalesByPacienteId = async (
 export const getSignosVitalesByPacienteAndFecha = async (
   pacienteId: number,
   fecha: string | Date
-): Promise<SignosVitalesDto> => {
+): Promise<SignosVitalesDto | null> => {
   try {
     const fechaFormatted =
       typeof fecha === "string" ? fecha : fecha.toISOString();
@@ -91,6 +98,10 @@ export const getSignosVitalesByPacienteAndFecha = async (
 
     return response.data;
   } catch (error: any) {
+    if (error.response?.status === 404) {
+      return null;
+    }
+
     throw new Error(
       error.response?.data ||
         "Error al obtener los signos vitales por paciente y fecha"

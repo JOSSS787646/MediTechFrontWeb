@@ -11,7 +11,7 @@
   --font: "Segoe UI", sans-serif;
 }
 
-/* ===== Layout general mejorado ===== */
+/* ===== Layout general ===== */
 .mainLayout {
   display: flex;
   width: 100%;
@@ -20,7 +20,7 @@
   font-family: var(--font);
 }
 
-/* ===== Área de contenido optimizada ===== */
+/* ===== Área de contenido ===== */
 .contentArea {
   flex: 1;
   padding: 1.5rem 2rem;
@@ -31,7 +31,7 @@
   overflow: hidden;
 }
 
-/* ===== Contenedor de scroll ===== */
+/* ===== Contenedor del scroll ===== */
 .scrollContainer {
   flex: 1;
   overflow-y: auto;
@@ -51,7 +51,7 @@
   background: #f1f5f9;
 }
 
-/* ===== Header compacto ===== */
+/* ===== Header ===== */
 .header {
   display: flex;
   justify-content: space-between;
@@ -116,11 +116,6 @@
   color: var(--text-light);
 }
 
-.icon {
-  opacity: 0.8;
-  font-size: 0.9em;
-}
-
 /* ===== Contenido principal ===== */
 .mainContent {
   display: flex;
@@ -129,17 +124,10 @@
   padding-bottom: 2rem;
 }
 
-/* ===== Formulario compacto ===== */
+/* ===== Formulario ===== */
 .compactForm {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* Sección doble (Médico + Paciente) */
-.doubleSection {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
 
@@ -151,7 +139,7 @@
   border: 1px solid var(--border-light);
 }
 
-/* Título de sección mejorado */
+/* ===== Títulos de sección ===== */
 .sectionTitle {
   display: flex;
   align-items: center;
@@ -164,12 +152,7 @@
   border-bottom: 2px solid #f1f5f9;
 }
 
-.sectionIcon {
-  opacity: 0.8;
-  font-size: 1.1rem;
-}
-
-/* Grid de formularios optimizado */
+/* ===== Grid general ===== */
 .gridForm {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -182,12 +165,11 @@
   gap: 1rem;
 }
 
-/* Inputs de ancho completo */
 .inputGroupFull {
   grid-column: 1 / -1;
 }
 
-/* Grupos de input mejorados */
+/* ===== Inputs ===== */
 .inputGroup {
   display: flex;
   flex-direction: column;
@@ -208,8 +190,8 @@
   border-radius: 8px;
   font-size: 0.9rem;
   font-family: var(--font);
-  transition: all 0.2s ease;
   background: #fafafa;
+  transition: all 0.2s ease;
 }
 
 .inputGroup textarea {
@@ -231,7 +213,10 @@
   border-color: #cbd5e1;
 }
 
-/* ===== Barra de acciones ===== */
+/* ========================================================= */
+/* 🔥 BOTONES DE ACCIÓN (Descargar + Enviar correo) */
+/* ========================================================= */
+
 .actionBar {
   display: flex;
   justify-content: center;
@@ -244,32 +229,23 @@
   flex-wrap: wrap;
 }
 
-.previewBtn, .saveBtn {
+.saveBtn,
+.emailBtn {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 1.8rem;
   border-radius: 8px;
   border: none;
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
-  transition: all 0.3s ease;
-  min-width: 180px;
+  min-width: 190px;
   justify-content: center;
+  transition: all 0.3s ease;
 }
 
-.previewBtn {
-  background: #e2e8f0;
-  color: var(--text-dark);
-}
-
-.previewBtn:hover:not(:disabled) {
-  background: #cbd5e1;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
-}
-
+/* ===== Botón Descargar Receta ===== */
 .saveBtn {
   background: var(--sidebar-color);
   color: white;
@@ -281,110 +257,61 @@
   box-shadow: var(--shadow-hover);
 }
 
-.previewBtn:disabled, .saveBtn:disabled {
-  opacity: 0.5;
+/* ===== ⭐ BOTÓN ENVIAR POR CORREO (nuevo diseño) ===== */
+.emailBtn {
+  background: linear-gradient(135deg, #4b8e83 0%, #63b2a5 100%);
+  color: white;
+  box-shadow: 0 3px 8px rgba(75, 142, 131, 0.25);
+}
+
+.emailBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3f7a70 0%, #559d92 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(75, 142, 131, 0.35);
+}
+
+.emailBtn:disabled,
+.saveBtn:disabled {
+  opacity: 0.55;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
-.btnIcon {
-  font-size: 1.1rem;
-}
-
-/* ===== Preview PDF mejorado ===== */
-.pdfPreview {
-  background: white;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border-light);
-  overflow: hidden;
-}
-
-.previewHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border-light);
-  background: #f8fafc;
-}
-
-.previewTitle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin: 0;
-}
-
-.previewIcon {
-  opacity: 0.8;
-}
-
-.closePreview {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 4px;
-  color: var(--text-light);
-}
-
-.closePreview:hover {
-  background: #e2e8f0;
-  color: var(--text-dark);
-}
-
-.previewContainer {
-  padding: 1.5rem;
-}
-
-.previewFrame {
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.previewActions {
+/* ===== Indicador de carga ===== */
+.estadoContainer {
   display: flex;
   justify-content: center;
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--border-light);
-  background: #f8fafc;
 }
 
-.downloadBtn {
+.cargando, .mensaje {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: var(--sidebar-color);
-  color: white;
-  padding: 0.75rem 2rem;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
   border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-size: 0.95rem;
   font-weight: 600;
-  transition: all 0.3s ease;
+  background: #f1f5f9;
+  color: var(--text-dark);
+  box-shadow: var(--shadow);
 }
 
-.downloadBtn:hover {
-  background: var(--sidebar-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
+.exito {
+  color: #2eb872;
+}
+
+.error {
+  color: #d9534f;
 }
 
 /* ===== Responsive ===== */
 @media (max-width: 1200px) {
-  .doubleSection {
+  .gridForm {
     grid-template-columns: 1fr;
-    gap: 1rem;
   }
-  
+  .vitalsGrid {
+    grid-template-columns: 1fr;
+  }
   .contentArea {
     padding: 1rem;
   }
@@ -396,77 +323,24 @@
     gap: 1rem;
     text-align: center;
   }
-  
+
   .userInfo {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
-  .gridForm {
-    grid-template-columns: 1fr;
-  }
-  
-  .vitalsGrid {
-    grid-template-columns: 1fr;
-  }
-  
+
   .logo {
     width: 160px;
   }
-  
+
   .actionBar {
     flex-direction: column;
-    align-items: center;
-  }
-  
-  .previewBtn, .saveBtn {
     width: 100%;
-    max-width: 300px;
+    max-width: 350px;
+    margin: 0 auto;
   }
-  
-  .timeInfo {
-    align-items: center;
+
+  .emailBtn, .saveBtn {
+    width: 100%;
   }
-}
-
-/* Agrega esto a tu DoctorRecetaView.module.css */
-
-/* Indicador de carga */
-.loadingOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  border-radius: 12px;
-}
-
-.loadingContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  color: var(--sidebar-color);
-}
-
-.loadingContent .material-icons {
-  font-size: 2rem;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Texto CURP en la tabla */
-.curpText {
-  font-size: 0.75rem;
-  color: var(--text-light);
-  margin-top: 0.2rem;
 }
