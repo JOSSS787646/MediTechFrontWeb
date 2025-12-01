@@ -369,3 +369,28 @@ input:checked + .slider:before {
   border: none;
   color: white;
 }
+.closeCardButton {
+  margin-top: 1.4rem;
+  padding: 0.65rem 1.2rem;
+  background: var(--sidebar-color);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: all 0.25s ease;
+}
+
+.closeCardButton:hover {
+  background: var(--sidebar-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.closeCardButton:active {
+  transform: translateY(1px);
+}

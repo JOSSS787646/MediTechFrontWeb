@@ -55,6 +55,7 @@ const ModalEnvioCorreo = ({
       ID_Doctor: formData.doctorId,
       Tratamientos: formData.tratamiento,
       ID_SignosVitales: formData.idSignosVitales,
+      
     };
 
     console.log("📤 Payload que se enviará a createReceta:", payload);

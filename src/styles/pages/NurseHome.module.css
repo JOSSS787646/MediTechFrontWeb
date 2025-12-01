@@ -1,78 +1,127 @@
+/* ===== Variables CSS ===== */
 :root {
   --sidebar-color: #63b2a5;
   --sidebar-hover: #4b8e83;
   --text-dark: #0a2928;
   --text-light: #64748b;
+  --white: #ffffff;
   --background: #f8fafc;
   --border-light: #e2e8f0;
   --shadow: 0 1px 3px rgba(0,0,0,0.1);
   --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
   --font: "Segoe UI", sans-serif;
 }
 
-/* ===== Layout ===== */
+/* ===== Layout general ===== */
 .mainLayout {
   display: flex;
+  width: 100%;
   min-height: 100vh;
   background: var(--background);
   font-family: var(--font);
 }
 
+/* ===== Contenido principal (CON SCROLL) ===== */
 .contentArea {
   flex: 1;
   padding: 1.5rem 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  height: 100vh;
+  overflow-y: auto; /* KEY: NO invade sidebar */
+  overflow-x: hidden;
 }
 
 .container {
-  max-width: 1400px;
   width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
-/* ===== Header ===== */
+/* ===== Header fijo ===== */
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: white;
   padding: 1rem 1.5rem;
   border-radius: 12px;
-  box-shadow: var(--shadow);
   border: 1px solid var(--border-light);
+  box-shadow: var(--shadow);
+  margin-bottom: 0.8rem;
+}
+
+.logoBox {
+  display: flex;
+  align-items: center;
 }
 
 .logo {
-  width: 200px;
+  width: 180px;
+  transition: 0.3s;
 }
 
+.logo:hover {
+  transform: scale(1.04);
+}
+
+/* USER INFO */
 .userInfo {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.3rem;
 }
 
 .userName {
-  background: #eef2f4;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-weight: 600;
-}
-
-/* ===== Buscador ===== */
-.searchSection {
-  background: white;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
   display: flex;
   align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.timeInfo {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.time {
+  color: var(--sidebar-color);
+  font-weight: 700;
+}
+
+.date {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+/* ===== Contenedor de contenido interno ===== */
+.scrollContainer {
+  flex: 1;
+  overflow: visible;
+}
+
+/* ===== BUSCADOR ===== */
+.searchSection {
+  background: white;
+  padding: 0.9rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow);
+  display: flex;
   gap: 1rem;
+  align-items: center;
 }
 
 .searchBarWrapper {
@@ -83,13 +132,21 @@
   padding: 0.75rem 1rem;
   border-radius: 8px;
   border: 1px solid var(--border-light);
+  gap: 0.5rem;
 }
 
 .searchBar {
   flex: 1;
   border: none;
-  background: transparent;
   outline: none;
+  background: transparent;
+}
+
+.searchBtn {
+  background: var(--sidebar-color);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 8px;
 }
 
 .agendarBtn {
@@ -103,41 +160,23 @@
   gap: 0.4rem;
 }
 
-/* ===== Título ===== */
-.sectionHeader {
-  background: white;
-  padding: 1.2rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* ===== TABLA SCROLLEABLE ===== */
+.scrollContainer table {
+  min-width: 900px;
 }
 
-.citaCount {
-  background: var(--sidebar-color);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-}
-
-/* ===== TABLA ===== */
 .scrollContainer {
   background: white;
-  border-radius: 12px;
   border: 1px solid var(--border-light);
+  border-radius: 12px;
   box-shadow: var(--shadow);
-
-  /** ⭐ Ajuste perfecto */
-  max-height: calc(100vh - 250px);
-
+  max-height: calc(100vh - 260px);
   overflow-y: auto;
   overflow-x: auto;
 }
 
 .citasTable {
   width: 100%;
-  min-width: 900px;
   border-collapse: collapse;
 }
 
@@ -146,23 +185,27 @@
   color: white;
   position: sticky;
   top: 0;
+  z-index: 5;
 }
 
 .citasTable th,
 .citasTable td {
-  padding: 1rem;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
 }
 
 .tableRow:hover {
   background: #f3fbf9;
 }
 
-.centerCol {
-  text-align: center;
+/* ROW ATENDIDA */
+.rowAtendida {
+  background-color: #fee2e2 !important;
+  color: #b91c1c !important;
 }
 
-/* ===== BOTÓN SIGNOS VITALES ===== */
+/* BOTÓN SIGNOS VITALES */
 .vitalsBtn {
   background: var(--sidebar-color);
   color: white;
@@ -173,89 +216,90 @@
   gap: 0.35rem;
   font-size: 0.85rem;
   font-weight: 600;
-  cursor: pointer;
-}
-
-.vitalsBtn:hover {
-  background: var(--sidebar-hover);
 }
 
 /* ===== PAGINACIÓN ===== */
 .paginationTable {
+  margin-top: 0;
   display: flex;
   justify-content: space-between;
-  padding: 1rem;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border-light);
+  border-top: none;
   background: white;
-  border-top: 1px solid var(--border-light);
+  border-radius: 0 0 12px 12px;
 }
 
 .rowsSelectorTable select {
-  padding: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border-light);
   border-radius: 6px;
 }
 
 .pageControlsTable {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.4rem;
 }
 
 .paginationBtn {
   background: var(--sidebar-color);
   color: white;
-  padding: 0.4rem 0.7rem;
+  padding: 0.45rem;
   border-radius: 6px;
-  cursor: pointer;
 }
 
 .pageInfoTable {
   font-weight: 600;
 }
-/* ===== Información de hora y fecha ===== */
-.timeInfo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.2rem;
+
+/* ============================= */
+/*          RESPONSIVE           */
+/* ============================= */
+
+/* ----- Tablets ----- */
+@media (max-width: 768px) {
+  .contentArea {
+    padding: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 0.6rem;
+    text-align: center;
+  }
+
+  .logo {
+    width: 150px;
+  }
+
+  .searchSection {
+    flex-direction: column;
+  }
+
+  .agendarBtn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .citasTable {
+    min-width: 700px;
+  }
 }
 
-/* Hora actual */
-.time {
-  color: var(--sidebar-color);
-  font-weight: 700;
-  font-size: 1.25rem; /* un poco más grande */
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
+/* ----- Teléfonos pequeños ----- */
+@media (max-width: 480px) {
+  .contentArea {
+    padding: 0.9rem;
+  }
 
-/* Fecha actual */
-.date {
-  color: var(--text-light);
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-weight: 500;
-}
+  .searchBar {
+    font-size: 0.85rem;
+  }
 
-/* Íconos del reloj */
-.time .material-icons-outlined,
-.date .material-icons-outlined {
-  font-size: 18px;
-  color: var(--sidebar-color);
-}
-.rowAtendida {
-  background-color: #fee2e2 !important;  /* rojo claro */
-  color: #b91c1c !important;             /* rojo fuerte */
-}
-
-.rowAtendida td {
-  border-top: 1px solid #fecaca;
-  border-bottom: 1px solid #fecaca;
-}
-
-.rowAtendida button {
-  opacity: 0.5;
-  cursor: not-allowed;
+  .vitalsBtn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.78rem;
+  }
 }

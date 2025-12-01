@@ -1,4 +1,4 @@
-/* EditUserModal.jsx — Versión mejorada */
+/* EditUserModal.jsx — Versión con mensaje SweetAlert2 */
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/Components/RegisterUserModal.module.css";
 import TextField from "../TextField";
@@ -6,6 +6,9 @@ import TextField from "../TextField";
 import { getTiposColaboradores } from "../../Api/tipoColaborador";
 import { getEspecialidades } from "../../Api/especialidad";
 import { getCedes } from "../../Api/cede";
+
+// ✅ Import necesario para mostrar el mensaje
+import Swal from "sweetalert2";
 
 export default function EditUserModal({ user, onClose, onSave }) {
   const [formData, setFormData] = useState({});
@@ -67,42 +70,52 @@ export default function EditUserModal({ user, onClose, onSave }) {
   }, [user]);
 
   // ==============================
-  // VALIDADORES + Instrucciones
+  // VALIDADORES
   // ==============================
   const validators = {
-    nombre: (val) => (!val ? "Ingresa el nombre." :
+    nombre: (val) =>
+      !val ? "Ingresa el nombre." :
       /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(val) ? "" :
-      "Solo se permiten letras."),
-    apellidoPaterno: (val) => (!val ? "Ingresa el apellido paterno." :
-      /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(val) ? "" :
-      "Solo se permiten letras."),
-    apellidoMaterno: (val) => (!val ? "Ingresa el apellido materno." :
-      /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(val) ? "" :
-      "Solo se permiten letras."),
+      "Solo se permiten letras.",
 
-    curp: (val) => (!val ? "Ingresa la CURP (18 caracteres)." :
+    apellidoPaterno: (val) =>
+      !val ? "Ingresa el apellido paterno." :
+      /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(val) ? "" :
+      "Solo se permiten letras.",
+
+    apellidoMaterno: (val) =>
+      !val ? "Ingresa el apellido materno." :
+      /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(val) ? "" :
+      "Solo se permiten letras.",
+
+    curp: (val) =>
+      !val ? "Ingresa la CURP (18 caracteres)." :
       /^[A-Z0-9]{18}$/.test(val) ? "" :
-      "La CURP debe tener 18 caracteres."),
+      "La CURP debe tener 18 caracteres.",
 
-    email: (val) => (!val ? "Ingresa tu correo." :
+    email: (val) =>
+      !val ? "Ingresa tu correo." :
       /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(val) ? "" :
-      "Correo electrónico inválido."),
+      "Correo inválido.",
 
-    telefono: (val) => (!val ? "Ingresa 10 dígitos." :
+    telefono: (val) =>
+      !val ? "Ingresa 10 dígitos." :
       /^\d{10}$/.test(val) ? "" :
-      "Debe tener 10 dígitos."),
+      "Debe tener 10 dígitos.",
 
-    matriculaProfesional: (val) => (!val ? "Ingresa 8 dígitos." :
+    matriculaProfesional: (val) =>
+      !val ? "Ingresa 8 dígitos." :
       /^\d{8}$/.test(val) ? "" :
-      "Debe tener 8 dígitos."),
+      "Debe tener 8 dígitos.",
 
-    licencia: (val) => (!val ? "Ingresa 8 dígitos." :
+    licencia: (val) =>
+      !val ? "Ingresa 8 dígitos." :
       /^\d{8}$/.test(val) ? "" :
-      "Debe tener 8 dígitos."),
+      "Debe tener 8 dígitos.",
   };
 
   // ==============================
-  // Calcular edad automáticamente
+  // Calcular edad
   // ==============================
   const calcularEdad = (fechaNacimiento) => {
     if (!fechaNacimiento) return "";
@@ -154,7 +167,7 @@ export default function EditUserModal({ user, onClose, onSave }) {
   };
 
   // ==============================
-  // Validar antes de guardar
+  // Validación final
   // ==============================
   const validateAll = () => {
     const newErrors = {};
@@ -192,6 +205,15 @@ export default function EditUserModal({ user, onClose, onSave }) {
     };
 
     onSave(user.id, payload, { guardarEnBackend: false });
+
+    // ✅ Mensaje como el de registrar
+    Swal.fire({
+      icon: "success",
+      title: "¡Cambios guardados!",
+      text: "El colaborador se modificó correctamente ✅",
+      confirmButtonColor: "#1e5e5c",
+    });
+
     onClose();
   };
 
@@ -203,8 +225,18 @@ export default function EditUserModal({ user, onClose, onSave }) {
         <div className={styles.scrollContainer}>
           <div className={styles.fieldsGrid}>
 
-            {/* Inputs con mensajes */}
-            {["nombre", "apellidoPaterno", "apellidoMaterno", "curp", "email", "telefono", "direccion", "matriculaProfesional", "licencia", "genero"].map((field) => (
+            {[
+              "nombre",
+              "apellidoPaterno",
+              "apellidoMaterno",
+              "curp",
+              "email",
+              "telefono",
+              "direccion",
+              "matriculaProfesional",
+              "licencia",
+              "genero"
+            ].map((field) => (
               <TextField
                 key={field}
                 label={field.charAt(0).toUpperCase() + field.slice(1)}
@@ -214,7 +246,6 @@ export default function EditUserModal({ user, onClose, onSave }) {
               />
             ))}
 
-            {/* Fecha nacimiento */}
             <TextField
               label="Fecha de nacimiento"
               type="date"
@@ -224,7 +255,6 @@ export default function EditUserModal({ user, onClose, onSave }) {
 
             <TextField label="Edad" value={formData.edad} disabled />
 
-            {/* Fecha contrato */}
             <TextField
               label="Fecha de contrato"
               type="date"
@@ -232,7 +262,6 @@ export default function EditUserModal({ user, onClose, onSave }) {
               onChange={(e) => handleChange("fechaContrato", e.target.value)}
             />
 
-            {/* Tipo colaborador */}
             <div className={styles.selectField}>
               <label>Tipo de colaborador</label>
               <select
@@ -248,7 +277,6 @@ export default function EditUserModal({ user, onClose, onSave }) {
               </select>
             </div>
 
-            {/* Cede */}
             <div className={styles.selectField}>
               <label>Cede</label>
               <select
@@ -264,7 +292,6 @@ export default function EditUserModal({ user, onClose, onSave }) {
               </select>
             </div>
 
-            {/* Especialidad */}
             <div className={styles.selectField}>
               <label>Especialidad</label>
               <select
@@ -285,7 +312,7 @@ export default function EditUserModal({ user, onClose, onSave }) {
 
         <div className={styles.actions}>
           <button className={styles.saveButton} onClick={handleSave}>
-            Guardar cambios 
+            Guardar cambios
           </button>
           <button className={styles.cancelButton} onClick={onClose}>
             Cancelar
