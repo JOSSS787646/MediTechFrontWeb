@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/Cita";
+const API_URL = "https://meditech-atdneshrczbsbtgw.canadacentral-01.azurewebsites.net/api/Cita";
 
 /* =========================================================
    ✔ Tipos de Respuesta del Backend
