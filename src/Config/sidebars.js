@@ -19,7 +19,7 @@ export const SidebarNurse = [
 // ========== DOCTOR ==========  
 export const SidebarDoctor = [
   { text: "Inicio", icon: "home", ruta: "/home-doctor" },
-  { text: "Citas", icon: "event", ruta: "/home-doctor/citas" },  
+  //{ text: "Citas", icon: "event", ruta: "/home-doctor/citas" },  
   { text: "Pacientes", icon: "personal_injury", ruta: "/home-pacientes" },
   { text: "Recetas", icon: "receipt_long", ruta: "/home-doctor/recetas" },
 ];

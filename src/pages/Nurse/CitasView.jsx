@@ -4,49 +4,62 @@ import styles from "../../styles/pages/DoctorCitasView.module.css";
 import logo from "../../assets/logoLargo.png";
 import { SidebarNurse } from "../../Config/sidebars";
 
+// API
 import { getPacienteByCurp } from "../../Api/paciente";
 import { getEspecialidades } from "../../Api/especialidad";
 import { getCedes } from "../../Api/cede";
 import { getColaboradoresByEspecialidad } from "../../Api/colaborator";
-import { createCita } from "../../Api/cita";
+import { createCitaPublica } from "../../Api/cita";
 
 export default function CitasView() {
   const [usuario, setUsuario] = useState(null);
-  const [token, setToken] = useState("");
-
-  const [pacienteInfo, setPacienteInfo] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const [especialidades, setEspecialidades] = useState([]);
   const [medicos, setMedicos] = useState([]);
-  const [cedes, setCedesState] = useState([]);
+  const [cedes, setCedes] = useState([]);
 
   const [loadingPaciente, setLoadingPaciente] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     curp: "",
+    nombre: "",
+    apellidoPaterno: "",
+    apellidoMaterno: "",
+    fechaNacimiento: "",
     especialidad: "",
     medico: "",
     sede: "",
-    fecha: "",
-    hora: "",
+    fechaCita: "",
+    horaCita: "",
     motivo: "",
   });
 
+  const [errors, setErrors] = useState({});
+  const [pacienteInfo, setPacienteInfo] = useState(null);
+
   // ============================
-  // Cargar usuario y catálogos
+  // Cargar usuario y hora
   // ============================
   useEffect(() => {
     const userData = localStorage.getItem("usuario");
-    const tokenData = localStorage.getItem("token");
-
     if (userData) setUsuario(JSON.parse(userData));
-    if (tokenData) setToken(tokenData);
 
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // ============================
+  // Cargar catálogos
+  // ============================
+  useEffect(() => {
     loadEspecialidades();
     loadCedes();
   }, []);
 
-  // Cargar especialidades
   const loadEspecialidades = async () => {
     try {
       const data = await getEspecialidades();
@@ -56,31 +69,21 @@ export default function CitasView() {
     }
   };
 
-  // Cargar cedes (corregido)
   const loadCedes = async () => {
     try {
       const data = await getCedes();
-
-      const lista = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.resultado)
-        ? data.resultado
-        : Array.isArray(data?.data)
-        ? data.data
-        : [];
-
-      console.log("CEDES:", lista);
-
-      setCedesState(lista);
+      setCedes(data);
     } catch (err) {
       console.error("Error cargando cedes:", err);
     }
   };
 
-  // Buscar paciente
+  // ============================
+  // Buscar paciente por CURP
+  // ============================
   const buscarPaciente = async () => {
     if (formData.curp.length !== 18) {
-      alert("La CURP debe tener 18 caracteres.");
+      setErrors({ curp: "La CURP debe tener 18 caracteres" });
       return;
     }
 
@@ -88,77 +91,148 @@ export default function CitasView() {
 
     try {
       const paciente = await getPacienteByCurp(formData.curp.toUpperCase());
+
+      if (!paciente) {
+        setPacienteInfo(null);
+        setErrors({ curp: "Paciente no encontrado" });
+        setLoadingPaciente(false);
+        return;
+      }
+
+      setErrors({});
       setPacienteInfo(paciente);
-    } catch {
-      alert("Paciente no encontrado.");
-      setPacienteInfo(null);
+
+      setFormData((prev) => ({
+        ...prev,
+        nombre: paciente.nombre,
+        apellidoPaterno: paciente.apellidoPaterno,
+        apellidoMaterno: paciente.apellidoMaterno,
+        fechaNacimiento: paciente.fechaNacimiento?.split("T")[0] || "",
+      }));
+
+    } catch (error) {
+      setErrors({ curp: "Error buscando paciente" });
     }
 
     setLoadingPaciente(false);
   };
 
-  // Cargar médicos por especialidad
-  const fetchMedicos = async (idEsp) => {
+  // ============================
+  // Cargar médicos cuando cambia la especialidad
+  // ============================
+  const fetchMedicos = async (id) => {
     try {
-      if (!idEsp) {
-        setMedicos([]);
-        return;
-      }
+      if (!id) return setMedicos([]);
 
-      const data = await getColaboradoresByEspecialidad(parseInt(idEsp));
+      const data = await getColaboradoresByEspecialidad(parseInt(id));
       setMedicos(data);
-    } catch (err) {
-      console.error("Error cargando médicos:", err);
-      setMedicos([]);
+    } catch (error) {
+      console.error("Error cargando médicos:", error);
     }
   };
 
-  // Manejo inputs
+  // ============================
+  // Manejo de cambios
+  // ============================
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
 
-    if (e.target.name === "especialidad") {
-      fetchMedicos(e.target.value);
+    setFormData({ ...formData, [name]: value });
+
+    if (name === "especialidad") {
       setFormData((prev) => ({ ...prev, medico: "" }));
+      fetchMedicos(value);
     }
   };
 
-  // Registrar cita
+  // ============================
+  // Validación
+  // ============================
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.curp.trim()) newErrors.curp = "CURP requerida";
+    if (!pacienteInfo) newErrors.paciente = "Debes buscar el paciente";
+    if (!formData.especialidad) newErrors.especialidad = "Especialidad requerida";
+    if (!formData.medico) newErrors.medico = "Médico requerido";
+    if (!formData.sede) newErrors.sede = "Sede requerida";
+    if (!formData.fechaCita) newErrors.fechaCita = "Fecha requerida";
+    if (!formData.horaCita) newErrors.horaCita = "Hora requerida";
+    if (!formData.motivo.trim()) newErrors.motivo = "Motivo requerido";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // ============================
+  // Registrar cita (igual que doctor)
+  // ============================
   const handleRegistrarCita = async () => {
-    if (!pacienteInfo) {
-      alert("Primero debes buscar un paciente.");
-      return;
-    }
+    if (!validateForm()) return;
+
+    setLoading(true);
 
     try {
-      const cita = {
-        especialidad: Number(formData.especialidad),
-        medico: Number(formData.medico),
-        sede: Number(formData.sede),
+      const especialidadObj = especialidades.find(
+        (e) => e.id === Number(formData.especialidad)
+      );
+
+      const medicoObj = medicos.find(
+        (m) => m.id === Number(formData.medico)
+      );
+
+      const sedeObj = cedes.find(
+        (c) => c.id === Number(formData.sede)
+      );
+
+      const citaDto = {
+        nombre: formData.nombre,
+        apellidoPaterno: formData.apellidoPaterno,
+        apellidoMaterno: formData.apellidoMaterno,
+        curp: formData.curp.toUpperCase(),
+        fechaNacimiento: formData.fechaNacimiento,
+
+        especialidad: especialidadObj?.nombre || "",
+        medico: medicoObj?.nombre || "",
+        sede: sedeObj?.direccion || "",
+
         motivo: formData.motivo,
-        fechaCita: formData.fecha,
-        horaCita: formData.hora,
+        fechaCita: formData.fechaCita,
+        horaCita: formData.horaCita,
       };
 
-      await createCita(cita, token);
+      await createCitaPublica(citaDto);
 
-      alert("Cita registrada exitosamente");
+      setShowSuccess(true);
 
+      // Reiniciar formulario
       setFormData({
         curp: "",
+        nombre: "",
+        apellidoPaterno: "",
+        apellidoMaterno: "",
+        fechaNacimiento: "",
         especialidad: "",
         medico: "",
         sede: "",
-        fecha: "",
-        hora: "",
+        fechaCita: "",
+        horaCita: "",
         motivo: "",
       });
 
       setPacienteInfo(null);
-    } catch (err) {
+
+    } catch (error) {
+      console.error("❌ Error registrando cita:", error);
       alert("Error al registrar la cita.");
-      console.error(err);
     }
+
+    setLoading(false);
+  };
+
+  const getMinAppointmentDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
   };
 
   return (
@@ -167,6 +241,7 @@ export default function CitasView() {
 
       <div className={styles.contentArea}>
         <div className={styles.container}>
+
           {/* HEADER */}
           <header className={styles.header}>
             <div className={styles.logoBox}>
@@ -178,6 +253,15 @@ export default function CitasView() {
                 <span className="material-icons">account_circle</span>
                 {usuario?.nombreUsuario || "Enfermería"}
               </div>
+
+              <div className={styles.timeInfo}>
+                <div className={styles.time}>
+                  {currentTime.toLocaleTimeString("es-MX")}
+                </div>
+                <div className={styles.date}>
+                  {currentTime.toLocaleDateString("es-MX")}
+                </div>
+              </div>
             </div>
           </header>
 
@@ -187,16 +271,12 @@ export default function CitasView() {
               <span className="material-icons">event_note</span>
               Registrar Nueva Cita
             </div>
-
-            <div className={styles.appointmentCount}>
-              <span className="material-icons">add</span>
-              Nueva Cita
-            </div>
           </section>
 
           {/* FORM */}
           <div className={styles.scrollContainer}>
             <div className={styles.formContent}>
+
               {/* BUSCAR PACIENTE */}
               <div className={styles.formSection}>
                 <h3 className={styles.sectionSubtitle}>
@@ -206,19 +286,15 @@ export default function CitasView() {
 
                 <div className={styles.formGrid}>
                   <div className={styles.inputGroupFull}>
-                    <label>
-                      <span className="material-icons">badge</span>
-                      CURP del paciente
-                    </label>
-
+                    <label>CURP del paciente</label>
                     <input
                       type="text"
                       name="curp"
                       value={formData.curp}
                       onChange={handleChange}
                       maxLength={18}
-                      className={styles.formInput}
                       style={{ textTransform: "uppercase" }}
+                      className={`${styles.formInput} ${errors.curp ? styles.inputError : ""}`}
                     />
 
                     <button
@@ -232,19 +308,17 @@ export default function CitasView() {
                     {loadingPaciente && <p>Buscando...</p>}
 
                     {pacienteInfo && (
-                      <p style={{ color: "green", marginTop: 10 }}>
-                        Paciente encontrado:{" "}
-                        <b>
-                          {pacienteInfo.nombre}{" "}
-                          {pacienteInfo.apellidoPaterno}
-                        </b>
+                      <p style={{ color: "green" }}>
+                        Paciente encontrado: <b>{pacienteInfo.nombre} {pacienteInfo.apellidoPaterno}</b>
                       </p>
                     )}
+
+                    {errors.curp && <p className={styles.errorText}>{errors.curp}</p>}
                   </div>
                 </div>
               </div>
 
-              {/* INFORMACIÓN DE LA CITA */}
+              {/* INFO CITA */}
               <div className={styles.formSection}>
                 <h3 className={styles.sectionSubtitle}>
                   <span className="material-icons">medical_services</span>
@@ -252,38 +326,33 @@ export default function CitasView() {
                 </h3>
 
                 <div className={styles.formGrid}>
+                  
                   {/* ESPECIALIDAD */}
                   <div className={styles.inputGroup}>
-                    <label>
-                      <span className="material-icons">local_hospital</span>
-                      Especialidad
-                    </label>
+                    <label>Especialidad</label>
                     <select
                       name="especialidad"
                       value={formData.especialidad}
                       onChange={handleChange}
-                      className={styles.formSelect}
+                      className={`${styles.formSelect} ${errors.especialidad ? styles.inputError : ""}`}
                     >
                       <option value="">Seleccione</option>
                       {especialidades.map((e) => (
-                        <option key={e.id} value={e.id}>
-                          {e.nombre}
-                        </option>
+                        <option key={e.id} value={e.id}>{e.nombre}</option>
                       ))}
                     </select>
+                    {errors.especialidad && <p className={styles.errorText}>{errors.especialidad}</p>}
                   </div>
 
                   {/* MÉDICO */}
                   <div className={styles.inputGroup}>
-                    <label>
-                      <span className="material-icons">person</span>
-                      Médico
-                    </label>
+                    <label>Médico</label>
                     <select
                       name="medico"
                       value={formData.medico}
                       onChange={handleChange}
-                      className={styles.formSelect}
+                      className={`${styles.formSelect} ${errors.medico ? styles.inputError : ""}`}
+                      disabled={!formData.especialidad}
                     >
                       <option value="">Seleccione</option>
                       {medicos.map((m) => (
@@ -292,90 +361,82 @@ export default function CitasView() {
                         </option>
                       ))}
                     </select>
+                    {errors.medico && <p className={styles.errorText}>{errors.medico}</p>}
                   </div>
 
                   {/* SEDE */}
                   <div className={styles.inputGroup}>
-                    <label>
-                      <span className="material-icons">location_on</span>
-                      Sede
-                    </label>
+                    <label>Sede</label>
                     <select
                       name="sede"
                       value={formData.sede}
                       onChange={handleChange}
-                      className={styles.formSelect}
+                      className={`${styles.formSelect} ${errors.sede ? styles.inputError : ""}`}
                     >
                       <option value="">Seleccione</option>
                       {cedes.map((c) => (
                         <option key={c.id} value={c.id}>
-                          {c.nombre}
+                          {c.ciudad} - {c.direccion}
                         </option>
                       ))}
                     </select>
+                    {errors.sede && <p className={styles.errorText}>{errors.sede}</p>}
                   </div>
 
                   {/* FECHA */}
                   <div className={styles.inputGroup}>
-                    <label>
-                      <span className="material-icons">calendar_today</span>
-                      Fecha de Cita
-                    </label>
+                    <label>Fecha</label>
                     <input
                       type="date"
-                      name="fecha"
-                      value={formData.fecha}
+                      name="fechaCita"
+                      value={formData.fechaCita}
                       onChange={handleChange}
-                      className={styles.formInput}
+                      className={`${styles.formInput} ${errors.fechaCita ? styles.inputError : ""}`}
+                      min={getMinAppointmentDate()}
                     />
+                    {errors.fechaCita && <p className={styles.errorText}>{errors.fechaCita}</p>}
                   </div>
 
                   {/* HORA */}
-                  <div className={styles.inputGroupFull}>
-                    <label>
-                      <span className="material-icons">access_time</span>
-                      Hora
-                    </label>
-                    <select
-                      name="hora"
-                      value={formData.hora}
+                  <div className={styles.inputGroup}>
+                    <label>Hora</label>
+                    <input
+                      type="time"
+                      name="horaCita"
+                      value={formData.horaCita}
                       onChange={handleChange}
-                      className={styles.formSelect}
-                    >
-                      <option value="">Seleccione</option>
-                      <option>08:00</option>
-                      <option>09:00</option>
-                      <option>10:00</option>
-                      <option>11:00</option>
-                    </select>
+                      className={`${styles.formInput} ${errors.horaCita ? styles.inputError : ""}`}
+                      min="08:00"
+                      max="18:00"
+                      step="1800"
+                    />
+                    {errors.horaCita && <p className={styles.errorText}>{errors.horaCita}</p>}
                   </div>
 
                   {/* MOTIVO */}
                   <div className={styles.inputGroupFull}>
-                    <label>
-                      <span className="material-icons">notes</span>
-                      Motivo
-                    </label>
+                    <label>Motivo</label>
                     <textarea
                       name="motivo"
                       value={formData.motivo}
                       onChange={handleChange}
-                      className={styles.formTextarea}
-                      rows="3"
+                      className={`${styles.formTextarea} ${errors.motivo ? styles.inputError : ""}`}
+                      rows={3}
                     ></textarea>
+                    {errors.motivo && <p className={styles.errorText}>{errors.motivo}</p>}
                   </div>
                 </div>
 
-                {/* BOTÓN GUARDAR */}
                 <div className={styles.formActions}>
                   <button
                     className={styles.saveButton}
+                    disabled={loading}
                     onClick={handleRegistrarCita}
                   >
-                    <span className="material-icons">check_circle</span>
                     Registrar Cita
                   </button>
                 </div>
+
               </div>
 
             </div>
@@ -383,6 +444,33 @@ export default function CitasView() {
 
         </div>
       </div>
+
+      {/* ===== MODAL DE ÉXITO ===== */}
+      {showSuccess && (
+        <div className={styles.successModalOverlay}>
+          <div className={styles.successModal}>
+            
+            <span className="material-icons" style={{ fontSize: "60px", color: "var(--success-color)" }}>
+              check_circle
+            </span>
+
+            <h2 className={styles.successTitle}>¡Cita Registrada!</h2>
+
+            <p className={styles.successMessage}>
+              La cita se ha guardado correctamente en el sistema.
+            </p>
+
+            <button
+              onClick={() => setShowSuccess(false)}
+              className={styles.successButton}
+            >
+              Aceptar
+            </button>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
