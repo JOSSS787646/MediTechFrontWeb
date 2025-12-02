@@ -29,7 +29,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow-y: auto; /* KEY: NO invade sidebar */
+  overflow-y: auto;   /* ✅ Scroll en la pantalla principal */
   overflow-x: hidden;
 }
 
@@ -43,7 +43,7 @@
 }
 
 /* ===== Header fijo ===== */
-.header {
+.headerSticky {
   position: sticky;
   top: 0;
   z-index: 50;
@@ -65,14 +65,13 @@
 
 .logo {
   width: 180px;
-  transition: 0.3s;
+  transition: 0.3s ease;
 }
 
 .logo:hover {
   transform: scale(1.04);
 }
 
-/* USER INFO */
 .userInfo {
   display: flex;
   align-items: center;
@@ -106,77 +105,94 @@
   color: var(--text-light);
 }
 
-/* ===== Contenedor de contenido interno ===== */
+/* ===== Contenedor de contenido (no hace scroll extra) ===== */
 .scrollContainer {
   flex: 1;
   overflow: visible;
 }
 
-/* ===== BUSCADOR ===== */
+/* ===== BUSCADOR COMPACTO ===== */
 .searchSection {
   background: white;
   padding: 0.9rem 1.2rem;
   border-radius: 12px;
   border: 1px solid var(--border-light);
   box-shadow: var(--shadow);
-  display: flex;
-  gap: 1rem;
-  align-items: center;
 }
 
-.searchBarWrapper {
-  flex: 1;
+.searchBarCompact {
   display: flex;
   align-items: center;
-  background: #fafafa;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  gap: 0.6rem;
+  background: #ffffff;
   border: 1px solid var(--border-light);
-  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
 }
 
-.searchBar {
+.searchBarCompact span {
+  font-size: 1.3rem;
+  opacity: 0.7;
+}
+
+.searchBarCompact input {
   flex: 1;
   border: none;
   outline: none;
   background: transparent;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-dark);
 }
 
-.searchBtn {
-  background: var(--sidebar-color);
-  color: white;
-  padding: 0.5rem;
-  border-radius: 8px;
+/* ===== Contador de pacientes ===== */
+.sectionHeader {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.7rem 1.2rem 0.2rem 1.2rem;
 }
 
-.agendarBtn {
-  background: var(--sidebar-color);
-  color: white;
-  padding: 0.75rem 1.2rem;
-  border-radius: 8px;
-  font-weight: 600;
+.appointmentCount {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  background: var(--sidebar-color);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow);
 }
 
-/* ===== TABLA SCROLLEABLE ===== */
-.scrollContainer table {
-  min-width: 900px;
-}
-
-.scrollContainer {
+/* ===== TABLA SCROLLEABLE (AQUÍ ESTÁ EL SCROLL DE LA TABLA) ===== */
+.tableScroll {
+  max-height: 55vh;      /* ✅ Altura relativa a la pantalla */
+  overflow-y: auto;      /* ✅ Scroll vertical dentro de la tabla */
+  overflow-x: auto;
   background: white;
   border: 1px solid var(--border-light);
   border-radius: 12px;
   box-shadow: var(--shadow);
-  max-height: calc(100vh - 260px);
-  overflow-y: auto;
-  overflow-x: auto;
 }
 
+.tableScroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.tableScroll::-webkit-scrollbar-thumb {
+  background: var(--sidebar-color);
+  border-radius: 4px;
+}
+.tableScroll::-webkit-scrollbar-track {
+  background: #e5edf0;
+}
+
+/* ===== Tabla ===== */
 .citasTable {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
 }
 
@@ -185,7 +201,7 @@
   color: white;
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 3;
 }
 
 .citasTable th,
@@ -195,30 +211,58 @@
   font-size: 0.9rem;
 }
 
-.tableRow:hover {
-  background: #f3fbf9;
-}
-
-/* ROW ATENDIDA */
-.rowAtendida {
-  background-color: #fee2e2 !important;
-  color: #b91c1c !important;
-}
-
-/* BOTÓN SIGNOS VITALES */
-.vitalsBtn {
-  background: var(--sidebar-color);
-  color: white;
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.85rem;
+.citasTable th {
   font-weight: 600;
 }
 
-/* ===== PAGINACIÓN ===== */
+.tableRow:hover {
+  background: #f2faf7;
+}
+
+.patientCell {
+  font-weight: 600;
+}
+
+/* ===== Estado vacío ===== */
+.emptyRow td {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.emptyState {
+  text-align: center;
+  color: var(--text-light);
+}
+
+.emptyState p {
+  color: var(--text-dark);
+  font-weight: 600;
+  margin: 0.3rem 0;
+}
+
+/* ===== Botón de paginación genérico ===== */
+.paginationBtn {
+  background: var(--sidebar-color);
+  color: white;
+  border: none;
+  padding: 0.45rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: var(--sidebar-hover);
+}
+
+.paginationBtn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* ===== Paginación tipo "footer" de la tabla ===== */
 .paginationTable {
   margin-top: 0;
   display: flex;
@@ -231,10 +275,16 @@
   border-radius: 0 0 12px 12px;
 }
 
+.rowsSelectorTable {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .rowsSelectorTable select {
   padding: 0.3rem 0.6rem;
-  border: 1px solid var(--border-light);
   border-radius: 6px;
+  border: 1px solid var(--border-light);
 }
 
 .pageControlsTable {
@@ -243,44 +293,25 @@
   gap: 0.4rem;
 }
 
-.paginationBtn {
-  background: var(--sidebar-color);
-  color: white;
-  padding: 0.45rem;
-  border-radius: 6px;
-}
-
 .pageInfoTable {
   font-weight: 600;
+  color: var(--text-dark);
 }
 
-/* ============================= */
-/*          RESPONSIVE           */
-/* ============================= */
-
-/* ----- Tablets ----- */
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
   .contentArea {
     padding: 1rem;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 0.6rem;
-    text-align: center;
   }
 
   .logo {
     width: 150px;
   }
 
-  .searchSection {
+  .headerSticky {
     flex-direction: column;
-  }
-
-  .agendarBtn {
-    width: 100%;
     text-align: center;
+    gap: 0.6rem;
   }
 
   .citasTable {
@@ -288,18 +319,16 @@
   }
 }
 
-/* ----- Teléfonos pequeños ----- */
 @media (max-width: 480px) {
   .contentArea {
     padding: 0.9rem;
   }
 
-  .searchBar {
-    font-size: 0.85rem;
+  .appointmentCount {
+    font-size: 0.8rem;
   }
 
-  .vitalsBtn {
-    padding: 0.35rem 0.7rem;
-    font-size: 0.78rem;
+  .searchBarCompact input {
+    font-size: 0.85rem;
   }
 }
