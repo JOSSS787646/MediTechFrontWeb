@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/Paciente";
+const API_URL = "https://meditech-atdneshrczbsbtgw.canadacentral-01.azurewebsites.net/api/Paciente";
 
 // ✅ Obtener todos los pacientes
 export const getPacientes = async () => {
