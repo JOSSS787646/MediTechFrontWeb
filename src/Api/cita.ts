@@ -95,6 +95,39 @@ export const getMisCitas = async (token: string): Promise<CitaVM[]> => {
   }
 };
 
+export interface CreateCitaDtoPublica {
+  nombre: string;
+  apellidoPaterno: string;
+  apellidoMaterno: string;
+  curp: string;
+  fechaNacimiento: string;
+  especialidad: string;
+  medico: string;
+  sede: string;
+  motivo: string;
+  fechaCita: string;
+  horaCita: string;
+}
+
+/* =========================================================
+   🔹 Crear cita pública (SIN TOKEN)
+   POST /api/Cita/publico
+========================================================= */
+export const createCitaPublica = async (citaData) => {
+  try {
+    const response = await axios.post(`${API_URL}/publico`, citaData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data; // Datos devueltos por el backend
+  } catch (error: any) {
+    console.error("❌ Error al crear cita pública:", error);
+    throw error.response?.data || error.message;
+  }
+};
+
 /* =========================================================
    🔹 Obtener TODAS las citas (ENDPOINT PÚBLICO)
    GET /api/Cita/mis-citas/publico
